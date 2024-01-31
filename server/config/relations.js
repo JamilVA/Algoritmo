@@ -55,6 +55,18 @@ module.exports ={
 }
 
 
+const Tema = require('../models/tema.model');
+const Pregunta = require('../models/pregunta.model');
+
+Tema.hasMany(Pregunta, {foreignKey: 'CodigoTema'});
+Pregunta.belongsTo(Tema, {foreignKey: 'CodigoTema'})
+
+module.exports ={
+    Tema,
+    Pregunta
+}
+
+
 const Pregunta = require('../models/pregunta.model');
 const Respuesta = require('../models/respuesta.model');
 
