@@ -64,7 +64,22 @@ Pregunta.hasMany(Respuesta, {foreignKey: 'CodigoPregunta'})
 Respuesta.belongsTo(Pregunta, {foreignKey: 'CodigoPregunta'})
 
 
+
 module.exports = {
+    Persona,
+    Usuario,
+    TipoUsuario,
+    Apoderado,
+    Estudiante,
+    Docente,
+    Grupo,
+    Pago,
+    ConceptoPago,
+    Nivel,
+    Grado,
+    Curso,
+    Horario,
+    Tema,
     Persona,
     Usuario,
     TipoUsuario,
@@ -81,4 +96,5 @@ module.exports = {
     Tema,
     Pregunta,
     Respuesta
+
 }
