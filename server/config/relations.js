@@ -80,5 +80,4 @@ module.exports ={
     Tema,
     Pregunta,
     Respuesta
-
 }
