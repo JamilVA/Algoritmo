@@ -27,6 +27,9 @@ Apoderado.belongsTo(Persona, {foreignKey:'CodigoPersona'})
 Persona.hasOne(Docente, {foreignKey:'CodigoPersona'})
 Docente.belongsTo(Persona, {foreignKey:'CodigoPersona'})
 
+Persona.hasOne(Estudiante, {foreignKey:'CodigoPersona'})
+Estudiante.belongsTo(Persona, {foreignKey:'CodigoPersona'})
+
 Apoderado.hasMany(Estudiante, {foreignKey:'CodigoApoderado'})
 Estudiante.belongsTo(Apoderado, {foreignKey:'CodigoApoderado'})
 

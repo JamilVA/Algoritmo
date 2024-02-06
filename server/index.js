@@ -5,10 +5,10 @@ const { dbConnection } = require('./config/database');
 const cors = require('cors');
 
 //Creando el servidor express
-const app = express();
+const app = express({origin: true, credentials: true});
 
 //Configuracion de CORS
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors()); 
 
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
@@ -25,6 +25,7 @@ app.use(express.json());
 dbConnection();
 
 app.use('/api/estudiante', require('./routes/estudiante.route'));
+// app.use('/api/docente', require('./routes/docante.route'));
 
 //Para levantar el servidor
 app.listen(process.env.PORT, () => {
