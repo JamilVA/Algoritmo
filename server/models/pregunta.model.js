@@ -8,7 +8,7 @@ const Pregunta = sequelize.define('Pregunta', {
         primaryKey:true,
     },
     Descripcion: DataTypes.TEXT,
-    RutaImagen: DataTypes.VARCHAR(60),
+    RutaImagen: DataTypes.STRING(60),
     
 })
 

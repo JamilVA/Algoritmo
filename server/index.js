@@ -10,11 +10,21 @@ const app = express();
 //Configuracion de CORS
 app.use(cors({ origin: true, credentials: true }));
 
+app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Headers', 'Origin, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Response-Time, X-PINGOTHER, X-CSRF-Token,Authorization');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT ,DELETE');
+    res.header('Access-Control-Allow-Credentials', true);
+    next();
+})
+
 //Lectura y parseo del body
 app.use(express.json());
 
 //Conexion a la BD
 dbConnection();
+
+app.use('/api/estudiante', require('./routes/estudiante.route'));
 
 //Para levantar el servidor
 app.listen(process.env.PORT, () => {

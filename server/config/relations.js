@@ -1,7 +1,5 @@
 const Usuario = require('../models/usuario.model');
 const Persona = require('../models/persona.model');
-const Usuario = require('../models/usuario.model');
-const Persona = require('../models/persona.model');
 const TipoUsuario = require('../models/tipoUsuario.model');
 const Apoderado = require('../models/apoderado.model');
 const Estudiante = require('../models/estudiante.model');

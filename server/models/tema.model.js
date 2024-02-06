@@ -7,7 +7,7 @@ const Tema = sequelize.define('Tema', {
         autoIncrement:true,
         primaryKey:true,
     },
-    Descripcion: DataTypes.VARCHAR(100),
+    Descripcion: DataTypes.STRING(100),
     
 })
 

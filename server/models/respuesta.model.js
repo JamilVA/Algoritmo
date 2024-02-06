@@ -8,7 +8,7 @@ const Respuesta = sequelize.define('Respuesta', {
         primaryKey:true,
     },
     Tipo: DataTypes.TINYINT,
-    Valor: DataTypes.VARCHAR(200),
+    Valor: DataTypes.STRING(200),
 })
 
 module.exports = Respuesta

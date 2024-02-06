@@ -7,7 +7,7 @@ const Grado = sequelize.define('Grado', {
         autoIncrement:true,
         primaryKey:true,
     },
-    Nombre: DataTypes.VARCHAR(15),
+    Nombre: DataTypes.STRING(15),
     
 })
 

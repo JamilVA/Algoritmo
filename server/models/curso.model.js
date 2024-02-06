@@ -7,7 +7,7 @@ const Curso = sequelize.define('Curso', {
         autoIncrement:true,
         primaryKey:true,
     },
-    Nombre: DataTypes.VARCHAR(30),
+    Nombre: DataTypes.STRING(30),
     
 })
 

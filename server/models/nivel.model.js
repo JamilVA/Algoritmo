@@ -7,7 +7,7 @@ const Nivel = sequelize.define('Nivel', {
         autoIncrement:true,
         primaryKey:true,
     },
-    Nombre: DataTypes.VARCHAR(15),
+    Nombre: DataTypes.STRING(15),
     
 })
 
