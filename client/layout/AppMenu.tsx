@@ -53,8 +53,22 @@ const AppMenu = () => {
                         { label: 'Pagos', icon: 'pi pi-fw pi-check-square', to: '/apoderado/pagos' },
                     ]
                 },
-
-
+                {
+                    label: 'Docente',
+                    items: [
+                        { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/docente' },
+                        { label: 'Cursos', icon: 'pi pi-fw pi-check-square', to: '/docente/cursos' },
+                    ]
+                },
+                {
+                    label: 'Estudiante',
+                    items: [
+                        { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/estudiante' },
+                        { label: 'Cursos', icon: 'pi pi-fw pi-check-square', to: '/estudiante/cursos' },
+                        { label: 'Examenes', icon: 'pi pi-fw pi-check-square', to: '/estudiante/examenes' },
+                        { label: 'Horarios', icon: 'pi pi-fw pi-check-square', to: '/estudiante/horarios' },
+                    ]
+                },
                 {
                     label: 'Crud',
                     icon: 'pi pi-fw pi-pencil',
