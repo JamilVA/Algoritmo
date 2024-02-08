@@ -39,33 +39,33 @@ const AppMenu = () => {
                         { label: 'Gestion Apoderados', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-apoderados' },
                         { label: 'Gestion Estudiantes', icon: 'pi pi-fw pi-check-square', to: '/administrador/gestion-estudiantes' },
                         { label: 'Gestion Docentes', icon: 'pi pi-fw pi-check-square', to: '/administrador/gestion-docentes' },
-                        { label: 'Gestion Cursos', icon: 'pi pi-fw pi-check-square', to: '/administrador/gestion-cursos' },
-                        { label: 'Gestion Pagos', icon: 'pi pi-fw pi-check-square', to: '/administrador/gestion-pagos' },
+                        { label: 'Gestion Cursos', icon: 'pi pi-fw pi-fw pi-book', to: '/administrador/gestion-cursos' },
+                        { label: 'Gestion Pagos', icon: 'pi pi-fw pi-money-bill', to: '/administrador/gestion-pagos' },
                     ]
                 },
                 {
                     label: 'Apoderado',
                     items: [
                         { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/apoderado' },
-                        { label: 'Cursos', icon: 'pi pi-fw pi-check-square', to: '/apoderado/cursos' },
-                        { label: 'Asistencia', icon: 'pi pi-fw pi-check-square', to: '/apoderado/asistencias' },
-                        { label: 'Horarios', icon: 'pi pi-fw pi-check-square', to: '/apoderado/horarios' },
-                        { label: 'Pagos', icon: 'pi pi-fw pi-check-square', to: '/apoderado/pagos' },
+                        { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/apoderado/cursos' },
+                        { label: 'Asistencia', icon: 'pi pi-fw pi-check-circle', to: '/apoderado/asistencias' },
+                        { label: 'Horarios', icon: 'pi pi-fw pi-calendar-plus', to: '/apoderado/horarios' },
+                        { label: 'Pagos', icon: 'pi pi-fw pi-money-bill', to: '/apoderado/pagos' },
                     ]
                 },
                 {
                     label: 'Docente',
                     items: [
                         { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/docente' },
-                        { label: 'Cursos', icon: 'pi pi-fw pi-check-square', to: '/docente/cursos' },
+                        { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/docente/cursos' },
                     ]
                 },
                 {
                     label: 'Estudiante',
                     items: [
                         { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/estudiante' },
-                        { label: 'Cursos', icon: 'pi pi-fw pi-check-square', to: '/estudiante/cursos' },
-                        { label: 'Examenes', icon: 'pi pi-fw pi-check-square', to: '/estudiante/examenes' },
+                        { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/estudiante/cursos' },
+                        { label: 'Examenes', icon: 'pi pi-fw pi-file', to: '/estudiante/examenes' },
                         { label: 'Horarios', icon: 'pi pi-fw pi-check-square', to: '/estudiante/horarios' },
                     ]
                 },
