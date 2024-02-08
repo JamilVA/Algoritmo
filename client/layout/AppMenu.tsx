@@ -37,8 +37,8 @@ const AppMenu = () => {
                     items: [
                         { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/administrador' },
                         { label: 'Gestion Apoderados', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-apoderados' },
-                        { label: 'Gestion Estudiantes', icon: 'pi pi-fw pi-check-square', to: '/administrador/gestion-estudiantes' },
-                        { label: 'Gestion Docentes', icon: 'pi pi-fw pi-check-square', to: '/administrador/gestion-docentes' },
+                        { label: 'Gestion Estudiantes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-estudiantes' },
+                        { label: 'Gestion Docentes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-docentes' },
                         { label: 'Gestion Cursos', icon: 'pi pi-fw pi-fw pi-book', to: '/administrador/gestion-cursos' },
                         { label: 'Gestion Pagos', icon: 'pi pi-fw pi-money-bill', to: '/administrador/gestion-pagos' },
                     ]
