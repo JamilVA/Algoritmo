@@ -26,6 +26,7 @@ dbConnection();
 
 app.use('/api/estudiante', require('./routes/estudiante.route'));
 app.use('/api/pago', require('./routes/pago.route'));
+app.use('/api/apoderado', require('./routes/apoderado.route'));
 
 
 // app.use('/api/docente', require('./routes/docante.route'));
