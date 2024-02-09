@@ -1,16 +1,14 @@
-const { TipoUsuario, Usuario, Persona, Estudiante} = require('../config/relations');
+const { TipoUsuario, Usuario, Persona, Estudiante, Grupo} = require('../config/relations');
 
 const getEstudiantes = async(req,res) => {
     const estudiantes = await Estudiante.findAll({
-        attributes: {
-            exclude: ['FechaNacimiento'],
-        },
         include : [
             {
                 model: Persona,
-                attributes:['Codigo','ApellidoPaterno','ApellidoMaterno']
+            },{
+                model: Grupo,
+                attributes: ['Nombre']
             }
-
         ]
     })
 
