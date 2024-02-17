@@ -17,23 +17,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Demo } from '@/types';
 import axios from 'axios';
 
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 
-export default function GestionCursos() {
-    const apoderadoVacio = {
-        Codigo: 0,
-        CodigoPersona: 0,
-        Direccion: '',
-        Telefono: '',
-        Persona: {
-            Codigo: 0,
-            Nombres: '',
-            ApellidoPaterno: '',
-            ApellidoMaterno: '',
-            DNI: ''
-        }
-    };
+const GestionCursos = () => {
+    const router = useRouter();
 
     const cursoVacio = {
         Codigo: 0,
@@ -62,15 +50,12 @@ export default function GestionCursos() {
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
-    const router = useRouter();
 
     useEffect(() => {
-        console.log('x')
         cargarNiveles();
     }, []);
 
     const cargarNiveles = async () => {
-        console.log('Hola');
         try {
             const { data } = await axios.get('http://localhost:3001/api/curso/niveles');
             const { niveles } = data;
@@ -112,7 +97,17 @@ export default function GestionCursos() {
 
     const editarCurso = (rowData: typeof cursoVacio) => {};
 
-    const onDropdownChange = (e: any) => {
+    const onNivelSelect = (e: any) => {
+        const val = (e.target && e.target.value) || '';
+        let _nivel = { ...nivel };
+
+        _nivel['Codigo'] = val;
+
+        setNivel(_nivel);
+        cargarCursos(val);
+    };
+
+    const onGradoSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
         let _nivel = { ...nivel };
 
@@ -124,7 +119,7 @@ export default function GestionCursos() {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Lista de Cursos</h5>
+            <h4 className="m-0">Lista de Cursos</h4>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <div className="field col">
                     <Dropdown
@@ -134,7 +129,7 @@ export default function GestionCursos() {
                         optionValue="Codigo"
                         name="Prerequisito"
                         onChange={(e) => {
-                            onDropdownChange(e);
+                            onNivelSelect(e);
                         }}
                         placeholder="Seleccione un nivel"
                         id="Prerequisito"
@@ -185,18 +180,20 @@ export default function GestionCursos() {
     const bancoPreguntas = (rowData: any) => {
         const codigoCurso = rowData.Codigo;
 
-        router.push({
-            pathname: '/administrador/gestion-cursos/banco-preguntas',
-            query: {
-                codigoCurso,
-            }
-        });
+        // router.push({
+        //     pathname: '/administrador/gestion-cursos/banco-preguntas',
+        //     query: {
+        //         codigoCurso,
+        //     }
+        // });
+
+        router.push(`/administrador/gestion-cursos/banco-preguntas?codigoCurso=${codigoCurso}`)
     };
 
     const actionBodyTemplate = (rowData: typeof cursoVacio) => {
         return (
             <>
-                <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Banco de preguntas" className="mr-2" onClick={() => bancoPreguntas(rowData)} />
+                <Button icon="pi pi-book" rounded severity="help" outlined tooltip="Banco de preguntas" className="mr-2" onClick={() => bancoPreguntas(rowData)} />
                 <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editarCurso(rowData)} />
             </>
         );
@@ -232,32 +229,22 @@ export default function GestionCursos() {
                     </DataTable>
 
                     <Dialog visible={cursoDialog} style={{ width: '600px' }} header="Datos del Apoderado" modal className="p-fluid" footer={cursoDialogFooter} onHide={hideDialog}>
-                        {/* <div className="field">
+                        <div className="field">
                             <label htmlFor="Persona.Nombres" className="font-bold">
-                                Nombres
+                                Nombre del curso
                             </label>
-                            <InputText id="Persona.Nombres" value={apoderado.Persona.Nombres} required autoFocus maxLength={60} className={classNames({ 'p-invalid': submitted && !apoderado.Persona.Nombres })} />
+                            <InputText id="Persona.Nombres" value={cursos.Persona.Nombres} required autoFocus maxLength={60} className={classNames({ 'p-invalid': submitted && !apoderado.Persona.Nombres })} />
                             {submitted && !apoderado.Persona.Nombres && <small className="p-error">Ingrese los nombres del apoderado.</small>}
                         </div>
                         <div className="form grid">
-                            <div className="field col">
-                                <label htmlFor="Persona.ApeliidoPaterno" className="font-bold">
-                                    Apellido Paterno
-                                </label>
-                                <InputText id="Persona.ApellidoPaterno" value={apoderado.Persona.ApellidoPaterno} required maxLength={45} className={classNames({ 'p-invalid': submitted && !apoderado.Persona.ApellidoPaterno })} />
-                                {submitted && !apoderado.Persona.ApellidoPaterno && <small className="p-error">Ingrese el apellido paterno del estudiante.</small>}
-                            </div>
-                            <div className="field col">
-                                <label htmlFor="Persona.ApellidoMaterno" className="font-bold">
-                                    Apellido Materno
-                                </label>
-                                <InputText id="Persona.ApellidoMaterno" value={apoderado.Persona.ApellidoMaterno} required maxLength={45} className={classNames({ 'p-invalid': submitted && !apoderado.Persona.ApellidoPaterno })} />
-                                {submitted && !apoderado.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido paterno del estudiante.</small>}
-                            </div>
-                        </div> */}
+
+                        </div>
                     </Dialog>
                 </div>
             </div>
         </div>
     );
 }
+
+
+export default GestionCursos;

@@ -21,11 +21,11 @@ export default function GestionDocente() {
     const docenteVacio = {
         Codigo: 0,
         CodigoPersona: 0,
-        Email: "",
-        Telefono: "",
+        Email: '',
+        Telefono: '',
         FechaNacimiento: new Date(),
-        Grupo:{
-            Nombre:"",
+        Grupo: {
+            Nombre: ''
         },
         Persona: {
             Codigo: 0,
@@ -33,7 +33,7 @@ export default function GestionDocente() {
             ApellidoPaterno: '',
             ApellidoMaterno: '',
             DNI: ''
-        },
+        }
     };
 
     const [docentes, setDocentes] = useState<(typeof docenteVacio)[]>([]);
@@ -47,7 +47,6 @@ export default function GestionDocente() {
     const dt = useRef<DataTable<any>>(null);
 
     useEffect(() => {
-
         cargarDatos();
     }, []);
 
@@ -74,60 +73,63 @@ export default function GestionDocente() {
     };
 
     const guardarDocente = () => {
+        let _docente = { ...docente };
+        console.log('Docente a guardar:', _docente);
 
-        let _docente = {...docente}
-        console.log('Docente a guardar:', _docente)
+        setSubmitted(true);
 
-        setSubmitted(true)
-
-        if(!docente.Codigo){
+        if (!docente.Codigo) {
             try {
-                axios.post('http://localhost:3001/api/docente', {
-                    Nombres: _docente.Persona.Nombres,
-                    ApellidoPaterno: _docente.Persona.ApellidoPaterno,
-                    ApellidoMaterno: _docente.Persona.ApellidoMaterno,
-                    Email: _docente.Email,
-                    Tefelono: _docente.Telefono,
-                    DNI: _docente.Persona.DNI,
-                    FechaNacimiento: _docente.FechaNacimiento,
-                }).then((response) => {
-                    console.log(response.data)
-                    toast.current!.show({severity:'success', summary: 'Successful', detail: 'Docente creado correctamente', life: 3000});
-                    cargarDatos();
-                })
+                axios
+                    .post('http://localhost:3001/api/docente', {
+                        Nombres: _docente.Persona.Nombres,
+                        ApellidoPaterno: _docente.Persona.ApellidoPaterno,
+                        ApellidoMaterno: _docente.Persona.ApellidoMaterno,
+                        Email: _docente.Email,
+                        Tefelono: _docente.Telefono,
+                        DNI: _docente.Persona.DNI,
+                        FechaNacimiento: _docente.FechaNacimiento
+                    })
+                    .then((response) => {
+                        console.log(response.data);
+                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Docente creado correctamente', life: 3000 });
+                        cargarDatos();
+                    });
                 setDocente(docenteVacio);
                 hideDialog();
             } catch (error) {
-                console.error(error)
+                console.error(error);
             }
-        }else{
+        } else {
             try {
-                axios.put('http://localhost:3001/api/docente', {
-                    Codigo: _docente.Codigo,
-                    CodigoPersona: _docente.CodigoPersona,
-                    Nombres: _docente.Persona.Nombres,
-                    ApellidoPaterno: _docente.Persona.ApellidoPaterno,
-                    ApellidoMaterno: _docente.Persona.ApellidoMaterno,
-                    DNI: _docente.Persona.DNI,
-                    FechaNacimiento: _docente.FechaNacimiento,
-                }).then((response) => {
-                    console.log(response.data)
-                    toast.current!.show({severity:'success', summary: 'Successful', detail: 'Docente modificado correctamente', life: 3000});
-                    cargarDatos();
-                })
+                axios
+                    .put('http://localhost:3001/api/docente', {
+                        Codigo: _docente.Codigo,
+                        CodigoPersona: _docente.CodigoPersona,
+                        Nombres: _docente.Persona.Nombres,
+                        ApellidoPaterno: _docente.Persona.ApellidoPaterno,
+                        ApellidoMaterno: _docente.Persona.ApellidoMaterno,
+                        DNI: _docente.Persona.DNI,
+                        FechaNacimiento: _docente.FechaNacimiento
+                    })
+                    .then((response) => {
+                        console.log(response.data);
+                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Docente modificado correctamente', life: 3000 });
+                        cargarDatos();
+                    });
                 setDocente(docenteVacio);
                 hideDialog();
             } catch (error) {
-                console.error(error)
+                console.error(error);
             }
         }
+    };
 
-   
     const editDocente = (docente: typeof docenteVacio) => {
         setDocente({ ...docente });
         setDocenteDialog(true);
 
-        console.log('Edtudiante recibido para editar:', docente)
+        console.log('Edtudiante recibido para editar:', docente);
     };
 
     const exportCSV = () => {
@@ -173,10 +175,10 @@ export default function GestionDocente() {
         return rowData.Email;
     };
     const fechaNacimientoBodyTemplate = (rowData: typeof docenteVacio) => {
-        return rowData.FechaNacimiento.toLocaleDateString("es-ES",{
-            day:"2-digit",
-            month:"long",
-            year:"numeric"
+        return rowData.FechaNacimiento.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
         });
     };
 
@@ -223,8 +225,6 @@ export default function GestionDocente() {
         setDocente(_docente);
         console.log('Docente recibido', _docente);
     };
-
-  
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -346,26 +346,25 @@ export default function GestionDocente() {
                                 {submitted && !docente.Persona.DNI && <small className="p-error">Ingrese el DNI del docente.</small>}
                             </div>
                             {/* <div className="field col">
-                                <label htmlFor="FechaNacimiento" className="font-bold">
-                                    Fecha Nacimiento
-                                </label>
-                                <Calendar
-                                    id="FechaNacimiento"
-                                    value={docente.FechaNacimiento}
-                                    onChange={(e) => {
-                                        onCalendarChange(e);
-                                    }}
-                                    showIcon
-                                    required
-                                    className={classNames({ 'p-invalid': submitted && !docente.FechaNacimiento })}
-                                />
-                                {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Seleccione la fecha de nacimiento del docente.</small>}
-                            </div> */}
+                            <label htmlFor="FechaNacimiento" className="font-bold">
+                                Fecha Nacimiento
+                            </label>
+                            <Calendar
+                                id="FechaNacimiento"
+                                value={docente.FechaNacimiento}
+                                onChange={(e) => {
+                                    onCalendarChange(e);
+                                }}
+                                showIcon
+                                required
+                                className={classNames({ 'p-invalid': submitted && !docente.FechaNacimiento })}
+                            />
+                            {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Seleccione la fecha de nacimiento del docente.</small>}
+                        </div> */}
                         </div>
                     </Dialog>
                 </div>
             </div>
         </div>
-      );
-    }   
+    );
 }

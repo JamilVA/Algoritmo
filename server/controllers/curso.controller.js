@@ -1,9 +1,7 @@
 const {
-  TipoUsuario,
   Usuario,
   Persona,
   Estudiante,
-  Grupo,
   Nivel,
   Curso,
   Grado,
@@ -15,6 +13,15 @@ const getNiveles = async (req, res) => {
   res.json({
     ok: true,
     niveles,
+  });
+};
+
+const getGrados = async (req, res) => {
+  const grados = await Grado.findAll({});
+
+  res.json({
+    ok: true,
+    grados,
   });
 };
 
@@ -37,44 +44,67 @@ const getCursos = async (req, res) => {
   });
 };
 
-const crearEstudiante = async (req, res) => {
+const crearCurso = async (req, res) => {
   try {
-    const persona = await Persona.create({
+    const curso = await Curso.create({
       Codigo: null,
-      Nombres: req.body.Nombres,
-      ApellidoPaterno: req.body.ApellidoPaterno,
-      ApellidoMaterno: req.body.ApellidoMaterno,
-      DNI: req.body.DNI,
-    });
-
-    const estudiante = await Estudiante.create({
-      Codigo: null,
-      FechaNacimiento: req.body.FechaNacimiento,
-      CodigoPersona: persona.Codigo,
-    });
-
-    const usuario = await Usuario.create({
-      Codigo: null,
-      Estado: true,
-      Email: req.body.Email,
-      Password: req.body.Password,
-      CodigoPersona: persona.Codigo,
-      CodigoTipoUsuario: 3,
+      Nombre: req.body.Nombre,
+      CodigoGrado: req.body.CodigoGrado,
     });
 
     res.json({
       ok: true,
-      persona,
-      estudiante,
-      usuario,
+      curso
     });
   } catch (error) {
     console.error(error);
   }
 };
 
+const editarCurso = async (req, res) => {
+    try {
+      const curso = await Curso.update({
+        Nombre: req.body.Nombre,
+        CodigoGrado: req.body.CodigoGrado,
+      },{
+        where: {
+            Codigo: req.body.Codigo,
+        }
+      });
+  
+      res.json({
+        ok: true,
+        curso
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+const asignarDocente = async (req, res) => {
+    try {
+      const curso = await Curso.update({
+        CodigoDocente: req.body.CodigoDocente,
+      },{
+        where: {
+            Codigo: req.body.Codigo,
+        }
+      });
+  
+      res.json({
+        ok: true,
+        curso
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 module.exports = {
   getNiveles,
+  getGrados,
   getCursos,
-  crearEstudiante,
+  crearCurso,
+  editarCurso,
+  asignarDocente
 };
