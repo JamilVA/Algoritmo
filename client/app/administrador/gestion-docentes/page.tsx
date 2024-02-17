@@ -3,6 +3,7 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
+import { Calendar } from 'primereact/calendar';
 import { FileUpload } from 'primereact/fileupload';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
@@ -22,7 +23,7 @@ export default function GestionDocente() {
         CodigoPersona: 0,
         Email: "",
         Telefono: "",
-        FechaNacimiento: "",
+        FechaNacimiento: new Date(),
         Grupo:{
             Nombre:"",
         },
@@ -172,7 +173,11 @@ export default function GestionDocente() {
         return rowData.Email;
     };
     const fechaNacimientoBodyTemplate = (rowData: typeof docenteVacio) => {
-        return rowData.FechaNacimiento;
+        return rowData.FechaNacimiento.toLocaleDateString("es-ES",{
+            day:"2-digit",
+            month:"long",
+            year:"numeric"
+        });
     };
 
     const telefonoBodyTemplate = (rowData: typeof docenteVacio) => {
@@ -264,7 +269,7 @@ export default function GestionDocente() {
                         <Column field="Persona.Nombres" header="Nombres Completos" sortable body={nombresBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
-                        <Column field="FechaNacimiento" header="Fecha de Nacimiento" sortable body={fechaNacimientoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        {/* <Column field="FechaNacimiento" header="Fecha de Nacimiento" sortable body={fechaNacimientoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column> */}
                         <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
@@ -275,7 +280,17 @@ export default function GestionDocente() {
                             <label htmlFor="Persona.Nombres" className="font-bold">
                                 Nombres
                             </label>
-                            <InputText id="Persona.Nombres" value={docente.Persona.Nombres} required autoFocus maxLength={60} className={classNames({ 'p-invalid': submitted && !docente.Persona.Nombres })} />
+                            <InputText
+                                id="Persona.Nombres"
+                                value={docente.Persona.Nombres}
+                                onChange={(e) => {
+                                    onInputChange(e, 'Nombres');
+                                }}
+                                required
+                                autoFocus
+                                maxLength={60}
+                                className={classNames({ 'p-invalid': submitted && !docente.Persona.Nombres })}
+                            />
                             {submitted && !docente.Persona.Nombres && <small className="p-error">Ingrese los nombres del docente.</small>}
                         </div>
                         <div className="form grid">
@@ -283,22 +298,74 @@ export default function GestionDocente() {
                                 <label htmlFor="Persona.ApeliidoPaterno" className="font-bold">
                                     Apellido Paterno
                                 </label>
-                                <InputText id="Persona.ApellidoPaterno" value={docente.Persona.ApellidoPaterno} required  maxLength={45} className={classNames({ 'p-invalid': submitted && !docente.Persona.ApellidoPaterno })} />
+                                <InputText
+                                    id="Persona.ApellidoPaterno"
+                                    value={docente.Persona.ApellidoPaterno}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Paterno');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                    className={classNames({ 'p-invalid': submitted && !docente.Persona.ApellidoPaterno })}
+                                />
                                 {submitted && !docente.Persona.ApellidoPaterno && <small className="p-error">Ingrese el apellido paterno del docente.</small>}
                             </div>
                             <div className="field col">
                                 <label htmlFor="Persona.ApellidoMaterno" className="font-bold">
                                     Apellido Materno
                                 </label>
-                                <InputText id="Persona.ApellidoMaterno" value={docente.Persona.ApellidoMaterno} required  maxLength={45} className={classNames({ 'p-invalid': submitted && !docente.Persona.ApellidoPaterno })} />
-                                {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido materno del docente.</small>}
+                                <InputText
+                                    id="Persona.ApellidoMaterno"
+                                    value={docente.Persona.ApellidoMaterno}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Materno');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                    className={classNames({ 'p-invalid': submitted && !docente.Persona.ApellidoPaterno })}
+                                />
+                                {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido paterno del docente.</small>}
                             </div>
                         </div>
 
+                        <div className="form grid">
+                            <div className="field col">
+                                <label htmlFor="Persona.DNI" className="font-bold">
+                                    DNI
+                                </label>
+                                <InputText
+                                    id="Persona.DNI"
+                                    value={docente.Persona.DNI}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'DNI');
+                                    }}
+                                    required
+                                    maxLength={8}
+                                    className={classNames({ 'p-invalid': submitted && !docente.Persona.DNI })}
+                                />
+                                {submitted && !docente.Persona.DNI && <small className="p-error">Ingrese el DNI del docente.</small>}
+                            </div>
+                            {/* <div className="field col">
+                                <label htmlFor="FechaNacimiento" className="font-bold">
+                                    Fecha Nacimiento
+                                </label>
+                                <Calendar
+                                    id="FechaNacimiento"
+                                    value={docente.FechaNacimiento}
+                                    onChange={(e) => {
+                                        onCalendarChange(e);
+                                    }}
+                                    showIcon
+                                    required
+                                    className={classNames({ 'p-invalid': submitted && !docente.FechaNacimiento })}
+                                />
+                                {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Seleccione la fecha de nacimiento del docente.</small>}
+                            </div> */}
+                        </div>
                     </Dialog>
                 </div>
             </div>
         </div>
-    );
-}
+      );
+    }   
 }
