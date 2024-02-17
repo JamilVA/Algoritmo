@@ -19,13 +19,10 @@ import axios from 'axios';
 
 import { useSearchParams } from 'next/navigation';
 
-import { useRouter } from 'next/router';
-
 
 export default function BancoPreguntas() {
     const searchParams = useSearchParams();
-    const codigoCurso = searchParams.get('codigoS');
-    const codigoEstudiante = searchParams.get('codigoE');
+    const codigoCurso = searchParams.get('codigoCurso');
 
     const cursoVacio = {
         Codigo: 0,
@@ -54,7 +51,6 @@ export default function BancoPreguntas() {
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
-    const router = useRouter();
 
     useEffect(() => {
         console.log('x')
@@ -174,21 +170,11 @@ export default function BancoPreguntas() {
         return rowData.Grado.Nombre;
     };
 
-    const bancoPreguntas = (rowData: any) => {
-        const codigoCurso = rowData.Codigo;
 
-        router.push({
-            pathname: '/administrador/gestion-cursos/banco-preguntas',
-            query: {
-                codigoCurso,
-            }
-        });
-    };
 
     const actionBodyTemplate = (rowData: typeof cursoVacio) => {
         return (
             <>
-                <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Banco de preguntas" className="mr-2" onClick={() => bancoPreguntas(rowData)} />
                 <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editarCurso(rowData)} />
             </>
         );

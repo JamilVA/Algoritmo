@@ -34,20 +34,43 @@ const crearEstudiante = async(req,res) =>{
             CodigoPersona: persona.Codigo,
         });
 
-        const usuario = await Usuario.create({
-            Codigo: null,
-            Estado: true,
-            Email: req.body.Email,
-            Password: req.body.Password,
-            CodigoPersona: persona.Codigo,
-            CodigoTipoUsuario: 3,
+        res.json({
+            ok:true,
+            persona,
+            estudiante,
         })
+            
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+const actualizarEstudiante = async(req,res) =>{
+    try {
+        const persona = await Persona.update({
+            Nombres: req.body.Nombres,
+            ApellidoPaterno: req.body.ApellidoPaterno,
+            ApellidoMaterno: req.body.ApellidoMaterno,
+            DNI: req.body.DNI,           
+        },{
+            where: {
+                Codigo: req.body.CodigoPersona,
+            }
+        });
+
+        const estudiante = await Estudiante.update({
+            FechaNacimiento: req.body.FechaNacimiento,
+            CodigoPersona: persona.Codigo,
+        },{
+            where: {
+                Codigo: req.body.Codigo,
+            }
+        });
 
         res.json({
             ok:true,
             persona,
             estudiante,
-            usuario
         })
             
     } catch (error) {
@@ -59,4 +82,5 @@ const crearEstudiante = async(req,res) =>{
 module.exports = {
     getEstudiantes,
     crearEstudiante,
+    actualizarEstudiante,
 }

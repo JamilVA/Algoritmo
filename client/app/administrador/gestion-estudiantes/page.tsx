@@ -47,18 +47,20 @@ export default function GestionEstudiantes() {
     const dt = useRef<DataTable<any>>(null);
 
     useEffect(() => {
-        const cargarDatos = async () => {
-            try {
-                const { data } = await axios.get('http://localhost:3001/api/estudiante', {});
-                const { estudiantes } = data;
-                console.log('Hola', estudiantes);
-                setEstudiantes(estudiantes);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+
         cargarDatos();
     }, []);
+
+    const cargarDatos = async () => {
+        try {
+            const { data } = await axios.get('http://localhost:3001/api/estudiante', {});
+            const { estudiantes } = data;
+            console.log('Hola', estudiantes);
+            setEstudiantes(estudiantes);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const openNew = () => {
         setEstudiante(estudianteVacio);
@@ -71,43 +73,60 @@ export default function GestionEstudiantes() {
         setEstudianteDialog(false);
     };
 
+    const guardarEstudiante = () => {
 
-    const saveProduct = () => {
-        // setSubmitted(true);
-        // if (product.name.trim()) {
-        //     let _products = [...(products as any)];
-        //     let _product = { ...product };
-        //     if (product.id) {
-        //         const index = findIndexById(product.id);
-        //         _products[index] = _product;
-        //         toast.current?.show({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Updated',
-        //             life: 3000
-        //         });
-        //     } else {
-        //         _product.id = createId();
-        //         _product.image = 'product-placeholder.svg';
-        //         _products.push(_product);
-        //         toast.current?.show({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Created',
-        //             life: 3000
-        //         });
-        //     }
-        //     setProducts(_products as any);
-        //     setEstudianteDialog(false);
-        //     setProduct(emptyProduct);
-        // }
+        let _estudiante = {...estudiante}
+        console.log('Estudiante a guardar:', _estudiante)
+
+        setSubmitted(true)
+
+        if(!estudiante.Codigo){
+            try {
+                axios.post('http://localhost:3001/api/estudiante', {
+                    Nombres: _estudiante.Persona.Nombres,
+                    ApellidoPaterno: _estudiante.Persona.ApellidoPaterno,
+                    ApellidoMaterno: _estudiante.Persona.ApellidoMaterno,
+                    DNI: _estudiante.Persona.DNI,
+                    FechaNacimiento: _estudiante.FechaNacimiento,
+                }).then((response) => {
+                    console.log(response.data)
+                    toast.current!.show({severity:'success', summary: 'Successful', detail: 'Estudiante creado correctamente', life: 3000});
+                    cargarDatos();
+                })
+                setEstudiante(estudianteVacio);
+                hideDialog();
+            } catch (error) {
+                console.error(error)
+            }
+        }else{
+            try {
+                axios.put('http://localhost:3001/api/estudiante', {
+                    Codigo: _estudiante.Codigo,
+                    CodigoPersona: _estudiante.CodigoPersona,
+                    Nombres: _estudiante.Persona.Nombres,
+                    ApellidoPaterno: _estudiante.Persona.ApellidoPaterno,
+                    ApellidoMaterno: _estudiante.Persona.ApellidoMaterno,
+                    DNI: _estudiante.Persona.DNI,
+                    FechaNacimiento: _estudiante.FechaNacimiento,
+                }).then((response) => {
+                    console.log(response.data)
+                    toast.current!.show({severity:'success', summary: 'Successful', detail: 'Estudiante modificado correctamente', life: 3000});
+                    cargarDatos();
+                })
+                setEstudiante(estudianteVacio);
+                hideDialog();
+            } catch (error) {
+                console.error(error)
+            }
+        }
     };
 
-    const editProduct = (estudiante: typeof estudianteVacio) => {
+    const editarEstudiante = (estudiante: typeof estudianteVacio) => {
         setEstudiante({ ...estudiante });
         setEstudianteDialog(true);
-    };
 
+        console.log('Edtudiante recibido para editar:', estudiante)
+    };
 
     const exportCSV = () => {
         dt.current?.exportCSV();
@@ -141,14 +160,45 @@ export default function GestionEstudiantes() {
     };
 
     const gradoBodyTemplate = (rowData: typeof estudianteVacio) => {
-        return rowData.Grupo.Nombre;
+        return rowData.Grupo?.Nombre;
     };
 
+    const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
+        const val = (e.target && e.target.value) || '';
+
+        let _estudiante = { ...estudiante };
+
+        if (name == 'Nombres') {
+            _estudiante.Persona.Nombres = val;
+        }
+        if (name == 'Paterno') {
+            _estudiante.Persona.ApellidoPaterno = val;
+        }
+        if (name == 'Materno') {
+            _estudiante.Persona.ApellidoMaterno = val;
+        }
+        if (name == 'DNI') {
+            _estudiante.Persona.DNI = val;
+        }
+
+        setEstudiante(_estudiante);
+    };
+
+    const onCalendarChange = (e: any) => {
+        const val = (e.target && e.target.value) || '';
+
+        let _estudiante = { ...estudiante };
+
+        _estudiante.FechaNacimiento = val;
+
+        setEstudiante(_estudiante);
+        console.log('Estudiante recibido', _estudiante);
+    };
 
     const actionBodyTemplate = (rowData: typeof estudianteVacio) => {
         return (
             <>
-                <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editProduct(rowData)} />
+                <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editarEstudiante(rowData)} />
             </>
         );
     };
@@ -166,7 +216,7 @@ export default function GestionEstudiantes() {
     const estudianteDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
-            <Button label="Guardar" icon="pi pi-check" text onClick={saveProduct} />
+            <Button label="Guardar" icon="pi pi-check" text onClick={guardarEstudiante} />
         </>
     );
 
@@ -204,7 +254,17 @@ export default function GestionEstudiantes() {
                             <label htmlFor="Persona.Nombres" className="font-bold">
                                 Nombres
                             </label>
-                            <InputText id="Persona.Nombres" value={estudiante.Persona.Nombres} required autoFocus maxLength={60} className={classNames({ 'p-invalid': submitted && !estudiante.Persona.Nombres })} />
+                            <InputText
+                                id="Persona.Nombres"
+                                value={estudiante.Persona.Nombres}
+                                onChange={(e) => {
+                                    onInputChange(e, 'Nombres');
+                                }}
+                                required
+                                autoFocus
+                                maxLength={60}
+                                className={classNames({ 'p-invalid': submitted && !estudiante.Persona.Nombres })}
+                            />
                             {submitted && !estudiante.Persona.Nombres && <small className="p-error">Ingrese los nombres del estudiante.</small>}
                         </div>
                         <div className="form grid">
@@ -212,14 +272,32 @@ export default function GestionEstudiantes() {
                                 <label htmlFor="Persona.ApeliidoPaterno" className="font-bold">
                                     Apellido Paterno
                                 </label>
-                                <InputText id="Persona.ApellidoPaterno" value={estudiante.Persona.ApellidoPaterno} required  maxLength={45} className={classNames({ 'p-invalid': submitted && !estudiante.Persona.ApellidoPaterno })} />
+                                <InputText
+                                    id="Persona.ApellidoPaterno"
+                                    value={estudiante.Persona.ApellidoPaterno}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Paterno');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                    className={classNames({ 'p-invalid': submitted && !estudiante.Persona.ApellidoPaterno })}
+                                />
                                 {submitted && !estudiante.Persona.ApellidoPaterno && <small className="p-error">Ingrese el apellido paterno del estudiante.</small>}
                             </div>
                             <div className="field col">
                                 <label htmlFor="Persona.ApellidoMaterno" className="font-bold">
                                     Apellido Materno
                                 </label>
-                                <InputText id="Persona.ApellidoMaterno" value={estudiante.Persona.ApellidoMaterno} required  maxLength={45} className={classNames({ 'p-invalid': submitted && !estudiante.Persona.ApellidoPaterno })} />
+                                <InputText
+                                    id="Persona.ApellidoMaterno"
+                                    value={estudiante.Persona.ApellidoMaterno}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Materno');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                    className={classNames({ 'p-invalid': submitted && !estudiante.Persona.ApellidoPaterno })}
+                                />
                                 {submitted && !estudiante.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido paterno del estudiante.</small>}
                             </div>
                         </div>
@@ -229,18 +307,35 @@ export default function GestionEstudiantes() {
                                 <label htmlFor="Persona.DNI" className="font-bold">
                                     DNI
                                 </label>
-                                <InputText id="Persona.DNI" value={estudiante.Persona.DNI} required  maxLength={8} className={classNames({ 'p-invalid': submitted && !estudiante.Persona.DNI })} />
+                                <InputText
+                                    id="Persona.DNI"
+                                    value={estudiante.Persona.DNI}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'DNI');
+                                    }}
+                                    required
+                                    maxLength={8}
+                                    className={classNames({ 'p-invalid': submitted && !estudiante.Persona.DNI })}
+                                />
                                 {submitted && !estudiante.Persona.DNI && <small className="p-error">Ingrese el DNI del estudiante.</small>}
                             </div>
                             <div className="field col">
                                 <label htmlFor="FechaNacimiento" className="font-bold">
                                     Fecha Nacimiento
                                 </label>
-                                <Calendar id='FechaNacimiento' value={estudiante.FechaNacimiento} showIcon required className={classNames({ 'p-invalid': submitted && !estudiante.FechaNacimiento})}/>
+                                <Calendar
+                                    id="FechaNacimiento"
+                                    value={estudiante.FechaNacimiento}
+                                    onChange={(e) => {
+                                        onCalendarChange(e);
+                                    }}
+                                    showIcon
+                                    required
+                                    className={classNames({ 'p-invalid': submitted && !estudiante.FechaNacimiento })}
+                                />
                                 {submitted && !estudiante.Persona.ApellidoMaterno && <small className="p-error">Seleccione la fecha de nacimiento del estudiante.</small>}
                             </div>
                         </div>
-
                     </Dialog>
                 </div>
             </div>
