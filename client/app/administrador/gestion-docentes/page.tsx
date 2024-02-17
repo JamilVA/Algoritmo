@@ -46,18 +46,20 @@ export default function GestionDocente() {
     const dt = useRef<DataTable<any>>(null);
 
     useEffect(() => {
-        const cargarDatos = async () => {
-            try {
-                const { data } = await axios.get('http://localhost:3001/api/docente', {});
-                const { docentes } = data;
-                console.log('Hola', docentes);
-                setDocentes(docentes);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+
         cargarDatos();
     }, []);
+
+    const cargarDatos = async () => {
+        try {
+            const { data } = await axios.get('http://localhost:3001/api/docente', {});
+            const { docentes } = data;
+            console.log('Hola', docentes);
+            setDocentes(docentes);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const openNew = () => {
         setDocente(docenteVacio);
@@ -70,43 +72,62 @@ export default function GestionDocente() {
         setDocenteDialog(false);
     };
 
+    const guardarDocente = () => {
 
-    const saveProduct = () => {
-        // setSubmitted(true);
-        // if (product.name.trim()) {
-        //     let _products = [...(products as any)];
-        //     let _product = { ...product };
-        //     if (product.id) {
-        //         const index = findIndexById(product.id);
-        //         _products[index] = _product;
-        //         toast.current?.show({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Updated',
-        //             life: 3000
-        //         });
-        //     } else {
-        //         _product.id = createId();
-        //         _product.image = 'product-placeholder.svg';
-        //         _products.push(_product);
-        //         toast.current?.show({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Created',
-        //             life: 3000
-        //         });
-        //     }
-        //     setProducts(_products as any);
-        //     setEstudianteDialog(false);
-        //     setProduct(emptyProduct);
-        // }
-    };
+        let _docente = {...docente}
+        console.log('Docente a guardar:', _docente)
 
-    const editProduct = (docente: typeof docenteVacio) => {
+        setSubmitted(true)
+
+        if(!docente.Codigo){
+            try {
+                axios.post('http://localhost:3001/api/docente', {
+                    Nombres: _docente.Persona.Nombres,
+                    ApellidoPaterno: _docente.Persona.ApellidoPaterno,
+                    ApellidoMaterno: _docente.Persona.ApellidoMaterno,
+                    Email: _docente.Email,
+                    Tefelono: _docente.Telefono,
+                    DNI: _docente.Persona.DNI,
+                    FechaNacimiento: _docente.FechaNacimiento,
+                }).then((response) => {
+                    console.log(response.data)
+                    toast.current!.show({severity:'success', summary: 'Successful', detail: 'Docente creado correctamente', life: 3000});
+                    cargarDatos();
+                })
+                setDocente(docenteVacio);
+                hideDialog();
+            } catch (error) {
+                console.error(error)
+            }
+        }else{
+            try {
+                axios.put('http://localhost:3001/api/docente', {
+                    Codigo: _docente.Codigo,
+                    CodigoPersona: _docente.CodigoPersona,
+                    Nombres: _docente.Persona.Nombres,
+                    ApellidoPaterno: _docente.Persona.ApellidoPaterno,
+                    ApellidoMaterno: _docente.Persona.ApellidoMaterno,
+                    DNI: _docente.Persona.DNI,
+                    FechaNacimiento: _docente.FechaNacimiento,
+                }).then((response) => {
+                    console.log(response.data)
+                    toast.current!.show({severity:'success', summary: 'Successful', detail: 'Docente modificado correctamente', life: 3000});
+                    cargarDatos();
+                })
+                setDocente(docenteVacio);
+                hideDialog();
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+   
+    const editDocente = (docente: typeof docenteVacio) => {
         setDocente({ ...docente });
         setDocenteDialog(true);
-    };
 
+        console.log('Edtudiante recibido para editar:', docente)
+    };
 
     const exportCSV = () => {
         dt.current?.exportCSV();
@@ -142,7 +163,7 @@ export default function GestionDocente() {
     const actionBodyTemplate = (rowData: typeof docenteVacio) => {
         return (
             <>
-                <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editProduct(rowData)} />
+                <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editDocente(rowData)} />
             </>
         );
     };
@@ -160,6 +181,45 @@ export default function GestionDocente() {
     const grupoNombreBodyTemplate = (rowData: typeof docenteVacio) => {
         return rowData.Grupo.Nombre;
     };
+    const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
+        const val = (e.target && e.target.value) || '';
+
+        let _docente = { ...docente };
+
+        if (name == 'Nombres') {
+            docente.Persona.Nombres = val;
+        }
+        if (name == 'Paterno') {
+            _docente.Persona.ApellidoPaterno = val;
+        }
+        if (name == 'Materno') {
+            _docente.Persona.ApellidoMaterno = val;
+        }
+        if (name == 'DNI') {
+            _docente.Persona.DNI = val;
+        }
+        if (name == 'EMAIL') {
+            _docente.Email = val;
+        }
+        if (name == 'TELEFONO') {
+            _docente.Telefono = val;
+        }
+
+        setDocente(_docente);
+    };
+
+    const onCalendarChange = (e: any) => {
+        const val = (e.target && e.target.value) || '';
+
+        let _docente = { ...docente };
+
+        docente.FechaNacimiento = val;
+
+        setDocente(_docente);
+        console.log('Docente recibido', _docente);
+    };
+
+  
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -174,7 +234,7 @@ export default function GestionDocente() {
     const docenteDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
-            <Button label="Guardar" icon="pi pi-check" text onClick={saveProduct} />
+            <Button label="Guardar" icon="pi pi-check" text onClick={guardarDocente} />
         </>
     );
 
@@ -240,4 +300,5 @@ export default function GestionDocente() {
             </div>
         </div>
     );
+}
 }
