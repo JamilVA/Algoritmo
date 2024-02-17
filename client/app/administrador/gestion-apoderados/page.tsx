@@ -3,6 +3,7 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
+import { Calendar } from 'primereact/calendar';
 import { FileUpload } from 'primereact/fileupload';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
@@ -20,15 +21,18 @@ export default function GestionApoderado() {
     const apoderadoVacio = {
         Codigo: 0,
         CodigoPersona: 0,
-        Direccion: "",
-        Telefono: "",
+        Email: '',
+        Telefono: '',
+        Grupo: {
+            Nombre: ''
+        },
         Persona: {
             Codigo: 0,
             Nombres: '',
             ApellidoPaterno: '',
             ApellidoMaterno: '',
             DNI: ''
-        },
+        }
     };
 
     const [apoderados, setApoderados] = useState<(typeof apoderadoVacio)[]>([]);
@@ -42,18 +46,19 @@ export default function GestionApoderado() {
     const dt = useRef<DataTable<any>>(null);
 
     useEffect(() => {
-        const cargarDatos = async () => {
-            try {
-                const { data } = await axios.get('http://localhost:3001/api/apoderado', {});
-                const { apoderados } = data;
-                console.log('Hola', apoderados);
-                setApoderados(apoderados);
-            } catch (error) {
-                console.error(error);
-            }
-        };
         cargarDatos();
     }, []);
+
+    const cargarDatos = async () => {
+        try {
+            const { data } = await axios.get('http://localhost:3001/api/apoderado', {});
+            const { apoderados } = data;
+            console.log('Hola', apoderados);
+            setApoderados(apoderados);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const openNew = () => {
         setApoderado(apoderadoVacio);
@@ -66,43 +71,63 @@ export default function GestionApoderado() {
         setApoderadoDialog(false);
     };
 
+    const guardarApoderado = () => {
+        let _apoderado = { ...apoderado };
+        console.log('Apoderado a guardar:', _apoderado);
 
-    const saveProduct = () => {
-        // setSubmitted(true);
-        // if (product.name.trim()) {
-        //     let _products = [...(products as any)];
-        //     let _product = { ...product };
-        //     if (product.id) {
-        //         const index = findIndexById(product.id);
-        //         _products[index] = _product;
-        //         toast.current?.show({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Updated',
-        //             life: 3000
-        //         });
-        //     } else {
-        //         _product.id = createId();
-        //         _product.image = 'product-placeholder.svg';
-        //         _products.push(_product);
-        //         toast.current?.show({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Created',
-        //             life: 3000
-        //         });
-        //     }
-        //     setProducts(_products as any);
-        //     setEstudianteDialog(false);
-        //     setProduct(emptyProduct);
-        // }
+        setSubmitted(true);
+
+        if (!apoderado.Codigo) {
+            try {
+                axios
+                    .post('http://localhost:3001/api/apoderado', {
+                        Nombres: _apoderado.Persona.Nombres,
+                        ApellidoPaterno: _apoderado.Persona.ApellidoPaterno,
+                        ApellidoMaterno: _apoderado.Persona.ApellidoMaterno,
+                        Email: _apoderado.Email,
+                        Tefelono: _apoderado.Telefono,
+                        DNI: _apoderado.Persona.DNI
+                    })
+                    .then((response) => {
+                        console.log(response.data);
+                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Apoderado creado correctamente', life: 3000 });
+                        cargarDatos();
+                    });
+                setApoderado(apoderadoVacio);
+                hideDialog();
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            try {
+                axios
+                    .put('http://localhost:3001/api/apoderado', {
+                        Codigo: _apoderado.Codigo,
+                        CodigoPersona: _apoderado.CodigoPersona,
+                        Nombres: _apoderado.Persona.Nombres,
+                        ApellidoPaterno: _apoderado.Persona.ApellidoPaterno,
+                        ApellidoMaterno: _apoderado.Persona.ApellidoMaterno,
+                        DNI: _apoderado.Persona.DNI
+                    })
+                    .then((response) => {
+                        console.log(response.data);
+                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Apoderado modificado correctamente', life: 3000 });
+                        cargarDatos();
+                    });
+                setApoderado(apoderadoVacio);
+                hideDialog();
+            } catch (error) {
+                console.error(error);
+            }
+        }
     };
 
-    const editProduct = (apoderado: typeof apoderadoVacio) => {
+    const editApoderado = (apoderado: typeof apoderadoVacio) => {
         setApoderado({ ...apoderado });
         setApoderadoDialog(true);
-    };
 
+        console.log('Edtudiante recibido para editar:', apoderado);
+    };
 
     const exportCSV = () => {
         dt.current?.exportCSV();
@@ -138,18 +163,48 @@ export default function GestionApoderado() {
     const actionBodyTemplate = (rowData: typeof apoderadoVacio) => {
         return (
             <>
-                <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editProduct(rowData)} />
+                <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editApoderado(rowData)} />
             </>
         );
     };
 
-    const direccionBodyTemplate = (rowData: typeof apoderadoVacio) => {
-        return rowData.Direccion;
+    const emailBodyTemplate = (rowData: typeof apoderadoVacio) => {
+        return rowData.Email;
     };
-
+    
     const telefonoBodyTemplate = (rowData: typeof apoderadoVacio) => {
         return rowData.Telefono;
     };
+    const grupoNombreBodyTemplate = (rowData: typeof apoderadoVacio) => {
+        return rowData.Grupo?.Nombre;
+    };
+    const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
+        const val = (e.target && e.target.value) || '';
+
+        let _apoderado = { ...apoderado };
+
+        if (name == 'Nombres') {
+            apoderado.Persona.Nombres = val;
+        }
+        if (name == 'Paterno') {
+            _apoderado.Persona.ApellidoPaterno = val;
+        }
+        if (name == 'Materno') {
+            _apoderado.Persona.ApellidoMaterno = val;
+        }
+        if (name == 'DNI') {
+            _apoderado.Persona.DNI = val;
+        }
+        if (name == 'EMAIL') {
+            _apoderado.Email = val;
+        }
+        if (name == 'TELEFONO') {
+            _apoderado.Telefono = val;
+        }
+
+        setApoderado(_apoderado);
+    };
+
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -164,7 +219,7 @@ export default function GestionApoderado() {
     const apoderadoDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
-            <Button label="Guardar" icon="pi pi-check" text onClick={saveProduct} />
+            <Button label="Guardar" icon="pi pi-check" text onClick={guardarApoderado} />
         </>
     );
 
@@ -193,8 +248,9 @@ export default function GestionApoderado() {
                         {/* <Column header="Codigo" sortable body={codeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column> */}
                         <Column field="Persona.Nombres" header="Nombres Completos" sortable body={nombresBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
-                        <Column field="Direccion" header="Direccion" sortable body={direccionBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
 
@@ -203,7 +259,17 @@ export default function GestionApoderado() {
                             <label htmlFor="Persona.Nombres" className="font-bold">
                                 Nombres
                             </label>
-                            <InputText id="Persona.Nombres" value={apoderado.Persona.Nombres} required autoFocus maxLength={60} className={classNames({ 'p-invalid': submitted && !apoderado.Persona.Nombres })} />
+                            <InputText
+                                id="Persona.Nombres"
+                                value={apoderado.Persona.Nombres}
+                                onChange={(e) => {
+                                    onInputChange(e, 'Nombres');
+                                }}
+                                required
+                                autoFocus
+                                maxLength={60}
+                                className={classNames({ 'p-invalid': submitted && !apoderado.Persona.Nombres })}
+                            />
                             {submitted && !apoderado.Persona.Nombres && <small className="p-error">Ingrese los nombres del apoderado.</small>}
                         </div>
                         <div className="form grid">
@@ -211,18 +277,54 @@ export default function GestionApoderado() {
                                 <label htmlFor="Persona.ApeliidoPaterno" className="font-bold">
                                     Apellido Paterno
                                 </label>
-                                <InputText id="Persona.ApellidoPaterno" value={apoderado.Persona.ApellidoPaterno} required  maxLength={45} className={classNames({ 'p-invalid': submitted && !apoderado.Persona.ApellidoPaterno })} />
-                                {submitted && !apoderado.Persona.ApellidoPaterno && <small className="p-error">Ingrese el apellido paterno del estudiante.</small>}
+                                <InputText
+                                    id="Persona.ApellidoPaterno"
+                                    value={apoderado.Persona.ApellidoPaterno}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Paterno');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                    className={classNames({ 'p-invalid': submitted && !apoderado.Persona.ApellidoPaterno })}
+                                />
+                                {submitted && !apoderado.Persona.ApellidoPaterno && <small className="p-error">Ingrese el apellido paterno del apoderado.</small>}
                             </div>
                             <div className="field col">
                                 <label htmlFor="Persona.ApellidoMaterno" className="font-bold">
                                     Apellido Materno
                                 </label>
-                                <InputText id="Persona.ApellidoMaterno" value={apoderado.Persona.ApellidoMaterno} required  maxLength={45} className={classNames({ 'p-invalid': submitted && !apoderado.Persona.ApellidoPaterno })} />
-                                {submitted && !apoderado.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido paterno del estudiante.</small>}
+                                <InputText
+                                    id="Persona.ApellidoMaterno"
+                                    value={apoderado.Persona.ApellidoMaterno}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Materno');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                    className={classNames({ 'p-invalid': submitted && !apoderado.Persona.ApellidoPaterno })}
+                                />
+                                {submitted && !apoderado.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido paterno del apoderado.</small>}
                             </div>
                         </div>
 
+                        <div className="form grid">
+                            <div className="field col">
+                                <label htmlFor="Persona.DNI" className="font-bold">
+                                    DNI
+                                </label>
+                                <InputText
+                                    id="Persona.DNI"
+                                    value={apoderado.Persona.DNI}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'DNI');
+                                    }}
+                                    required
+                                    maxLength={8}
+                                    className={classNames({ 'p-invalid': submitted && !apoderado.Persona.DNI })}
+                                />
+                                {submitted && !apoderado.Persona.DNI && <small className="p-error">Ingrese el DNI del apoderado.</small>}
+                            </div>
+                        </div>
                     </Dialog>
                 </div>
             </div>

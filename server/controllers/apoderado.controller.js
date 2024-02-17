@@ -1,58 +1,86 @@
-const { TipoUsuario, Usuario, Persona, Apoderado} = require('../config/relations');
+const { TipoUsuario, Usuario, Persona, Docente, Grupo} = require('../config/relations');
 
-const getApoderados = async(req,res) => {
-    const apoderados = await Apoderado.findAll({
+const getDocentes = async(req,res) => {
+    const docentes = await Docente.findAll({
         include : [
             {
                 model: Persona,
-            },
+            },{
+                model: Grupo,
+                attributes: ['Nombre']
+            }
         ]
     })
 
     res.json({
         ok:true,
-        apoderados
+        docentes
     })
 }
 
-// const crearEstudiante = async(req,res) =>{
-//     try {
-//         const persona = await Persona.create({
-//             Codigo: null,
-//             Nombres: req.body.Nombres,
-//             ApellidoPaterno: req.body.ApellidoPaterno,
-//             ApellidoMaterno: req.body.ApellidoMaterno,
-//             DNI: req.body.DNI,          
-//         });
+const crearDocente = async(req,res) =>{
+    try {
+        const persona = await Persona.create({
+            Codigo: null,
+            Nombres: req.body.Nombres,
+            ApellidoPaterno: req.body.ApellidoPaterno,
+            ApellidoMaterno: req.body.ApellidoMaterno,
+            DNI: req.body.DNI,          
+        });
 
-//         const estudiante = await Estudiante.create({
-//             Codigo: null,
-//             FechaNacimiento: req.body.FechaNacimiento,
-//             CodigoPersona: persona.Codigo,
-//         });
+        const docente = await Docente.create({
+            Codigo: null,
+            FechaNacimiento: req.body.FechaNacimiento,
+            CodigoPersona: persona.Codigo,
+        });
 
-//         const usuario = await Usuario.create({
-//             Codigo: null,
-//             Estado: true,
-//             Email: req.body.Email,
-//             Password: req.body.Password,
-//             CodigoPersona: persona.Codigo,
-//             CodigoTipoUsuario: 3,
-//         })
-
-//         res.json({
-//             ok:true,
-//             persona,
-//             estudiante,
-//             usuario
-//         })
+        res.json({
+            ok:true,
+            persona,
+            docente,
+        })
             
-//     } catch (error) {
-//         console.error(error)
-//     }
-// }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+const actualizarDocente = async(req,res) =>{
+    try {
+        const persona = await Persona.update({
+            Nombres: req.body.Nombres,
+            ApellidoPaterno: req.body.ApellidoPaterno,
+            ApellidoMaterno: req.body.ApellidoMaterno,
+            DNI: req.body.DNI,           
+        },{
+            where: {
+                Codigo: req.body.CodigoPersona,
+            }
+        });
+
+        const docente = await Docente.update({
+            FechaNacimiento: req.body.FechaNacimiento,
+            CodigoPersona: persona.Codigo,
+        },{
+            where: {
+                Codigo: req.body.Codigo,
+            }
+        });
+
+        res.json({
+            ok:true,
+            persona,
+            docente,
+        })
+            
+    } catch (error) {
+        console.error(error)
+    }
+}
 
 
 module.exports = {
-    getApoderados,
+    getDocentes,
+    crearDocente,
+    actualizarDocente,
 }
