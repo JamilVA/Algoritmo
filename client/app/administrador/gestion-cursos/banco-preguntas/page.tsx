@@ -17,23 +17,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Demo } from '@/types';
 import axios from 'axios';
 
+import { useSearchParams } from 'next/navigation';
+
 import { useRouter } from 'next/router';
 
 
-export default function GestionCursos() {
-    const apoderadoVacio = {
-        Codigo: 0,
-        CodigoPersona: 0,
-        Direccion: '',
-        Telefono: '',
-        Persona: {
-            Codigo: 0,
-            Nombres: '',
-            ApellidoPaterno: '',
-            ApellidoMaterno: '',
-            DNI: ''
-        }
-    };
+export default function BancoPreguntas() {
+    const searchParams = useSearchParams();
+    const codigoCurso = searchParams.get('codigoS');
+    const codigoEstudiante = searchParams.get('codigoE');
 
     const cursoVacio = {
         Codigo: 0,

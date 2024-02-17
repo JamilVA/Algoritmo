@@ -3,15 +3,16 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
+import { Calendar } from 'primereact/calendar';
 import { FileUpload } from 'primereact/fileupload';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
-import { Rating } from 'primereact/rating';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Demo } from '@/types';
 import axios from 'axios';
@@ -220,6 +221,23 @@ export default function GestionEstudiantes() {
                                 </label>
                                 <InputText id="Persona.ApellidoMaterno" value={estudiante.Persona.ApellidoMaterno} required  maxLength={45} className={classNames({ 'p-invalid': submitted && !estudiante.Persona.ApellidoPaterno })} />
                                 {submitted && !estudiante.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido paterno del estudiante.</small>}
+                            </div>
+                        </div>
+
+                        <div className="form grid">
+                            <div className="field col">
+                                <label htmlFor="Persona.DNI" className="font-bold">
+                                    DNI
+                                </label>
+                                <InputText id="Persona.DNI" value={estudiante.Persona.DNI} required  maxLength={8} className={classNames({ 'p-invalid': submitted && !estudiante.Persona.DNI })} />
+                                {submitted && !estudiante.Persona.DNI && <small className="p-error">Ingrese el DNI del estudiante.</small>}
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="FechaNacimiento" className="font-bold">
+                                    Fecha Nacimiento
+                                </label>
+                                <Calendar id='FechaNacimiento' value={estudiante.FechaNacimiento} showIcon required className={classNames({ 'p-invalid': submitted && !estudiante.FechaNacimiento})}/>
+                                {submitted && !estudiante.Persona.ApellidoMaterno && <small className="p-error">Seleccione la fecha de nacimiento del estudiante.</small>}
                             </div>
                         </div>
 
