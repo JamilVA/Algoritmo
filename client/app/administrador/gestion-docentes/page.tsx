@@ -175,7 +175,7 @@ export default function GestionDocente() {
         return rowData.Email;
     };
     const fechaNacimientoBodyTemplate = (rowData: typeof docenteVacio) => {
-        return rowData.FechaNacimiento.toLocaleDateString('es-ES', {
+        return rowData.FechaNacimiento?.toLocaleDateString('es-ES', {
             day: '2-digit',
             month: 'long',
             year: 'numeric'
@@ -186,7 +186,7 @@ export default function GestionDocente() {
         return rowData.Telefono;
     };
     const grupoNombreBodyTemplate = (rowData: typeof docenteVacio) => {
-        return rowData.Grupo.Nombre;
+        return rowData.Grupo?.Nombre;
     };
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
         const val = (e.target && e.target.value) || '';
@@ -345,7 +345,7 @@ export default function GestionDocente() {
                                 />
                                 {submitted && !docente.Persona.DNI && <small className="p-error">Ingrese el DNI del docente.</small>}
                             </div>
-                            {/* <div className="field col">
+                            <div className="field col">
                             <label htmlFor="FechaNacimiento" className="font-bold">
                                 Fecha Nacimiento
                             </label>
@@ -360,7 +360,7 @@ export default function GestionDocente() {
                                 className={classNames({ 'p-invalid': submitted && !docente.FechaNacimiento })}
                             />
                             {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Seleccione la fecha de nacimiento del docente.</small>}
-                        </div> */}
+                        </div>
                         </div>
                     </Dialog>
                 </div>
