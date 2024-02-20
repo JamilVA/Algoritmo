@@ -3,7 +3,6 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
-import { Calendar } from 'primereact/calendar';
 import { FileUpload } from 'primereact/fileupload';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
@@ -21,11 +20,8 @@ export default function GestionApoderado() {
     const apoderadoVacio = {
         Codigo: 0,
         CodigoPersona: 0,
-        Email: '',
+        Direccion: '',
         Telefono: '',
-        Grupo: {
-            Nombre: ''
-        },
         Persona: {
             Codigo: 0,
             Nombres: '',
@@ -72,7 +68,7 @@ export default function GestionApoderado() {
     };
 
     const guardarApoderado = () => {
-        let _apoderado = { ...apoderado };
+        let _apoderado = { ...apoderado};
         console.log('Apoderado a guardar:', _apoderado);
 
         setSubmitted(true);
@@ -84,8 +80,8 @@ export default function GestionApoderado() {
                         Nombres: _apoderado.Persona.Nombres,
                         ApellidoPaterno: _apoderado.Persona.ApellidoPaterno,
                         ApellidoMaterno: _apoderado.Persona.ApellidoMaterno,
-                        Email: _apoderado.Email,
-                        Tefelono: _apoderado.Telefono,
+                        Direccion: _apoderado.Direccion,
+                        Telefono: '123293912',
                         DNI: _apoderado.Persona.DNI
                     })
                     .then((response) => {
@@ -97,11 +93,16 @@ export default function GestionApoderado() {
                 hideDialog();
             } catch (error) {
                 console.error(error);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Operacion fallida',
+                    detail: 'Ha ocurrido un error al procesar la solicitud',
+                    life: 3000
+                });
             }
         } else {
             try {
-                axios
-                    .put('http://localhost:3001/api/apoderado', {
+                axios.put('http://localhost:3001/api/apoderado', {
                         Codigo: _apoderado.Codigo,
                         CodigoPersona: _apoderado.CodigoPersona,
                         Nombres: _apoderado.Persona.Nombres,
@@ -168,15 +169,12 @@ export default function GestionApoderado() {
         );
     };
 
-    const emailBodyTemplate = (rowData: typeof apoderadoVacio) => {
-        return rowData.Email;
+    const direccionBodyTemplate = (rowData: typeof apoderadoVacio) => {
+        return rowData.Direccion;
     };
     
     const telefonoBodyTemplate = (rowData: typeof apoderadoVacio) => {
         return rowData.Telefono;
-    };
-    const grupoNombreBodyTemplate = (rowData: typeof apoderadoVacio) => {
-        return rowData.Grupo?.Nombre;
     };
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
         const val = (e.target && e.target.value) || '';
@@ -195,8 +193,8 @@ export default function GestionApoderado() {
         if (name == 'DNI') {
             _apoderado.Persona.DNI = val;
         }
-        if (name == 'EMAIL') {
-            _apoderado.Email = val;
+        if (name == 'Direccion') {
+            _apoderado.Direccion = val;
         }
         if (name == 'TELEFONO') {
             _apoderado.Telefono = val;
@@ -248,9 +246,8 @@ export default function GestionApoderado() {
                         {/* <Column header="Codigo" sortable body={codeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column> */}
                         <Column field="Persona.Nombres" header="Nombres Completos" sortable body={nombresBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
-                        <Column field="Email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Direccion" header="Direccion" sortable body={direccionBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
-                        <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
 

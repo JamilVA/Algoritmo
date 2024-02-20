@@ -1,43 +1,42 @@
-const { TipoUsuario, Usuario, Persona, Docente, Grupo} = require('../config/relations');
+const { TipoUsuario, Usuario, Persona, Apoderado} = require('../config/relations');
 
-const getDocentes = async(req,res) => {
-    const docentes = await Docente.findAll({
+const getApoderados = async(req,res) => {
+    const apoderados = await Apoderado.findAll({
         include : [
             {
                 model: Persona,
-            },{
-                model: Grupo,
-                attributes: ['Nombre']
             }
         ]
     })
 
     res.json({
         ok:true,
-        docentes
+        apoderados
     })
 }
 
-const crearDocente = async(req,res) =>{
+const crearApoderado = async(req,res) =>{
     try {
         const persona = await Persona.create({
             Codigo: null,
             Nombres: req.body.Nombres,
             ApellidoPaterno: req.body.ApellidoPaterno,
             ApellidoMaterno: req.body.ApellidoMaterno,
-            DNI: req.body.DNI,          
+            DNI: req.body.DNI,    
+             
         });
 
-        const docente = await Docente.create({
+        const apoderado = await Apoderado.create({
             Codigo: null,
-            FechaNacimiento: req.body.FechaNacimiento,
+            Direccion: req.body.Direccion,
+            Telefono: req.body.Telefono,   
             CodigoPersona: persona.Codigo,
         });
 
         res.json({
             ok:true,
             persona,
-            docente,
+            apoderado,
         })
             
     } catch (error) {
@@ -45,7 +44,7 @@ const crearDocente = async(req,res) =>{
     }
 }
 
-const actualizarDocente = async(req,res) =>{
+const actualizarApoderado = async(req,res) =>{
     try {
         const persona = await Persona.update({
             Nombres: req.body.Nombres,
@@ -58,8 +57,7 @@ const actualizarDocente = async(req,res) =>{
             }
         });
 
-        const docente = await Docente.update({
-            FechaNacimiento: req.body.FechaNacimiento,
+        const apoderado = await Apoderado.update({
             CodigoPersona: persona.Codigo,
         },{
             where: {
@@ -70,7 +68,7 @@ const actualizarDocente = async(req,res) =>{
         res.json({
             ok:true,
             persona,
-            docente,
+            apoderado,
         })
             
     } catch (error) {
@@ -80,7 +78,7 @@ const actualizarDocente = async(req,res) =>{
 
 
 module.exports = {
-    getDocentes,
-    crearDocente,
-    actualizarDocente,
+    getApoderados,
+    crearApoderado,
+    actualizarApoderado,
 }
