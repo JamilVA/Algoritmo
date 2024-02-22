@@ -31,13 +31,19 @@ const crearDocente = async(req,res) =>{
         const docente = await Docente.create({
             Codigo: null,
             FechaNacimiento: req.body.FechaNacimiento,
+            Telefono: req.body.Telefono,
+            Email: req.body.Email,
             CodigoPersona: persona.Codigo,
+        });
+        const usuario = await Usuario.create({
+           Password: req.body.Password,
         });
 
         res.json({
             ok:true,
             persona,
             docente,
+            usuario,
         })
             
     } catch (error) {
@@ -60,17 +66,22 @@ const actualizarDocente = async(req,res) =>{
 
         const docente = await Docente.update({
             FechaNacimiento: req.body.FechaNacimiento,
+            Telefono: req.body.Telefono,
+            Email: req.body.Email,
             CodigoPersona: persona.Codigo,
         },{
             where: {
                 Codigo: req.body.Codigo,
             }
         });
-
+        const usuario = await Usuario.create({
+            Password: req.body.Password,
+         });
         res.json({
             ok:true,
             persona,
             docente,
+            usuario,
         })
             
     } catch (error) {

@@ -81,7 +81,7 @@ export default function GestionApoderado() {
                         ApellidoPaterno: _apoderado.Persona.ApellidoPaterno,
                         ApellidoMaterno: _apoderado.Persona.ApellidoMaterno,
                         Direccion: _apoderado.Direccion,
-                        Telefono: '123293912',
+                        Telefono: _apoderado.Telefono,
                         DNI: _apoderado.Persona.DNI
                     })
                     .then((response) => {
@@ -108,6 +108,8 @@ export default function GestionApoderado() {
                         Nombres: _apoderado.Persona.Nombres,
                         ApellidoPaterno: _apoderado.Persona.ApellidoPaterno,
                         ApellidoMaterno: _apoderado.Persona.ApellidoMaterno,
+                        Direccion: _apoderado.Direccion,
+                        Telefono: _apoderado.Telefono,
                         DNI: _apoderado.Persona.DNI
                     })
                     .then((response) => {
@@ -196,7 +198,7 @@ export default function GestionApoderado() {
         if (name == 'Direccion') {
             _apoderado.Direccion = val;
         }
-        if (name == 'TELEFONO') {
+        if (name == 'Telefono') {
             _apoderado.Telefono = val;
         }
 
@@ -320,6 +322,40 @@ export default function GestionApoderado() {
                                     className={classNames({ 'p-invalid': submitted && !apoderado.Persona.DNI })}
                                 />
                                 {submitted && !apoderado.Persona.DNI && <small className="p-error">Ingrese el DNI del apoderado.</small>}
+                            </div>
+                        </div>
+                        <div className="form grid">
+                            <div className="field col">
+                                <label htmlFor="Telefono" className="font-bold">
+                                    Telefono
+                                </label>
+                                <InputText
+                                    id="Telefono"
+                                    value={apoderado.Telefono}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Telefono');
+                                    }}
+                                    required
+                                    maxLength={9}
+                                    className={classNames({ 'p-invalid': submitted && !apoderado.Telefono })}
+                                />
+                                {submitted && !apoderado.Telefono && <small className="p-error">Ingrese el telefono del docente.</small>}
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="Direccion" className="font-bold">
+                                    Direccion
+                                </label>
+                                <InputText
+                                    id="Direccion"
+                                    value={apoderado.Direccion}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Direccion');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                    className={classNames({ 'p-invalid': submitted && !apoderado.Direccion })}
+                                />
+                                {submitted && !apoderado.Direccion && <small className="p-error">Ingrese la direccion del docente.</small>}
                             </div>
                         </div>
                     </Dialog>

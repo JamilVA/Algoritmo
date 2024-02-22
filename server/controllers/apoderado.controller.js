@@ -28,8 +28,8 @@ const crearApoderado = async(req,res) =>{
 
         const apoderado = await Apoderado.create({
             Codigo: null,
-            Direccion: req.body.Direccion,
-            Telefono: req.body.Telefono,   
+            Telefono: req.body.Telefono,
+            Direccion: req.body.Direccion, 
             CodigoPersona: persona.Codigo,
         });
 
@@ -59,6 +59,8 @@ const actualizarApoderado = async(req,res) =>{
 
         const apoderado = await Apoderado.update({
             CodigoPersona: persona.Codigo,
+            Direccion: req.body.Direccion,
+            Telefono: req.body.Telefono,
         },{
             where: {
                 Codigo: req.body.Codigo,

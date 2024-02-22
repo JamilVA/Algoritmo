@@ -33,6 +33,9 @@ export default function GestionDocente() {
             ApellidoPaterno: '',
             ApellidoMaterno: '',
             DNI: ''
+        },
+        Usuario:{
+            Password: ""
         }
     };
 
@@ -80,15 +83,14 @@ export default function GestionDocente() {
 
         if (!docente.Codigo) {
             try {
-                axios
-                    .post('http://localhost:3001/api/docente', {
+                axios.post('http://localhost:3001/api/docente', {
                         Nombres: _docente.Persona.Nombres,
                         ApellidoPaterno: _docente.Persona.ApellidoPaterno,
                         ApellidoMaterno: _docente.Persona.ApellidoMaterno,
                         Email: _docente.Email,
-                        Tefelono: _docente.Telefono,
+                        Telefono: _docente.Telefono,
                         DNI: _docente.Persona.DNI,
-                        FechaNacimiento: _docente.FechaNacimiento
+                        FechaNacimiento: _docente.FechaNacimiento,
                     })
                     .then((response) => {
                         console.log(response.data);
@@ -102,15 +104,16 @@ export default function GestionDocente() {
             }
         } else {
             try {
-                axios
-                    .put('http://localhost:3001/api/docente', {
+                axios.put('http://localhost:3001/api/docente', {
                         Codigo: _docente.Codigo,
                         CodigoPersona: _docente.CodigoPersona,
                         Nombres: _docente.Persona.Nombres,
                         ApellidoPaterno: _docente.Persona.ApellidoPaterno,
                         ApellidoMaterno: _docente.Persona.ApellidoMaterno,
+                        Email: _docente.Email,
+                        Telefono: _docente.Telefono,
                         DNI: _docente.Persona.DNI,
-                        FechaNacimiento: _docente.FechaNacimiento
+                        FechaNacimiento: _docente.FechaNacimiento,
                     })
                     .then((response) => {
                         console.log(response.data);
@@ -205,10 +208,10 @@ export default function GestionDocente() {
         if (name == 'DNI') {
             _docente.Persona.DNI = val;
         }
-        if (name == 'EMAIL') {
+        if (name == 'Email') {
             _docente.Email = val;
         }
-        if (name == 'TELEFONO') {
+        if (name == 'Telefono') {
             _docente.Telefono = val;
         }
 
@@ -324,7 +327,41 @@ export default function GestionDocente() {
                                     maxLength={45}
                                     className={classNames({ 'p-invalid': submitted && !docente.Persona.ApellidoPaterno })}
                                 />
-                                {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido paterno del docente.</small>}
+                                {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido materno del docente.</small>}
+                            </div>
+                        </div>
+                        <div className="form grid">
+                            <div className="field col">
+                                <label htmlFor="Telefono" className="font-bold">
+                                    Telefono
+                                </label>
+                                <InputText
+                                    id="Telefono"
+                                    value={docente.Telefono}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Telefono');
+                                    }}
+                                    required
+                                    maxLength={9}
+                                    className={classNames({ 'p-invalid': submitted && !docente.Telefono })}
+                                />
+                                {submitted && !docente.Telefono && <small className="p-error">Ingrese el telefono del docente.</small>}
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="Email" className="font-bold">
+                                    Email
+                                </label>
+                                <InputText
+                                    id="Email"
+                                    value={docente.Email}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Email');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                    className={classNames({ 'p-invalid': submitted && !docente.Email })}
+                                />
+                                {submitted && !docente.Email && <small className="p-error">Ingrese el email del docente.</small>}
                             </div>
                         </div>
 
@@ -346,9 +383,9 @@ export default function GestionDocente() {
                                 {submitted && !docente.Persona.DNI && <small className="p-error">Ingrese el DNI del docente.</small>}
                             </div>
                             <div className="field col">
-                            <label htmlFor="FechaNacimiento" className="font-bold">
-                                Fecha Nacimiento
-                            </label>
+                                 <label htmlFor="FechaNacimiento" className="font-bold">
+                                    Fecha Nacimiento
+                                </label>
                             <Calendar
                                 id="FechaNacimiento"
                                 value={docente.FechaNacimiento}
