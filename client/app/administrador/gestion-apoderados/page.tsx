@@ -323,6 +323,23 @@ export default function GestionApoderado() {
                                 />
                                 {submitted && !apoderado.Persona.DNI && <small className="p-error">Ingrese el DNI del apoderado.</small>}
                             </div>
+                             <div className="field col">
+                                <label htmlFor="Persona.DNI" className="font-bold">
+                                    DNI
+                                </label>
+                                <InputText
+                                    id="Persona.DNI"
+                                    value={apoderado.Persona.DNI}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'DNI');
+                                    }}
+                                    required
+                                    maxLength={8}
+                                    className={classNames({ 'p-invalid': submitted && !apoderado.Persona.DNI })}
+                                />
+                                {submitted && !apoderado.Persona.DNI && <small className="p-error">Ingrese el DNI del apoderado.</small>}
+                            </div>
+                            
                         </div>
                         <div className="form grid">
                             <div className="field col">

@@ -16,6 +16,8 @@ import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { Demo } from '@/types';
 import axios from 'axios';
+import { Password } from 'primereact/password';
+
 
 export default function GestionDocente() {
     const docenteVacio = {
@@ -32,11 +34,12 @@ export default function GestionDocente() {
             Nombres: '',
             ApellidoPaterno: '',
             ApellidoMaterno: '',
-            DNI: ''
-        },
-        Usuario:{
-            Password: ""
+            DNI: '',
+            Usuario:{
+                Password: ""
+            }
         }
+        
     };
 
     const [docentes, setDocentes] = useState<(typeof docenteVacio)[]>([]);
@@ -90,6 +93,7 @@ export default function GestionDocente() {
                         Email: _docente.Email,
                         Telefono: _docente.Telefono,
                         DNI: _docente.Persona.DNI,
+                        Password: _docente.Persona.Usuario.Password,
                         FechaNacimiento: _docente.FechaNacimiento,
                     })
                     .then((response) => {
@@ -137,7 +141,7 @@ export default function GestionDocente() {
 
     const exportCSV = () => {
         dt.current?.exportCSV();
-    };
+    };      
 
     const leftToolbarTemplate = () => {
         return (
@@ -191,6 +195,10 @@ export default function GestionDocente() {
     const grupoNombreBodyTemplate = (rowData: typeof docenteVacio) => {
         return rowData.Grupo?.Nombre;
     };
+    const passwordBodyTemplate = (rowData: typeof docenteVacio) => {
+        return rowData.Persona?.Usuario?.Password;
+    };
+
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
         const val = (e.target && e.target.value) || '';
 
@@ -199,6 +207,7 @@ export default function GestionDocente() {
         if (name == 'Nombres') {
             docente.Persona.Nombres = val;
         }
+       
         if (name == 'Paterno') {
             _docente.Persona.ApellidoPaterno = val;
         }
@@ -210,6 +219,9 @@ export default function GestionDocente() {
         }
         if (name == 'Email') {
             _docente.Email = val;
+        }
+        if (name == 'Password') {
+            _docente.Persona.Usuario.Password = val;
         }
         if (name == 'Telefono') {
             _docente.Telefono = val;
@@ -273,6 +285,8 @@ export default function GestionDocente() {
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         {/* <Column field="FechaNacimiento" header="Fecha de Nacimiento" sortable body={fechaNacimientoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column> */}
+                        <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Persona.Usuario.Password" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
@@ -381,6 +395,15 @@ export default function GestionDocente() {
                                     className={classNames({ 'p-invalid': submitted && !docente.Persona.DNI })}
                                 />
                                 {submitted && !docente.Persona.DNI && <small className="p-error">Ingrese el DNI del docente.</small>}
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="Persona.Usuario.Password" className="font-bold">
+                                    Password
+                                </label>
+                                <Password value={docente?.Persona?.Usuario?.Password} onChange={(e) => {
+                                        onInputChange(e, 'Password');
+                                    }} toggleMask />
+                                {submitted && !docente?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una contraseña para docente.</small>}
                             </div>
                             <div className="field col">
                                  <label htmlFor="FechaNacimiento" className="font-bold">

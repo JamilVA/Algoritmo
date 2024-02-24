@@ -5,6 +5,11 @@ const getDocentes = async(req,res) => {
         include : [
             {
                 model: Persona,
+                include:[
+                    {
+                        model: Usuario,
+                    }
+                ]
             },{
                 model: Grupo,
                 attributes: ['Nombre']
@@ -37,6 +42,10 @@ const crearDocente = async(req,res) =>{
         });
         const usuario = await Usuario.create({
            Password: req.body.Password,
+           Email: req.body.Email,
+           Estado: true,
+           CodigoPersona: persona.Codigo,
+           CodigoTipoUsuario: 2,
         });
 
         res.json({
@@ -74,8 +83,9 @@ const actualizarDocente = async(req,res) =>{
                 Codigo: req.body.Codigo,
             }
         });
-        const usuario = await Usuario.create({
+        const usuario = await Usuario.update({
             Password: req.body.Password,
+            Email: req.body.Email,
          });
         res.json({
             ok:true,
