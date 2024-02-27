@@ -17,7 +17,7 @@ import { Demo } from '@/types';
 import axios from 'axios';
 import { Password } from 'primereact/password';
 
-export default function GestionEstudiantes() {
+export default function GestionEstudiante() {
     const estudianteVacio = {
         Codigo: 0,
         FechaNacimiento: new Date(),
@@ -78,10 +78,10 @@ export default function GestionEstudiantes() {
 
     const guardarEstudiante = () => {
 
-        let _estudiante = {...estudiante}
-        console.log('Estudiante a guardar:', _estudiante)
+        let _estudiante = {...estudiante};
+        console.log('Estudiante a guardar:', _estudiante);
 
-        setSubmitted(true)
+        setSubmitted(true);
 
         if(!estudiante.Codigo){
             try {
