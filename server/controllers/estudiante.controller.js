@@ -5,6 +5,10 @@ const getEstudiantes = async(req,res) => {
         include : [
             {
                 model: Persona,
+                include:[
+                    {
+                        model: Usuario,
+                    }]
             },{
                 model: Grupo,
                 attributes: ['Nombre']
@@ -38,13 +42,14 @@ const crearEstudiante = async(req,res) =>{
             Email: req.body.Email,
             Estado: true,
             CodigoPersona: persona.Codigo,
-            CodigoTipoUsuario: 2,
+            CodigoTipoUsuario: 3,
          });
          
         res.json({
             ok:true,
             persona,
             estudiante,
+            usuario,
         })
             
     } catch (error) {
@@ -82,6 +87,7 @@ const actualizarEstudiante = async(req,res) =>{
             ok:true,
             persona,
             estudiante,
+            usuario,
         })
             
     } catch (error) {

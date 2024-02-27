@@ -88,7 +88,7 @@ export default function GestionApoderado() {
                         Direccion: _apoderado.Direccion,
                         Telefono: _apoderado.Telefono,
                         DNI: _apoderado.Persona.DNI,
-                        Password: _apoderado.Persona.Usuario.Password
+                        Password: _apoderado.Persona.Usuario.Password,
                     })
                     .then((response) => {
                         console.log(response.data);
@@ -135,7 +135,7 @@ export default function GestionApoderado() {
         setApoderado({ ...apoderado });
         setApoderadoDialog(true);
 
-        console.log('Edtudiante recibido para editar:', apoderado);
+        console.log('Apoderado recibido para editar:', apoderado);
     };
 
     const exportCSV = () => {
@@ -347,23 +347,6 @@ export default function GestionApoderado() {
                                     }} toggleMask />
                                 {submitted && !apoderado?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una contraseña para apoderado.</small>}
                             </div>
-                             <div className="field col">
-                                <label htmlFor="Persona.DNI" className="font-bold">
-                                    DNI
-                                </label>
-                                <InputText
-                                    id="Persona.DNI"
-                                    value={apoderado.Persona.DNI}
-                                    onChange={(e) => {
-                                        onInputChange(e, 'DNI');
-                                    }}
-                                    required
-                                    maxLength={8}
-                                    className={classNames({ 'p-invalid': submitted && !apoderado.Persona.DNI })}
-                                />
-                                {submitted && !apoderado.Persona.DNI && <small className="p-error">Ingrese el DNI del apoderado.</small>}
-                            </div>
-                            
                         </div>
                         <div className="form grid">
                             <div className="field col">

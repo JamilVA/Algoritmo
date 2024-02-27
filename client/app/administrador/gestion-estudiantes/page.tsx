@@ -24,6 +24,9 @@ export default function GestionEstudiantes() {
         CodigoPersona: 0,
         CodigoGrupo: 0,
         CodigoApoderado: 0,
+        Grupo: {
+            Nombre: ''
+        },
         Persona: {
             Codigo: 0,
             Nombres: '',
@@ -33,9 +36,6 @@ export default function GestionEstudiantes() {
             Usuario:{
                 Password: ""
             }
-        },
-        Grupo: {
-            Nombre: ''
         }
     };
 

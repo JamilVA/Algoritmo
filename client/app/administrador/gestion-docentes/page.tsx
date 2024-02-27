@@ -135,7 +135,7 @@ export default function GestionDocente() {
         setDocente({ ...docente });
         setDocenteDialog(true);
 
-        console.log('Edtudiante recibido para editar:', docente);
+        console.log('Docente recibido para editar:', docente);
     };
 
     const exportCSV = () => {
@@ -287,7 +287,7 @@ export default function GestionDocente() {
                         <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Persona.Usuario.Password" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
-                        <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        {/* <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column> */}
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
 

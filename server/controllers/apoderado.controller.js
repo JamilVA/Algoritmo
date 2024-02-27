@@ -5,6 +5,11 @@ const getApoderados = async(req,res) => {
         include : [
             {
                 model: Persona,
+                include:[
+                    {
+                        model: Usuario,
+                    }
+                ]
             }
         ]
     })
@@ -37,12 +42,13 @@ const crearApoderado = async(req,res) =>{
             Email: req.body.Email,
             Estado: true,
             CodigoPersona: persona.Codigo,
-            CodigoTipoUsuario: 2,
+            CodigoTipoUsuario: 4,
          });
         res.json({
             ok:true,
             persona,
             apoderado,
+            usuario,
         })
             
     } catch (error) {
@@ -81,6 +87,7 @@ const actualizarApoderado = async(req,res) =>{
             ok:true,
             persona,
             apoderado,
+            usuario,
         })
             
     } catch (error) {
