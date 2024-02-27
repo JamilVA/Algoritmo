@@ -32,7 +32,13 @@ const crearApoderado = async(req,res) =>{
             Direccion: req.body.Direccion, 
             CodigoPersona: persona.Codigo,
         });
-
+        const usuario = await Usuario.create({
+            Password: req.body.Password,
+            Email: req.body.Email,
+            Estado: true,
+            CodigoPersona: persona.Codigo,
+            CodigoTipoUsuario: 2,
+         });
         res.json({
             ok:true,
             persona,
@@ -66,6 +72,10 @@ const actualizarApoderado = async(req,res) =>{
                 Codigo: req.body.Codigo,
             }
         });
+        const usuario = await Usuario.update({
+            Password: req.body.Password,
+            Email: req.body.Email,
+         });
 
         res.json({
             ok:true,

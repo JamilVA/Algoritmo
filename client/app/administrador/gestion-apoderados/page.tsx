@@ -15,6 +15,8 @@ import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { Demo } from '@/types';
 import axios from 'axios';
+import { Password } from 'primereact/password';
+
 
 export default function GestionApoderado() {
     const apoderadoVacio = {
@@ -27,7 +29,10 @@ export default function GestionApoderado() {
             Nombres: '',
             ApellidoPaterno: '',
             ApellidoMaterno: '',
-            DNI: ''
+            DNI: '',
+            Usuario:{
+                Password: ""
+            }
         }
     };
 
@@ -82,7 +87,8 @@ export default function GestionApoderado() {
                         ApellidoMaterno: _apoderado.Persona.ApellidoMaterno,
                         Direccion: _apoderado.Direccion,
                         Telefono: _apoderado.Telefono,
-                        DNI: _apoderado.Persona.DNI
+                        DNI: _apoderado.Persona.DNI,
+                        Password: _apoderado.Persona.Usuario.Password
                     })
                     .then((response) => {
                         console.log(response.data);
@@ -178,6 +184,11 @@ export default function GestionApoderado() {
     const telefonoBodyTemplate = (rowData: typeof apoderadoVacio) => {
         return rowData.Telefono;
     };
+
+    const passwordBodyTemplate = (rowData: typeof apoderadoVacio) => {
+        return rowData.Persona?.Usuario?.Password;
+    };
+
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
         const val = (e.target && e.target.value) || '';
 
@@ -197,6 +208,9 @@ export default function GestionApoderado() {
         }
         if (name == 'Direccion') {
             _apoderado.Direccion = val;
+        }
+        if (name == 'Password') {
+            _apoderado.Persona.Usuario.Password = val;
         }
         if (name == 'Telefono') {
             _apoderado.Telefono = val;
@@ -249,6 +263,7 @@ export default function GestionApoderado() {
                         <Column field="Persona.Nombres" header="Nombres Completos" sortable body={nombresBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Direccion" header="Direccion" sortable body={direccionBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Persona.Usuario.Password" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
@@ -322,6 +337,15 @@ export default function GestionApoderado() {
                                     className={classNames({ 'p-invalid': submitted && !apoderado.Persona.DNI })}
                                 />
                                 {submitted && !apoderado.Persona.DNI && <small className="p-error">Ingrese el DNI del apoderado.</small>}
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="Persona.Usuario.Password" className="font-bold">
+                                    Password
+                                </label>
+                                <Password value={apoderado?.Persona?.Usuario?.Password} onChange={(e) => {
+                                        onInputChange(e, 'Password');
+                                    }} toggleMask />
+                                {submitted && !apoderado?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una contraseña para apoderado.</small>}
                             </div>
                              <div className="field col">
                                 <label htmlFor="Persona.DNI" className="font-bold">

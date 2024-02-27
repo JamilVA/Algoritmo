@@ -18,7 +18,6 @@ import { Demo } from '@/types';
 import axios from 'axios';
 import { Password } from 'primereact/password';
 
-
 export default function GestionDocente() {
     const docenteVacio = {
         Codigo: 0,
