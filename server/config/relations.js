@@ -39,6 +39,9 @@ Estudiante.belongsTo(Grupo, {foreignKey:'CodigoGrupo'})
 Docente.hasOne(Grupo, {foreignKey:'CodigoDocente'})
 Grupo.belongsTo(Docente, {foreignKey:'CodigoDocente'})
 
+Docente.hasMany(Curso, {foreignKey:'CodigoDocente'})
+Curso.belongsTo(Docente, {foreignKey:'CodigoDocente'})
+
 Estudiante.hasMany(Pago, {foreignKey:'CodigoEstudiante'})
 Pago.belongsTo(Estudiante, {foreignKey:'CodigoEstudiante'})
 
@@ -62,8 +65,6 @@ Pregunta.belongsTo(Tema, {foreignKey: 'CodigoTema'})
 
 Pregunta.hasMany(Respuesta, {foreignKey: 'CodigoPregunta'})
 Respuesta.belongsTo(Pregunta, {foreignKey: 'CodigoPregunta'})
-
-
 
 module.exports = {
     Persona,

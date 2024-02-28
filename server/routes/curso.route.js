@@ -14,6 +14,6 @@ router.post('/', crearCurso);
 
 router.put('/', editarCurso);
 
-router.post('/asignarDocente', asignarDocente);
+router.put('/asignarDocente', asignarDocente);
 
 module.exports = router;

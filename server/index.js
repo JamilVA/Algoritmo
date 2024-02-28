@@ -29,6 +29,7 @@ app.use('/api/pago', require('./routes/pago.route'));
 app.use('/api/apoderado', require('./routes/apoderado.route'));
 app.use('/api/docente', require('./routes/docente.route'));
 app.use('/api/curso', require('./routes/curso.route'));
+app.use('/api/pregunta', require('./routes/pregunta.route'));
 
 
 // app.use('/api/docente', require('./routes/docante.route'));

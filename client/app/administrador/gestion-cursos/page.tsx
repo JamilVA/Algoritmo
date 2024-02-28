@@ -19,7 +19,6 @@ import axios from 'axios';
 
 import { useRouter } from 'next/navigation';
 
-
 const GestionCursos = () => {
     const router = useRouter();
 
@@ -30,19 +29,45 @@ const GestionCursos = () => {
         Nombre: '',
         Grado: {
             Codigo: 0,
-            Nombre: '',
+            Nombre: ''
+        },
+        Docente: {
+            Codigo: 0,
+            Persona: {
+                Nombres: '',
+                ApellidoPaterno: '',
+                ApellidoMaterno: ''
+            }
         }
     };
 
     const nivelVacio = {
         Codigo: 0,
+        Nombre: ''
+    };
+
+    const gradoVacio = {
+        Codigo: 0,
         Nombre: '',
-    }
+        CodigoNivel: 0
+    };
+    const docenteVacio = {
+        Codigo: 0,
+        Persona: {
+            Nombres: '',
+            ApellidoPaterno: '',
+            ApellidoMaterno: ''
+        }
+    };
 
     const [niveles, setNiveles] = useState<(typeof nivelVacio)[]>([]);
+    const [grados, setGrados] = useState<(typeof gradoVacio)[]>([]);
+    const [docentes, setDocentes] = useState<(typeof docenteVacio)[]>([]);
     const [cursos, setCursos] = useState<(typeof cursoVacio)[]>([]);
     const [nivel, setNivel] = useState(nivelVacio);
+    const [curso, setCurso] = useState(cursoVacio);
     const [cursoDialog, setCursoDialog] = useState(false);
+    const [asignarDocenteDialog, setAsignarDocenteDialog] = useState(false);
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -50,24 +75,25 @@ const GestionCursos = () => {
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
-
     useEffect(() => {
-        cargarNiveles();
+        cargarDatos();
     }, []);
 
-    const cargarNiveles = async () => {
+    const cargarDatos = async () => {
         try {
             const { data } = await axios.get('http://localhost:3001/api/curso/niveles');
-            const { niveles } = data;
+            const { niveles, grados, docentes } = data;
             console.log('Hola', data);
             setNiveles(niveles);
+            setGrados(grados);
+            setDocentes(docentes);
         } catch (error) {
             console.error(error);
         }
     };
 
     const cargarCursos = async (CodigoNivel: number) => {
-        console.log('CodigoRecibido', CodigoNivel)
+        console.log('CodigoRecibido', CodigoNivel);
         try {
             const { data } = await axios.get('http://localhost:3001/api/curso', {
                 params: { CodigoNivel: CodigoNivel }
@@ -80,10 +106,105 @@ const GestionCursos = () => {
         }
     };
 
+    const guardarCurso = () => {
+        let _curso = { ...curso };
+        console.log('Curso a guardar:', _curso);
+
+        setSubmitted(true);
+
+        if (!curso.Codigo) {
+            try {
+                axios
+                    .post('http://localhost:3001/api/curso', {
+                        Nombre: _curso.Nombre,
+                        CodigoGrado: _curso.CodigoGrado
+                    })
+                    .then((response) => {
+                        console.log(response.data);
+                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Curso creado correctamente', life: 3000 });
+                        cargarCursos(nivel.Codigo);
+                    });
+                setCurso(cursoVacio);
+                hideDialog();
+            } catch (error) {
+                console.error(error);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Operacion fallida',
+                    detail: 'Ha ocurrido un error al procesar la solicitud',
+                    life: 3000
+                });
+            }
+        } else {
+            try {
+                axios
+                    .put('http://localhost:3001/api/curso', {
+                        Codigo: _curso.Codigo,
+                        Nombre: _curso.Nombre,
+                        CodigoGrado: _curso.CodigoGrado
+                    })
+                    .then((response) => {
+                        console.log(response.data);
+                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Curso modificado correctamente', life: 3000 });
+                        cargarCursos(nivel.Codigo);
+                    });
+                setCurso(cursoVacio);
+                hideDialog();
+            } catch (error) {
+                console.error(error);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Operacion fallida',
+                    detail: 'Ha ocurrido un error al procesar la solicitud',
+                    life: 3000
+                });
+            }
+        }
+    };
+
+    const asignarDocente = async () => {
+        console.log('CursoRecibidoParaAsignar:', curso);
+
+        setSubmitted(true);
+        if (curso.CodigoDocente === null) {
+            return;
+        }
+        hideAsignarDocenteDialog();
+        await axios
+            .put(
+                'http://localhost:3001/api/curso/asignarDocente',
+                {},
+                {
+                    params: {
+                        Codigo: curso.Codigo,
+                        CodigoDocente: curso.CodigoDocente
+                    }
+                }
+            )
+            .then((response) => {
+                cargarCursos(nivel.Codigo);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Operacion exitosa',
+                    detail: response.data.message,
+                    life: 3000
+                });
+            })
+            .catch((error) => {
+                console.error(error.response);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Operacion fallida',
+                    detail: 'Ha ocurrido un error al procesar la solicitud',
+                    life: 3000
+                });
+            });
+    };
+
     const openNew = () => {
-        // setCurso(apoderadoVacio);
-        // setSubmitted(false);
-        // setCursoDialog(true);
+        setCurso(cursoVacio);
+        setSubmitted(false);
+        setCursoDialog(true);
     };
 
     const hideDialog = () => {
@@ -93,9 +214,12 @@ const GestionCursos = () => {
 
     const exportarCursos = () => {};
 
-    const guardarCurso = () => {};
+    const editarCurso = (curso: typeof cursoVacio) => {
+        setCurso({ ...curso });
+        setCursoDialog(true);
 
-    const editarCurso = (rowData: typeof cursoVacio) => {};
+        console.log('Edtudiante recibido para editar:', curso)
+    };
 
     const onNivelSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
@@ -109,12 +233,43 @@ const GestionCursos = () => {
 
     const onGradoSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        let _nivel = { ...nivel };
+        let _curso = { ...curso };
 
-        _nivel['Codigo'] = val;
+        _curso['CodigoGrado'] = val;
+        _curso.Grado.Codigo = val;
 
-        setNivel(_nivel);
-        cargarCursos(val);
+        setCurso(_curso);
+    };
+
+    const onDocenteSelect = (e: any) => {
+        const val = (e.target && e.target.value) || '';
+        let _curso = { ...curso };
+
+        _curso['CodigoDocente'] = val;
+
+        setCurso(_curso);
+        console.log('Docente asignado a', _curso);
+    };
+
+    const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = (e.target && e.target.value) || '';
+
+        let _curso = { ...curso };
+
+        _curso['Nombre'] = val
+
+        setCurso(_curso);
+    };
+
+    const openAsignarDocente = (curso: typeof cursoVacio) => {
+        setSubmitted(false);
+        setAsignarDocenteDialog(true);
+        setCurso(curso);
+    };
+
+    const hideAsignarDocenteDialog = () => {
+        setSubmitted(false);
+        setAsignarDocenteDialog(false);
     };
 
     const header = (
@@ -127,12 +282,12 @@ const GestionCursos = () => {
                         options={niveles}
                         optionLabel="Nombre"
                         optionValue="Codigo"
-                        name="Prerequisito"
+                        name="Nivel"
                         onChange={(e) => {
                             onNivelSelect(e);
                         }}
                         placeholder="Seleccione un nivel"
-                        id="Prerequisito"
+                        id="Nivel"
                         required
                     />
                 </div>{' '}
@@ -160,8 +315,15 @@ const GestionCursos = () => {
 
     const cursoDialogFooter = (
         <>
-            <Button label="Cancelar" icon="pi pi-times" text onClick={guardarCurso} />
-            <Button label="Guardar" icon="pi pi-check" text onClick={hideDialog} />
+            <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
+            <Button label="Guardar" icon="pi pi-check" text onClick={guardarCurso} />
+        </>
+    );
+
+    const asignarDocenteDialogFooter = (
+        <>
+            <Button label="Cancelar" icon="pi pi-times" text onClick={hideAsignarDocenteDialog} />
+            <Button label="Asignar" icon="pi pi-check" text onClick={asignarDocente} />
         </>
     );
 
@@ -169,12 +331,26 @@ const GestionCursos = () => {
         return rowData.Nombre;
     };
 
+    // const docenteBodyTemplate = (rowData: typeof cursoVacio) => {
+    //     return rowData.CodigoDocente ? rowData.CodigoDocente : 'No Asignado';
+    // };
+
     const docenteBodyTemplate = (rowData: typeof cursoVacio) => {
-        return rowData.CodigoDocente ? rowData.CodigoDocente : 'No Asignado';
+        let docente = rowData.Docente?.Persona?.Nombres + ' ' + rowData.Docente?.Persona?.ApellidoPaterno + ' ' + rowData.Docente?.Persona?.ApellidoPaterno;
+        return (
+            <div className="flex align-content-center">
+                <div className="flex align-items-center justify-content-center">
+                    <p>{!rowData.Docente ? '' : docente}</p>
+                </div>
+                <div className="flex align-items-center justify-content-center">
+                    <Button icon="pi pi-user" rounded text severity="secondary" onClick={() => openAsignarDocente(rowData)} tooltip={rowData.CodigoDocente ? 'Reasignar docente' : 'Asignar docente'} />
+                </div>
+            </div>
+        );
     };
 
     const gradoBodyTemplate = (rowData: typeof cursoVacio) => {
-        return rowData.Grado.Nombre;
+        return rowData.Grado?.Nombre;
     };
 
     const bancoPreguntas = (rowData: any) => {
@@ -187,7 +363,7 @@ const GestionCursos = () => {
         //     }
         // });
 
-        router.push(`/administrador/gestion-cursos/banco-preguntas?codigoCurso=${codigoCurso}`)
+        router.push(`/administrador/gestion-cursos/banco-preguntas?codigoCurso=${codigoCurso}`);
     };
 
     const actionBodyTemplate = (rowData: typeof cursoVacio) => {
@@ -230,21 +406,68 @@ const GestionCursos = () => {
 
                     <Dialog visible={cursoDialog} style={{ width: '600px' }} header="Datos del Apoderado" modal className="p-fluid" footer={cursoDialogFooter} onHide={hideDialog}>
                         <div className="field">
-                            <label htmlFor="Persona.Nombres" className="font-bold">
+                            <label htmlFor="Nombre" className="font-bold">
                                 Nombre del curso
                             </label>
-                            <InputText id="Persona.Nombres" value={cursos.Persona.Nombres} required autoFocus maxLength={60} className={classNames({ 'p-invalid': submitted && !apoderado.Persona.Nombres })} />
-                            {submitted && !apoderado.Persona.Nombres && <small className="p-error">Ingrese los nombres del apoderado.</small>}
+                            <InputText
+                                id="Nombre"
+                                value={curso.Nombre}
+                                onChange={(e) => {
+                                    onInputChange(e);
+                                }}
+                                required
+                                autoFocus
+                                maxLength={60}
+                                className={classNames({ 'p-invalid': submitted && !curso.Nombre })}
+                            />
+                            {submitted && !curso.Nombre && <small className="p-error">Ingrese el nombre del curso.</small>}
                         </div>
-                        <div className="form grid">
+                        <div className="field">
+                            <label htmlFor="Grado" className="font-bold">
+                                Grado:
+                            </label>
+                            <Dropdown
+                                id="Grado"
+                                value={curso.CodigoGrado}
+                                onChange={(e) => {
+                                    onGradoSelect(e);
+                                }}
+                                name="CodigoCurso"
+                                options={grados}
+                                optionLabel="Nombre"
+                                optionValue="Codigo"
+                                placeholder="Seleccione grado del curso"
+                                className={classNames({ 'p-invalid': submitted && !curso.Grado })}
+                            ></Dropdown>
+                        </div>
+                    </Dialog>
 
+                    <Dialog visible={asignarDocenteDialog} style={{ width: '450px' }} header="Asignar o reasignar docente" modal className="p-fluid" footer={asignarDocenteDialogFooter} onHide={hideAsignarDocenteDialog}>
+                        <div className="field">
+                            <label htmlFor="docente">Docente</label>
+                            <Dropdown
+                                id="docente"
+                                value={curso.CodigoDocente}
+                                options={docentes}
+                                optionLabel="Persona.Nombres"
+                                optionValue="Codigo"
+                                placeholder="Seleccione un docente"
+                                onChange={(e) => onDocenteSelect(e)}
+                                required
+                                autoFocus
+                                showClear
+                                itemTemplate={(option) => <div>{`${option.Persona.Nombres} ${option.Persona.ApellidoPaterno} ${option.Persona.ApellidoMaterno}`}</div>}
+                                className={classNames({
+                                    'p-invalid': submitted && !curso.Docente
+                                })}
+                            />
+                            {submitted && !curso.CodigoDocente && <small className="p-invalid">Seleccione un docente para asignarlo</small>}
                         </div>
                     </Dialog>
                 </div>
             </div>
         </div>
     );
-}
-
+};
 
 export default GestionCursos;
