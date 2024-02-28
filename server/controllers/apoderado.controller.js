@@ -5,6 +5,11 @@ const getApoderados = async(req,res) => {
         include : [
             {
                 model: Persona,
+                include:[
+                    {
+                        model: Usuario,
+                    }
+                ]
             }
         ]
     })
@@ -28,15 +33,22 @@ const crearApoderado = async(req,res) =>{
 
         const apoderado = await Apoderado.create({
             Codigo: null,
-            Direccion: req.body.Direccion,
-            Telefono: req.body.Telefono,   
+            Telefono: req.body.Telefono,
+            Direccion: req.body.Direccion, 
             CodigoPersona: persona.Codigo,
         });
-
+        const usuario = await Usuario.create({
+            Password: req.body.Password,
+            Email: req.body.Email,
+            Estado: true,
+            CodigoPersona: persona.Codigo,
+            CodigoTipoUsuario: 4,
+         });
         res.json({
             ok:true,
             persona,
             apoderado,
+            usuario,
         })
             
     } catch (error) {
@@ -59,16 +71,23 @@ const actualizarApoderado = async(req,res) =>{
 
         const apoderado = await Apoderado.update({
             CodigoPersona: persona.Codigo,
+            Direccion: req.body.Direccion,
+            Telefono: req.body.Telefono,
         },{
             where: {
                 Codigo: req.body.Codigo,
             }
         });
+        const usuario = await Usuario.update({
+            Password: req.body.Password,
+            Email: req.body.Email,
+         });
 
         res.json({
             ok:true,
             persona,
             apoderado,
+            usuario,
         })
             
     } catch (error) {

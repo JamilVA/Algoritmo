@@ -16,6 +16,7 @@ import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { Demo } from '@/types';
 import axios from 'axios';
+import { Password } from 'primereact/password';
 
 export default function GestionDocente() {
     const docenteVacio = {
@@ -32,8 +33,12 @@ export default function GestionDocente() {
             Nombres: '',
             ApellidoPaterno: '',
             ApellidoMaterno: '',
-            DNI: ''
+            DNI: '',
+            Usuario:{
+                Password: ""
+            }
         }
+        
     };
 
     const [docentes, setDocentes] = useState<(typeof docenteVacio)[]>([]);
@@ -80,15 +85,15 @@ export default function GestionDocente() {
 
         if (!docente.Codigo) {
             try {
-                axios
-                    .post('http://localhost:3001/api/docente', {
+                axios.post('http://localhost:3001/api/docente', {
                         Nombres: _docente.Persona.Nombres,
                         ApellidoPaterno: _docente.Persona.ApellidoPaterno,
                         ApellidoMaterno: _docente.Persona.ApellidoMaterno,
                         Email: _docente.Email,
-                        Tefelono: _docente.Telefono,
+                        Telefono: _docente.Telefono,
                         DNI: _docente.Persona.DNI,
-                        FechaNacimiento: _docente.FechaNacimiento
+                        Password: _docente.Persona.Usuario.Password,
+                        FechaNacimiento: _docente.FechaNacimiento,
                     })
                     .then((response) => {
                         console.log(response.data);
@@ -102,15 +107,16 @@ export default function GestionDocente() {
             }
         } else {
             try {
-                axios
-                    .put('http://localhost:3001/api/docente', {
+                axios.put('http://localhost:3001/api/docente', {
                         Codigo: _docente.Codigo,
                         CodigoPersona: _docente.CodigoPersona,
                         Nombres: _docente.Persona.Nombres,
                         ApellidoPaterno: _docente.Persona.ApellidoPaterno,
                         ApellidoMaterno: _docente.Persona.ApellidoMaterno,
+                        Email: _docente.Email,
+                        Telefono: _docente.Telefono,
                         DNI: _docente.Persona.DNI,
-                        FechaNacimiento: _docente.FechaNacimiento
+                        FechaNacimiento: _docente.FechaNacimiento,
                     })
                     .then((response) => {
                         console.log(response.data);
@@ -129,12 +135,12 @@ export default function GestionDocente() {
         setDocente({ ...docente });
         setDocenteDialog(true);
 
-        console.log('Edtudiante recibido para editar:', docente);
+        console.log('Docente recibido para editar:', docente);
     };
 
     const exportCSV = () => {
         dt.current?.exportCSV();
-    };
+    };      
 
     const leftToolbarTemplate = () => {
         return (
@@ -188,6 +194,10 @@ export default function GestionDocente() {
     const grupoNombreBodyTemplate = (rowData: typeof docenteVacio) => {
         return rowData.Grupo?.Nombre;
     };
+    const passwordBodyTemplate = (rowData: typeof docenteVacio) => {
+        return rowData.Persona?.Usuario?.Password;
+    };
+
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
         const val = (e.target && e.target.value) || '';
 
@@ -196,6 +206,7 @@ export default function GestionDocente() {
         if (name == 'Nombres') {
             docente.Persona.Nombres = val;
         }
+       
         if (name == 'Paterno') {
             _docente.Persona.ApellidoPaterno = val;
         }
@@ -205,10 +216,13 @@ export default function GestionDocente() {
         if (name == 'DNI') {
             _docente.Persona.DNI = val;
         }
-        if (name == 'EMAIL') {
+        if (name == 'Email') {
             _docente.Email = val;
         }
-        if (name == 'TELEFONO') {
+        if (name == 'Password') {
+            _docente.Persona.Usuario.Password = val;
+        }
+        if (name == 'Telefono') {
             _docente.Telefono = val;
         }
 
@@ -270,8 +284,10 @@ export default function GestionDocente() {
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         {/* <Column field="FechaNacimiento" header="Fecha de Nacimiento" sortable body={fechaNacimientoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column> */}
-                        <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Persona.Usuario.Password" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        {/* <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column> */}
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
 
@@ -324,7 +340,41 @@ export default function GestionDocente() {
                                     maxLength={45}
                                     className={classNames({ 'p-invalid': submitted && !docente.Persona.ApellidoPaterno })}
                                 />
-                                {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido paterno del docente.</small>}
+                                {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Ingrese el apellido materno del docente.</small>}
+                            </div>
+                        </div>
+                        <div className="form grid">
+                            <div className="field col">
+                                <label htmlFor="Telefono" className="font-bold">
+                                    Telefono
+                                </label>
+                                <InputText
+                                    id="Telefono"
+                                    value={docente.Telefono}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Telefono');
+                                    }}
+                                    required
+                                    maxLength={9}
+                                    className={classNames({ 'p-invalid': submitted && !docente.Telefono })}
+                                />
+                                {submitted && !docente.Telefono && <small className="p-error">Ingrese el telefono del docente.</small>}
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="Email" className="font-bold">
+                                    Email
+                                </label>
+                                <InputText
+                                    id="Email"
+                                    value={docente.Email}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Email');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                    className={classNames({ 'p-invalid': submitted && !docente.Email })}
+                                />
+                                {submitted && !docente.Email && <small className="p-error">Ingrese el email del docente.</small>}
                             </div>
                         </div>
 
@@ -346,9 +396,18 @@ export default function GestionDocente() {
                                 {submitted && !docente.Persona.DNI && <small className="p-error">Ingrese el DNI del docente.</small>}
                             </div>
                             <div className="field col">
-                            <label htmlFor="FechaNacimiento" className="font-bold">
-                                Fecha Nacimiento
-                            </label>
+                                <label htmlFor="Persona.Usuario.Password" className="font-bold">
+                                    Password
+                                </label>
+                                <Password value={docente?.Persona?.Usuario?.Password} onChange={(e) => {
+                                        onInputChange(e, 'Password');
+                                    }} toggleMask />
+                                {submitted && !docente?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una contraseña para docente.</small>}
+                            </div>
+                            <div className="field col">
+                                 <label htmlFor="FechaNacimiento" className="font-bold">
+                                    Fecha Nacimiento
+                                </label>
                             <Calendar
                                 id="FechaNacimiento"
                                 value={docente.FechaNacimiento}

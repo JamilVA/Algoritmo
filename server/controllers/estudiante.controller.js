@@ -5,6 +5,10 @@ const getEstudiantes = async(req,res) => {
         include : [
             {
                 model: Persona,
+                include:[
+                    {
+                        model: Usuario,
+                    }]
             },{
                 model: Grupo,
                 attributes: ['Nombre']
@@ -33,11 +37,19 @@ const crearEstudiante = async(req,res) =>{
             FechaNacimiento: req.body.FechaNacimiento,
             CodigoPersona: persona.Codigo,
         });
-
+        const usuario = await Usuario.create({
+            Password: req.body.Password,
+            Email: req.body.Email,
+            Estado: true,
+            CodigoPersona: persona.Codigo,
+            CodigoTipoUsuario: 3,
+         });
+         
         res.json({
             ok:true,
             persona,
             estudiante,
+            usuario,
         })
             
     } catch (error) {
@@ -66,11 +78,16 @@ const actualizarEstudiante = async(req,res) =>{
                 Codigo: req.body.Codigo,
             }
         });
-
+        const usuario = await Usuario.update({
+            Password: req.body.Password,
+            Email: req.body.Email,
+         });
+         
         res.json({
             ok:true,
             persona,
             estudiante,
+            usuario,
         })
             
     } catch (error) {

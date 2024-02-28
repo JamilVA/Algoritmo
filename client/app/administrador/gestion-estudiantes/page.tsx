@@ -12,27 +12,30 @@ import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Demo } from '@/types';
 import axios from 'axios';
+import { Password } from 'primereact/password';
 
-export default function GestionEstudiantes() {
+export default function GestionEstudiante() {
     const estudianteVacio = {
         Codigo: 0,
         FechaNacimiento: new Date(),
         CodigoPersona: 0,
         CodigoGrupo: 0,
         CodigoApoderado: 0,
+        Grupo: {
+            Nombre: ''
+        },
         Persona: {
             Codigo: 0,
             Nombres: '',
             ApellidoPaterno: '',
             ApellidoMaterno: '',
-            DNI: ''
-        },
-        Grupo: {
-            Nombre: ''
+            DNI: '',
+            Usuario:{
+                Password: ""
+            }
         }
     };
 
@@ -75,10 +78,10 @@ export default function GestionEstudiantes() {
 
     const guardarEstudiante = () => {
 
-        let _estudiante = {...estudiante}
-        console.log('Estudiante a guardar:', _estudiante)
+        let _estudiante = {...estudiante};
+        console.log('Estudiante a guardar:', _estudiante);
 
-        setSubmitted(true)
+        setSubmitted(true);
 
         if(!estudiante.Codigo){
             try {
@@ -87,6 +90,7 @@ export default function GestionEstudiantes() {
                     ApellidoPaterno: _estudiante.Persona.ApellidoPaterno,
                     ApellidoMaterno: _estudiante.Persona.ApellidoMaterno,
                     DNI: _estudiante.Persona.DNI,
+                    Password: _estudiante.Persona.Usuario.Password,
                     FechaNacimiento: _estudiante.FechaNacimiento,
                 }).then((response) => {
                     console.log(response.data)
@@ -163,6 +167,10 @@ export default function GestionEstudiantes() {
         return rowData.Grupo?.Nombre;
     };
 
+    const passwordBodyTemplate = (rowData: typeof estudianteVacio) => {
+        return rowData.Persona?.Usuario?.Password;
+    };
+
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
         const val = (e.target && e.target.value) || '';
 
@@ -179,6 +187,9 @@ export default function GestionEstudiantes() {
         }
         if (name == 'DNI') {
             _estudiante.Persona.DNI = val;
+        }
+        if (name == 'Password') {
+            _estudiante.Persona.Usuario.Password = val;
         }
 
         setEstudiante(_estudiante);
@@ -245,6 +256,7 @@ export default function GestionEstudiantes() {
                         {/* <Column header="Codigo" sortable body={codeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column> */}
                         <Column field="Persona.Nombres" header="Nombres Completos" sortable body={nombresBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Persona.Usuario.Password" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Grupo.Nombre" header="Grado" sortable body={gradoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
@@ -318,6 +330,15 @@ export default function GestionEstudiantes() {
                                     className={classNames({ 'p-invalid': submitted && !estudiante.Persona.DNI })}
                                 />
                                 {submitted && !estudiante.Persona.DNI && <small className="p-error">Ingrese el DNI del estudiante.</small>}
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="Persona.Usuario.Password" className="font-bold">
+                                    Password
+                                </label>
+                                <Password value={estudiante?.Persona?.Usuario?.Password} onChange={(e) => {
+                                        onInputChange(e, 'Password');
+                                    }} toggleMask />
+                                {submitted && !estudiante?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una contraseña para estudiante.</small>}
                             </div>
                             <div className="field col">
                                 <label htmlFor="FechaNacimiento" className="font-bold">
