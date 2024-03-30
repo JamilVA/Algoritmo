@@ -300,6 +300,7 @@ const Page = () => {
                         </div>
                         <div className="font-medium text-lg my-3 text-900">
                             Correctas: {respuestasEstudiante.filter((respuesta: boolean) => respuesta === true).length} / {respuestasEstudiante.length}
+                            En blanco: 2
                         </div>
                         <Button className="p-button-sm flex" label="OK" severity="info" onClick={clear}></Button>
                     </div>
@@ -314,21 +315,21 @@ const Page = () => {
                 <Button
                     onClick={() => {
                         confirm();
-                        if (correcto) {
-                            toast.current?.show({
-                                severity: 'success',
-                                summary: '¡Correcto!',
-                                detail: 'Has seleccionado la respuesta correcta.',
-                                life: 2000
-                            });
-                        } else {
-                            toast.current?.show({
-                                severity: 'error',
-                                summary: '¡Incorrecto!',
-                                detail: 'La respuesta que seleccionaste es incorrecta.',
-                                life: 2000
-                            });
-                        }
+                        // if (correcto) {
+                        //     toast.current?.show({
+                        //         severity: 'success',
+                        //         summary: '¡Correcto!',
+                        //         detail: 'Has seleccionado la respuesta correcta.',
+                        //         life: 2000
+                        //     });
+                        // } else {
+                        //     toast.current?.show({
+                        //         severity: 'error',
+                        //         summary: '¡Incorrecto!',
+                        //         detail: 'La respuesta que seleccionaste es incorrecta.',
+                        //         life: 2000
+                        //     });
+                        // }
                     }}
                     label="Enviar Examen"
                     icon="pi pi-check"
@@ -365,21 +366,21 @@ const Page = () => {
     const siguientePregunta = () => {
         setTimeLeft(60);
         startTimer();
-        if (correcto) {
-            toast.current?.show({
-                severity: 'success',
-                summary: '¡Correcto!',
-                detail: 'Has seleccionado la respuesta correcta.',
-                life: 2000
-            });
-        } else {
-            toast.current?.show({
-                severity: 'error',
-                summary: '¡Incorrecto!',
-                detail: 'La respuesta que seleccionaste es incorrecta.',
-                life: 2000
-            });
-        }
+        // if (correcto) {
+        //     toast.current?.show({
+        //         severity: 'success',
+        //         summary: '¡Correcto!',
+        //         detail: 'Has seleccionado la respuesta correcta.',
+        //         life: 2000
+        //     });
+        // } else {
+        //     toast.current?.show({
+        //         severity: 'error',
+        //         summary: '¡Incorrecto!',
+        //         detail: 'La respuesta que seleccionaste es incorrecta.',
+        //         life: 2000
+        //     });
+        // }
         setSelectedRepuesta(-1);
         respuestasEstudiante.push(correcto);
         console.log(respuestasEstudiante);
@@ -415,7 +416,7 @@ const Page = () => {
             <div className="card m-0">
                 <Toast ref={toast}></Toast>
                 <Toast ref={toastBC} position="center" onRemove={clear} />
-                <h1>Tema: Cultura General{curso?.Nombre}</h1>
+                {/* <h1>Tema: Cultura General{curso?.Nombre}</h1> */}
                 <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
 
                 <TabView

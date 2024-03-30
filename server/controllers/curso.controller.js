@@ -21,7 +21,7 @@ const getNiveles = async (req, res) => {
     ok: true,
     niveles,
     grados,
-    docentes
+    docentes,
   });
 };
 
@@ -49,9 +49,9 @@ const getCursos = async (req, res) => {
         include: [
           {
             model: Persona,
-            attributes: ['Nombres', 'ApellidoPaterno', 'ApellidoMaterno'],
-          }
-        ]
+            attributes: ["Nombres", "ApellidoPaterno", "ApellidoMaterno"],
+          },
+        ],
       },
     ],
   });
@@ -72,7 +72,7 @@ const crearCurso = async (req, res) => {
 
     res.json({
       ok: true,
-      curso
+      curso,
     });
   } catch (error) {
     console.error(error);
@@ -80,36 +80,42 @@ const crearCurso = async (req, res) => {
 };
 
 const editarCurso = async (req, res) => {
-    try {
-      const curso = await Curso.update({
+  try {
+    const curso = await Curso.update(
+      {
         Nombre: req.body.Nombre,
         CodigoGrado: req.body.CodigoGrado,
-      },{
+      },
+      {
         where: {
-            Codigo: req.body.Codigo,
-        }
-      });
-  
-      res.json({
-        ok: true,
-        curso
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
+          Codigo: req.body.Codigo,
+        },
+      }
+    );
 
-  const asignarDocente = async (req, res) => {
-    try {
-        await Curso.update({ CodigoDocente: req.query.CodigoDocente }, {
-            where: { Codigo: req.query.Codigo }
-        })
-        res.json({ message: 'Docente asignado correctamente' })
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({ error: 'Error al asignar el docente' })
-    }
-}
+    res.json({
+      ok: true,
+      curso,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const asignarDocente = async (req, res) => {
+  try {
+    await Curso.update(
+      { CodigoDocente: req.body.CodigoDocente },
+      {
+        where: { Codigo: req.body.Codigo },
+      }
+    );
+    res.json({ message: "Docente asignado correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al asignar el docente" });
+  }
+};
 
 module.exports = {
   getNiveles,
@@ -117,5 +123,5 @@ module.exports = {
   getCursos,
   crearCurso,
   editarCurso,
-  asignarDocente
+  asignarDocente,
 };

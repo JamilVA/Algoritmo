@@ -71,6 +71,7 @@ export default function BancoPreguntas() {
     const [pregunta, setPregunta] = useState(preguntaVacia);
     const [respuesta, setRespuesta] = useState(respuestaVacia);
     const [temaDialog, setTemaDialog] = useState(false);
+    const [preguntasDialog, setPreguntasDialog] = useState(false);
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -122,6 +123,10 @@ export default function BancoPreguntas() {
         setTemaDialog(false);
     };
 
+    const hidePreguntasDialog = () => {
+        setPreguntasDialog(false);
+    };
+
     const exportarCursos = () => {};
 
     const guardarTema = () => {
@@ -131,9 +136,8 @@ export default function BancoPreguntas() {
         setSubmitted(true);
 
         if (_tema.Codigo == 0) {
-            
             try {
-                console.log('crear')
+                console.log('crear');
                 axios
                     .post('http://localhost:3001/api/pregunta', {
                         Descripcion: _tema.Descripcion,
@@ -146,7 +150,7 @@ export default function BancoPreguntas() {
                     });
                 setTema(temaVacio);
                 hideDialog();
-            }catch(error){
+            } catch (error) {
                 console.error(error);
                 toast.current?.show({
                     severity: 'error',
@@ -160,7 +164,7 @@ export default function BancoPreguntas() {
                 axios
                     .put('http://localhost:3001/api/pregunta', {
                         Codigo: _tema.Codigo,
-                        Descripcion: _tema.Descripcion,
+                        Descripcion: _tema.Descripcion
                     })
                     .then((response) => {
                         console.log(response.data);
@@ -185,14 +189,12 @@ export default function BancoPreguntas() {
         setTema({ ...tema });
         setTemaDialog(true);
 
-        console.log('Tema recibido para editar:', tema)
+        console.log('Tema recibido para editar:', tema);
     };
 
     const verPreguntas = (tema: typeof temaVacio) => {
         setTema({ ...tema });
-        // setPreguntasDialog(true);
-
-        console.log('A agregar preguntiñas')
+        setPreguntasDialog(true);
     };
 
     const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -246,6 +248,10 @@ export default function BancoPreguntas() {
         );
     };
 
+    const headerPreguntasDialog = () => {
+        return <Button label="New" icon="pi pi-plus" size="small" severity="success" className=" mr-2" onClick={openNew} />;
+    };
+
     const temaDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
@@ -253,10 +259,16 @@ export default function BancoPreguntas() {
         </>
     );
 
+    const preguntasDialogFooter = (
+        <>
+            <Button label="Cancelar" icon="pi pi-times" text onClick={hidePreguntasDialog} />
+            <Button label="Guardar" icon="pi pi-check" text onClick={hidePreguntasDialog} />
+        </>
+    );
+
     const nombreCursoBodyTemplate = (rowData: typeof temaVacio) => {
         return rowData.Descripcion;
     };
-
 
     const actionBodyTemplate = (rowData: typeof temaVacio) => {
         return (
@@ -313,6 +325,29 @@ export default function BancoPreguntas() {
                             />
                             {submitted && !tema.Descripcion && <small className="p-error">Ingrese una descripción del tema.</small>}
                         </div>
+                    </Dialog>
+
+                    <Dialog visible={preguntasDialog} style={{ width: '800px' }} header={'Lista de preguntas del tema'} modal className="p-fluid" footer={preguntasDialogFooter} onHide={hidePreguntasDialog}>
+                        <Toolbar className="mb-4" left={headerPreguntasDialog}></Toolbar>
+
+                        <DataTable
+                            ref={dt}
+                            value={preguntas}
+                            dataKey="id"
+                            paginator
+                            rows={10}
+                            rowsPerPageOptions={[5, 10, 25]}
+                            className="datatable-responsive"
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} preguntas"
+                            globalFilter={globalFilter}
+                            emptyMessage="Este tema aún no tiene preguntas registradas."
+                            responsiveLayout="scroll"
+                        >
+                            {/* <Column header="Codigo" sortable body={codeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column> */}
+                            <Column field="Descripcion" header="Tema" sortable body={nombreCursoBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
+                            <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
+                        </DataTable>
                     </Dialog>
                 </div>
             </div>

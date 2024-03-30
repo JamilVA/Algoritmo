@@ -173,7 +173,6 @@ const GestionCursos = () => {
         await axios
             .put(
                 'http://localhost:3001/api/curso/asignarDocente',
-                {},
                 {
                     params: {
                         Codigo: curso.Codigo,
