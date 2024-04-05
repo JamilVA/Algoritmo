@@ -41,6 +41,7 @@ const AppMenu = () => {
                         { label: 'Gestion Docentes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-docentes' },
                         { label: 'Gestion Cursos', icon: 'pi pi-fw pi-fw pi-book', to: '/administrador/gestion-cursos' },
                         { label: 'Gestion Pagos', icon: 'pi pi-fw pi-money-bill', to: '/administrador/gestion-pagos' },
+                        { label: 'Gestion Matricula', icon: 'pi pi-fw pi-list', to: '/administrador/matricula' },
                     ]
                 },
                 {

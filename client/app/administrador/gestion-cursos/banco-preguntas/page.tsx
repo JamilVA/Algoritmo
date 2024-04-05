@@ -65,13 +65,18 @@ export default function BancoPreguntas() {
     const [temas, setTemas] = useState<(typeof temaVacio)[]>([]);
     const [preguntas, setPreguntas] = useState<(typeof preguntaVacia)[]>([]);
     const [respuestas, setRespuestas] = useState<(typeof respuestaVacia)[]>([]);
-
+    const [respuesta1, setRespuesta1] = useState(respuestaVacia);
+    const [respuesta2, setRespuesta2] = useState(respuestaVacia);
+    const [respuesta3, setRespuesta3] = useState(respuestaVacia);
+    const [respuesta4, setRespuesta4] = useState(respuestaVacia);
+    
     const [curso, setCurso] = useState(cursoVacio);
     const [tema, setTema] = useState(temaVacio);
     const [pregunta, setPregunta] = useState(preguntaVacia);
-    const [respuesta, setRespuesta] = useState(respuestaVacia);
+
     const [temaDialog, setTemaDialog] = useState(false);
     const [preguntasDialog, setPreguntasDialog] = useState(false);
+    const [newPreguntaDialog, setNewPreguntaDialog] = useState(false);
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -81,13 +86,13 @@ export default function BancoPreguntas() {
 
     useEffect(() => {
         console.log('x');
-        cargarPreguntas(codigoCurso);
+        cargarTemas(codigoCurso);
     }, []);
 
-    const cargarPreguntas = async (CodigoCurso: any) => {
+    const cargarTemas = async (CodigoCurso: any) => {
         console.log('Hola');
         try {
-            const { data } = await axios.get('http://localhost:3001/api/pregunta', {
+            const { data } = await axios.get('http://localhost:3001/api/pregunta/cargarTemas', {
                 params: { CodigoCurso }
             });
             const { curso, temas } = data;
@@ -99,14 +104,16 @@ export default function BancoPreguntas() {
         }
     };
 
-    const cargarCursos = async (CodigoNivel: number) => {
-        console.log('CodigoRecibido', CodigoNivel);
+    const cargarPreguntas = async (CodigoTema: number) => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/curso', {
-                params: { CodigoNivel: CodigoNivel }
+            const { data } = await axios.get('http://localhost:3001/api/pregunta/cargarPreguntas', {
+                params: { CodigoTema }
             });
-            const { temas } = data;
-            console.log('Hola', temas);
+            const { preguntas } = data;
+            console.log('Preguntas', data);
+            if(preguntas!.length()>0){
+                setPreguntas(preguntas);
+            }
         } catch (error) {
             console.error(error);
         }
@@ -116,6 +123,11 @@ export default function BancoPreguntas() {
         setTema(temaVacio);
         setSubmitted(false);
         setTemaDialog(true);
+    };
+
+    const openNewPregunta = () => {
+        setPregunta(preguntaVacia)
+        setNewPreguntaDialog(true);
     };
 
     const hideDialog = () => {
@@ -128,6 +140,13 @@ export default function BancoPreguntas() {
     };
 
     const exportarCursos = () => {};
+
+    const guardarPregunta = () => {
+        let _pregunta = {...pregunta};
+        
+        console.log('Crear pregunta', pregunta)
+        console.log('Add Respuestas', respuesta1, respuesta2, respuesta3, respuesta4)
+    }
 
     const guardarTema = () => {
         let _tema = { ...tema };
@@ -146,7 +165,7 @@ export default function BancoPreguntas() {
                     .then((response) => {
                         console.log(response.data);
                         toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Tema creado correctamente', life: 3000 });
-                        cargarPreguntas(codigoCurso);
+                        cargarTemas(codigoCurso);
                     });
                 setTema(temaVacio);
                 hideDialog();
@@ -169,7 +188,7 @@ export default function BancoPreguntas() {
                     .then((response) => {
                         console.log(response.data);
                         toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Tema modificado correctamente', life: 3000 });
-                        cargarPreguntas(codigoCurso);
+                        cargarTemas(codigoCurso);
                     });
                 setTema(temaVacio);
                 hideDialog();
@@ -193,6 +212,7 @@ export default function BancoPreguntas() {
     };
 
     const verPreguntas = (tema: typeof temaVacio) => {
+        cargarPreguntas(tema.Codigo);
         setTema({ ...tema });
         setPreguntasDialog(true);
     };
@@ -205,6 +225,37 @@ export default function BancoPreguntas() {
         _tema['Descripcion'] = val;
 
         setTema(_tema);
+    };
+
+    const onPreguntaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const val = (e.target && e.target.value) || '';
+
+        let _pregunta = { ...pregunta };
+
+        _pregunta['Descripcion'] = val;
+
+        setPregunta(_pregunta);
+    };
+
+    const onRespuestaChange = (e: React.ChangeEvent<HTMLInputElement>, respuesta: number) => {
+        const val = e.target.value || '';
+    
+        switch (respuesta) {
+            case 1:
+                setRespuesta1({ ...respuesta1, Valor: val });
+                break;
+            case 2:
+                setRespuesta2({ ...respuesta2, Valor: val });
+                break;
+            case 3:
+                setRespuesta3({ ...respuesta3, Valor: val });
+                break;
+            case 4:
+                setRespuesta4({ ...respuesta4, Valor: val });
+                break;
+            default:
+                break;
+        }
     };
 
     const header = (
@@ -249,20 +300,20 @@ export default function BancoPreguntas() {
     };
 
     const headerPreguntasDialog = () => {
-        return <Button label="New" icon="pi pi-plus" size="small" severity="success" className=" mr-2" onClick={openNew} />;
+        return <Button label="New" icon="pi pi-plus" size="small" severity="success" className=" mr-2" onClick={openNewPregunta} />;
     };
+
+    const newPreguntaDialogFooter = (
+        <>
+            <Button label="Cancelar" icon="pi pi-times" text onClick={()=>{setNewPreguntaDialog(false); setPregunta(preguntaVacia); setRespuesta1(respuestaVacia); setRespuesta2(respuestaVacia); setRespuesta3(respuestaVacia); setRespuesta4(respuestaVacia)}} />
+            <Button label="Guardar" icon="pi pi-check" text onClick={guardarPregunta} />
+        </>
+    );
 
     const temaDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
             <Button label="Guardar" icon="pi pi-check" text onClick={guardarTema} />
-        </>
-    );
-
-    const preguntasDialogFooter = (
-        <>
-            <Button label="Cancelar" icon="pi pi-times" text onClick={hidePreguntasDialog} />
-            <Button label="Guardar" icon="pi pi-check" text onClick={hidePreguntasDialog} />
         </>
     );
 
@@ -276,6 +327,32 @@ export default function BancoPreguntas() {
                 <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editarTema(rowData)} />
                 <Button icon="pi pi-list" rounded severity="info" outlined tooltip="Ver preguntas" className="mr-2" onClick={() => verPreguntas(rowData)} />
             </>
+        );
+    };
+
+    /* Body Preguntas */
+
+    const respuestaBodyTemplate = (rowData: typeof respuestaVacia) => {
+        return rowData.Valor;
+    };
+
+    const correctaBodyTemplate = (rowData: typeof respuestaVacia) => {
+        return <i className={classNames('pi', { 'text-green-500 pi-check-circle': rowData.Tipo, 'text-red-500 pi-times-circle': !rowData.Tipo })}></i>;
+    };
+
+    const filtrarRespuestas = (Respuestas: (typeof respuestaVacia)[], Codigo: number) => {
+        return Respuestas.filter((s) => s.CodigoPregunta === Codigo);
+    };
+
+    const respuestasBodyTemplate = (rowData: typeof preguntaVacia) => {
+        return (
+            <React.Fragment>
+                <DataTable ref={dt} value={filtrarRespuestas(respuestas, rowData.Codigo)} header={pregunta?.Descripcion ?? ''} dataKey="Codigo">
+                    <Column headerStyle={{ display: 'none' }} body={respuestaBodyTemplate} style={{ minWidth: '1rem' }}></Column>
+                    <Column headerStyle={{ display: 'none' }} body={correctaBodyTemplate} style={{ minWidth: '8rem' }}></Column>
+                </DataTable>
+                {/* <Button tooltip="Nueva Sesion" icon="pi pi-plus" className="p-button-success p-button-sm m-2" style={{ padding: '0.75em' }} onClick={() => openNew(rowData)} outlined /> */}
+            </React.Fragment>
         );
     };
 
@@ -327,13 +404,91 @@ export default function BancoPreguntas() {
                         </div>
                     </Dialog>
 
-                    <Dialog visible={preguntasDialog} style={{ width: '800px' }} header={'Lista de preguntas del tema'} modal className="p-fluid" footer={preguntasDialogFooter} onHide={hidePreguntasDialog}>
+                    <Dialog visible={newPreguntaDialog} style={{ width: '600px' }} header="Nueva Pregunta" modal className="p-fluid" footer={newPreguntaDialogFooter} onHide={() =>{setNewPreguntaDialog(false); setPregunta(preguntaVacia)}}>
+                        <div className="field">
+                            <label htmlFor="Descripcion" className="font-bold">
+                                Pregunta:
+                            </label>
+                            <InputTextarea
+                                id="Descripcion"
+                                value={pregunta.Descripcion}
+                                onChange={(e) => {
+                                    onPreguntaChange(e);
+                                }}
+                                required
+                                autoFocus
+                                maxLength={100}
+                                className={classNames({ 'p-invalid': submitted && !tema.Descripcion })}
+                            />
+                            {submitted && !tema.Descripcion && <small className="p-error">Ingrese una descripción del tema.</small>}
+                        </div>
+                        <div className="field">
+                            <label htmlFor="Descripcion" className="font-bold">
+                                Respuesta Correcta:
+                            </label>
+                            <InputText
+                                id="respuesta1.Valor"
+                                value={respuesta1.Valor ?? ''}
+                                onChange={(e) => {
+                                    onRespuestaChange(e, 1);
+                                }}
+                                required
+                                autoFocus
+                                maxLength={100}
+                                className={classNames({ 'p-invalid': submitted && !respuesta1.Valor })}
+                            />
+                        </div>
+
+                        <div className="field">
+                            <label htmlFor="Valor" className="font-bold">
+                                Respuestas Incorrectas:
+                            </label>
+                            <InputText
+                                id="respuesta2.Valor"
+                                value={respuesta2.Valor ?? ''}
+                                onChange={(e) => {
+                                    onRespuestaChange(e, 2);
+                                }}
+                                required
+                                autoFocus
+                                maxLength={100}
+                                className={classNames({ 'p-invalid': submitted && !respuesta2.Valor })}
+                            />
+                            <br /><br />
+                            <InputText
+                                id="respuesta3.Valor"
+                                value={respuesta3.Valor ?? ''}
+                                onChange={(e) => {
+                                    onRespuestaChange(e, 3);
+                                }}
+                                required
+                                autoFocus
+                                maxLength={100}
+                                className={classNames({ 'p-invalid': submitted && !respuesta3.Valor })}
+                            />
+                            <br /><br />
+                            <InputText
+                                id="respuesta4.Valor"
+                                value={respuesta4.Valor ?? ''}
+                                onChange={(e) => {
+                                    onRespuestaChange(e, 4);
+                                }}
+                                required
+                                autoFocus
+                                maxLength={100}
+                                className={classNames({ 'p-invalid': submitted && !respuesta4.Valor })}
+                            />
+                        </div>
+                        
+                    </Dialog>
+
+                    <Dialog visible={preguntasDialog} style={{ width: '800px' }} header={'Lista de preguntas del tema'} modal className="p-fluid" onHide={hidePreguntasDialog}>
                         <Toolbar className="mb-4" left={headerPreguntasDialog}></Toolbar>
 
                         <DataTable
                             ref={dt}
                             value={preguntas}
-                            dataKey="id"
+                            dataKey="Codigo"
                             paginator
                             rows={10}
                             rowsPerPageOptions={[5, 10, 25]}
@@ -344,9 +499,7 @@ export default function BancoPreguntas() {
                             emptyMessage="Este tema aún no tiene preguntas registradas."
                             responsiveLayout="scroll"
                         >
-                            {/* <Column header="Codigo" sortable body={codeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column> */}
-                            <Column field="Descripcion" header="Tema" sortable body={nombreCursoBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
-                            <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
+                            <Column body={respuestasBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                         </DataTable>
                     </Dialog>
                 </div>

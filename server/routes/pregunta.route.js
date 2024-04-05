@@ -1,12 +1,16 @@
 const { Router } = require('express');
 
-const { getPreguntas, crearTema, editarTema } = require("../controllers/pregunta.controller");
+const { getTemas, crearTema, editarTema, cargarPreguntas, crearPregunta } = require("../controllers/pregunta.controller");
 
 const router = Router();
 
-router.get('/', getPreguntas);
+router.get('/cargarTemas', getTemas);
+
+router.get('/cargarPreguntas', cargarPreguntas);
 
 router.post('/', crearTema);
+
+router.post('/', crearPregunta);
 
 router.put('/', editarTema);
 
