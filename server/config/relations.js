@@ -14,6 +14,13 @@ const Horario = require('../models/horario.model');
 const Tema = require('../models/tema.model');
 const Pregunta = require('../models/pregunta.model');
 const Respuesta = require('../models/respuesta.model');
+//const Asistencia = require('../models/asistencia.model');
+//const CursoEstudiante = require('../models/cursoestudiante.model');
+//const EstudianteExamenDiario = require('../models/estudianteexamendiario.model');
+//const ExamenDiario = require('../models/examendiario.model');
+//const PreguntaExamenDiarioEstudiante = require('../models/preguntaexamendiarioestudiante.model');
+//const Sesion = require('../models/sesion.model');
+
 
 Persona.hasOne(Usuario, {foreignKey:'CodigoPersona'});
 Usuario.belongsTo(Persona, {foreignKey:'CodigoPersona'});
@@ -66,6 +73,7 @@ Pregunta.belongsTo(Tema, {foreignKey: 'CodigoTema'})
 Pregunta.hasMany(Respuesta, {foreignKey: 'CodigoPregunta'})
 Respuesta.belongsTo(Pregunta, {foreignKey: 'CodigoPregunta'})
 
+
 module.exports = {
     Persona,
     Usuario,
@@ -97,5 +105,4 @@ module.exports = {
     Tema,
     Pregunta,
     Respuesta
-
 }

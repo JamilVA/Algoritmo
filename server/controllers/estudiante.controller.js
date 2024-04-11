@@ -1,4 +1,4 @@
-const { Sequelize } = require("sequelize");
+const { Sequelize, json } = require("sequelize");
 const {
   TipoUsuario,
   Usuario,
@@ -100,7 +100,17 @@ const crearEstudiante = async (req, res) => {
     console.error(error);
   }
 };
+const cargarGrados = async(req, res) => {
+  try {
+    const grupos = await Grupo.findAll(
+      {}
+    )
+    res,json({grupos}) 
+  } catch (error) {
+    console.error(error);
+    }
 
+}
 const actualizarEstudiante = async (req, res) => {
   try {
     const persona = await Persona.update(
@@ -160,10 +170,28 @@ const asignarApoderado = async (req, res) => {
     res.status(500).json({ error: "Error al asignar el apoderado" });
   }
 };
+const asignarGrado = async (req, res) => {
+  try {
+
+    const estudiante = await Estudiante.update(
+      { CodigoGrupo: req.body.CodigoGrupo },
+      {
+        where: { Codigo: req.body.Codigo },
+      }
+    );
+
+    res.json({ message: "Grado asignado correctamente", estudiante });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al grado el apoderado" });
+  }
+};
 
 module.exports = {
   getEstudiantes,
   crearEstudiante,
   actualizarEstudiante,
   asignarApoderado,
+  asignarGrado,
+  cargarGrados,
 };
