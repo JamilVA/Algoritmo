@@ -125,10 +125,10 @@ export default function GestionEstudiante() {
         console.log("aaaaa");
 
         const { data } = await axios.get('http://localhost:3001/api/estudiante/cargarGrados', {});
-       // const { grupos } = data;
+       const { grupos } = data;
+       console.log("iiiiiiiiii");
 
         console.log('Adios', data);
-        console.log("iiiiiiiiii");
         setGrupos(grupos);
 
     };
@@ -308,7 +308,7 @@ export default function GestionEstudiante() {
         return (
             <div className="flex align-content-center">
                 <div className="flex align-items-center justify-content-center">
-                    <p>{!rowData?.Grupo?.Nombre ? '' : grupo?.Nombre}</p>
+                    <p>{rowData?.Grupo?.Nombre}</p>
                 </div>
                 <div className="flex align-items-center justify-content-center">
                     <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.CodigoApoderado ? 'Reasignar docente' : 'Asignar docente'} />
@@ -459,7 +459,7 @@ export default function GestionEstudiante() {
                     <DataTable
                         ref={dt}
                         value={estudiantes}
-                        dataKey="id"
+                        dataKey="Codigo"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}

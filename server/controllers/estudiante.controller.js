@@ -106,7 +106,10 @@ const cargarGrados = async(req, res) => {
       {}
     )
     console.log("cualquiercosa", grupos)
-    res,json({grupos}) 
+    res.json({
+      ok: true,
+      grupos,
+    });
   } catch (error) {
     console.error(error);
     }
