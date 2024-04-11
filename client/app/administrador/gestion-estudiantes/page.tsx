@@ -59,7 +59,7 @@ export default function GestionEstudiante() {
             ApellidoPaterno: '',
             ApellidoMaterno: '',
             DNI: '',
-            Usuario:{
+            Usuario: {
                 Password: ""
             }
         }
@@ -75,7 +75,7 @@ export default function GestionEstudiante() {
     const [apoderados, setApoderados] = useState<(typeof apoderadoVacio)[]>([]);
 
     const [grupos, setGrupos] = useState<(typeof grupoVacio)[]>([]);
-    const [grupoDialog, setGrupoDialog]  = useState(false);
+    const [grupoDialog, setGrupoDialog] = useState(false);
 
     const [estudianteDialog, setEstudianteDialog] = useState(false);
 
@@ -93,6 +93,7 @@ export default function GestionEstudiante() {
     useEffect(() => {
         cargarDatos();
         cargarApoderados();
+        cargarGrupos();
     }, []);
 
     const cargarDatos = async () => {
@@ -121,15 +122,15 @@ export default function GestionEstudiante() {
     };
 
     const cargarGrupos = async () => {
-        try {
-            const { data } = await axios.get('http://localhost:3001/api/estudiante/cargarGrados', {});
-            const { grupos } = data;
+        console.log("aaaaa");
 
-            console.log('Hola', grupos);
-            setGrupos(grupos);
-        } catch (error) {
-            console.error(error);
-        }
+        const { data } = await axios.get('http://localhost:3001/api/estudiante/cargarGrados', {});
+       // const { grupos } = data;
+
+        console.log('Adios', data);
+        console.log("iiiiiiiiii");
+        setGrupos(grupos);
+
     };
 
     const openNew = () => {
@@ -201,7 +202,7 @@ export default function GestionEstudiante() {
         if (estudiante.CodigoApoderado === null) {
             return;
         }
-        
+
         await axios.put(
             'http://localhost:3001/api/estudiante/asignarApoderado',
             {
@@ -209,16 +210,16 @@ export default function GestionEstudiante() {
                 CodigoApoderado: estudiante.CodigoApoderado
             }
         ).then((response) => {
-                console.log(response.data)
-                cargarDatos();
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Operacion exitosa',
-                    detail: response.data.message,
-                    life: 3000
-                });
-                hideAsignarDocenteDialog();
-            })
+            console.log(response.data)
+            cargarDatos();
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Operacion exitosa',
+                detail: response.data.message,
+                life: 3000
+            });
+            hideAsignarDocenteDialog();
+        })
             .catch((error) => {
                 console.error(error.response);
                 toast.current?.show({
@@ -233,10 +234,10 @@ export default function GestionEstudiante() {
     const asignarGrupo = async () => {
         console.log('GrupoRecibidoParaAsignar:', estudiante);
 
-        if (estudiante.CodigoGrupo=== null) {
+        if (estudiante.CodigoGrupo === null) {
             return;
         }
-        
+
         await axios.put(
             'http://localhost:3001/api/estudiante/asignarGrado',
             {
@@ -244,16 +245,16 @@ export default function GestionEstudiante() {
                 CodigoGrupo: estudiante.CodigoGrupo,
             }
         ).then((response) => {
-                console.log(response.data)
-                cargarDatos();
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Operacion exitosa',
-                    detail: response.data.message,
-                    life: 3000
-                });
-                hideAsignarGrupoDialog();
-            })
+            console.log(response.data)
+            cargarDatos();
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Operacion exitosa',
+                detail: response.data.message,
+                life: 3000
+            });
+            hideAsignarGrupoDialog();
+        })
             .catch((error) => {
                 console.error(error.response);
                 toast.current?.show({
@@ -304,7 +305,16 @@ export default function GestionEstudiante() {
     };
 
     const gradoBodyTemplate = (rowData: typeof estudianteVacio) => {
-        return rowData.Grupo?.Nombre;
+        return (
+            <div className="flex align-content-center">
+                <div className="flex align-items-center justify-content-center">
+                    <p>{!rowData?.Grupo?.Nombre ? '' : grupo?.Nombre}</p>
+                </div>
+                <div className="flex align-items-center justify-content-center">
+                    <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.CodigoApoderado ? 'Reasignar docente' : 'Asignar docente'} />
+                </div>
+            </div>
+        );
     };
 
     const apoderadoBodyTemplate = (rowData: typeof estudianteVacio) => {
@@ -324,6 +334,12 @@ export default function GestionEstudiante() {
     const openAsignarDocente = (estudiante: typeof estudianteVacio) => {
         setSubmitted(false);
         setApoderadoDialog(true);
+        setEstudiante(estudiante);
+    };
+
+    const openAsignarGrado = (estudiante: typeof estudianteVacio) => {
+        setSubmitted(false);
+        setGrupoDialog(true);
         setEstudiante(estudiante);
     };
 
@@ -602,7 +618,7 @@ export default function GestionEstudiante() {
                                 autoFocus
                                 showClear
                                 itemTemplate={(option) => <div>{`${option.Nombre}`}</div>}
-                                
+
                             />
                         </div>
                     </Dialog>

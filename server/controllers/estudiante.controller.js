@@ -105,6 +105,7 @@ const cargarGrados = async(req, res) => {
     const grupos = await Grupo.findAll(
       {}
     )
+    console.log("cualquiercosa", grupos)
     res,json({grupos}) 
   } catch (error) {
     console.error(error);
