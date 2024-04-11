@@ -64,16 +64,25 @@ export default function GestionEstudiante() {
             }
         }
     };
+    const grupoVacio = {
+        Codigo: 0,
+        Nombre: " ",
+    }
 
     const [estudiantes, setEstudiantes] = useState<(typeof estudianteVacio)[]>([]);
     const [estudiante, setEstudiante] = useState(estudianteVacio);
 
     const [apoderados, setApoderados] = useState<(typeof apoderadoVacio)[]>([]);
 
+    const [grupos, setGrupos] = useState<(typeof grupoVacio)[]>([]);
+    const [grupoDialog, setGrupoDialog]  = useState(false);
+
     const [estudianteDialog, setEstudianteDialog] = useState(false);
 
     const [apoderado, setApoderado] = useState(apoderadoVacio);
     const [apoderadoDialog, setApoderadoDialog] = useState(false);
+
+    const [grupo, setGrupo] = useState(grupoVacio);
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -106,6 +115,18 @@ export default function GestionEstudiante() {
 
             console.log('Hola', apoderados);
             setApoderados(apoderados);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const cargarGrupos = async () => {
+        try {
+            const { data } = await axios.get('http://localhost:3001/api/estudiante/cargarGrados', {});
+            const { grupos } = data;
+
+            console.log('Hola', grupos);
+            setGrupos(grupos);
         } catch (error) {
             console.error(error);
         }
@@ -209,6 +230,41 @@ export default function GestionEstudiante() {
             });
     };
 
+    const asignarGrupo = async () => {
+        console.log('GrupoRecibidoParaAsignar:', estudiante);
+
+        if (estudiante.CodigoGrupo=== null) {
+            return;
+        }
+        
+        await axios.put(
+            'http://localhost:3001/api/estudiante/asignarGrado',
+            {
+                Codigo: estudiante.Codigo,
+                CodigoGrupo: estudiante.CodigoGrupo,
+            }
+        ).then((response) => {
+                console.log(response.data)
+                cargarDatos();
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Operacion exitosa',
+                    detail: response.data.message,
+                    life: 3000
+                });
+                hideAsignarGrupoDialog();
+            })
+            .catch((error) => {
+                console.error(error.response);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Operacion fallida',
+                    detail: 'Ha ocurrido un error al procesar la solicitud',
+                    life: 3000
+                });
+            });
+    };
+
     const editarEstudiante = (estudiante: typeof estudianteVacio) => {
         setEstudiante({ ...estudiante });
         setEstudianteDialog(true);
@@ -277,6 +333,12 @@ export default function GestionEstudiante() {
         setEstudiante(estudianteVacio);
     };
 
+    const hideAsignarGrupoDialog = () => {
+        setSubmitted(false);
+        setGrupoDialog(false);
+        setEstudiante(estudianteVacio);
+    };
+
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
         const val = (e.target && e.target.value) || '';
 
@@ -322,6 +384,16 @@ export default function GestionEstudiante() {
         console.log('Docente asignado a', _estudiante);
     };
 
+    const onGrupoSelect = (e: any) => {
+        const val = (e.target && e.target.value) || '';
+        let _estudiante = { ...estudiante };
+
+        _estudiante['CodigoGrupo'] = val;
+
+        setEstudiante(_estudiante);
+        console.log('Grupo asignado a', _estudiante);
+    };
+
     const actionBodyTemplate = (rowData: typeof estudianteVacio) => {
         return (
             <>
@@ -351,6 +423,13 @@ export default function GestionEstudiante() {
         <>
             <Button label="Cancelar" icon="pi pi-times" text onClick={hideAsignarDocenteDialog} />
             <Button label="Asignar" icon="pi pi-check" text onClick={asignarDocente} />
+        </>
+    );
+
+    const asignarGrupoDialogFooter = (
+        <>
+            <Button label="Cancelar" icon="pi pi-times" text onClick={hideAsignarGrupoDialog} />
+            <Button label="Asignar" icon="pi pi-check" text onClick={asignarGrupo} />
         </>
     );
 
@@ -506,6 +585,25 @@ export default function GestionEstudiante() {
                                 })}
                             />
                             {submitted && !estudiante.Apoderado && <small className="p-invalid">Seleccione un docente para asignarlo</small>}
+                        </div>
+                    </Dialog>
+                    <Dialog visible={grupoDialog} style={{ width: '450px' }} header="Asignar o reasignar grupo" modal className="p-fluid" footer={asignarGrupoDialogFooter} onHide={hideAsignarGrupoDialog}>
+                        <div className="field">
+                            <label htmlFor="Estudiante">Grupo</label>
+                            <Dropdown
+                                id="grupo"
+                                value={estudiante.CodigoGrupo}
+                                options={grupos}
+                                optionLabel="Nombre"
+                                optionValue="Codigo"
+                                placeholder="Seleccione un grupo"
+                                onChange={(e) => onGrupoSelect(e)}
+                                required
+                                autoFocus
+                                showClear
+                                itemTemplate={(option) => <div>{`${option.Nombre}`}</div>}
+                                
+                            />
                         </div>
                     </Dialog>
                 </div>
