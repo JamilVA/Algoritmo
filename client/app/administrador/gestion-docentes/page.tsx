@@ -42,13 +42,17 @@ export default function GestionDocente() {
             Usuario:{
                 Password: ""
             }
+        },
+        Grupo: {
+            Nombre: ''
         }
         
     };
 
     const grupoVacio = {
         Codigo: 0,
-        Nombre: " ",
+        Nombre: "",
+        CodigoDocente: 0
     }
 
     const [docentes, setDocentes] = useState<(typeof docenteVacio)[]>([]);
@@ -171,15 +175,12 @@ export default function GestionDocente() {
     const asignarGrupo = async () => {
         console.log('GrupoRecibidoParaAsignar:', docente.Persona.Estudiante);
 
-        if (docente.Persona.Estudiante.CodigoGrupo === null) {
-            return;
-        }
 
         await axios.put(
             'http://localhost:3001/api/docente/asignarGrado',
             {
-                Codigo: docente.Persona.Estudiante.Codigo,
-                CodigoGrupo: docente.Persona.Estudiante.CodigoGrupo,
+                CodigoDocente: docente.Codigo,
+                CodigoGrupo: grupo.Codigo,
             }
         ).then((response) => {
             console.log(response.data)
@@ -235,12 +236,11 @@ export default function GestionDocente() {
 
     const onGrupoSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        let _docente = { ...docente};
+        let _grupo = { Codigo: val, Nombre: '', CodigoDocente: docente.Codigo};
 
-        _docente.Persona.Estudiante['CodigoGrupo'] = val;
+        setGrupo(_grupo)
 
-        setDocente(_docente);
-        console.log('Tutor asignado al grado', _docente);
+        console.log('Tutor asignado al grado', _grupo);
     };
 
     const nombresBodyTemplate = (rowData: typeof docenteVacio) => {
@@ -283,7 +283,7 @@ export default function GestionDocente() {
         return (
             <div className="flex align-content-center">
                 <div className="flex align-items-center justify-content-center">
-                    <p>{rowData?.Persona?.Estudiante?.Grupo?.Nombre}</p>
+                    <p>{rowData?.Grupo?.Nombre}</p>
                 </div>
                 <div className="flex align-items-center justify-content-center">
                     <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.Persona?.Estudiante?.CodigoGrupo? 'Reasignar grado' : 'Asignar grado'} />
@@ -368,7 +368,7 @@ export default function GestionDocente() {
                     <DataTable
                         ref={dt}
                         value={docentes}
-                        dataKey="id"
+                        dataKey="Codigo"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
@@ -529,7 +529,7 @@ export default function GestionDocente() {
                             <label htmlFor="Estudiante">Grupo</label>
                             <Dropdown
                                 id="grupo"
-                                value={docente?.Persona?.Estudiante?.CodigoGrupo}
+                                value={grupo.Codigo}
                                 options={grupos}
                                 optionLabel="Nombre"
                                 optionValue="Codigo"

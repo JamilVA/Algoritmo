@@ -102,10 +102,10 @@ const actualizarDocente = async(req,res) =>{
 const asignarGrado = async (req, res) => {
     try {
   
-      const docente = await Docente.update(
-        { CodigoGrupo: req.body.CodigoGrupo },
+      const docente = await Grupo.update(
+        { CodigoDocente: req.body.CodigoDocente },
         {
-          where: { Codigo: req.body.Codigo },
+          where: { Codigo: req.body.CodigoGrupo },
         }
       );
 
