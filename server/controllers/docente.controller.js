@@ -97,11 +97,45 @@ const actualizarDocente = async(req,res) =>{
     } catch (error) {
         console.error(error)
     }
-}
+};
 
+const asignarGrado = async (req, res) => {
+    try {
+  
+      const docente = await Docente.update(
+        { CodigoGrupo: req.body.CodigoGrupo },
+        {
+          where: { Codigo: req.body.Codigo },
+        }
+      );
+
+      res.json({ message: "Grado asignado correctamente", docente });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Error al asignar tutor al grado" });
+    }
+  };
+
+  const cargarGrados = async(req, res) => {
+    try {
+      const grupos = await Grupo.findAll(
+        {}
+      )
+      console.log("cualquiercosa", grupos)
+      res.json({
+        ok: true,
+        grupos,
+      });
+    } catch (error) {
+      console.error(error);
+      }
+  
+  }
 
 module.exports = {
     getDocentes,
     crearDocente,
     actualizarDocente,
-}
+    asignarGrado,
+    cargarGrados,
+};

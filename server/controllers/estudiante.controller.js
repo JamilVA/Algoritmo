@@ -187,7 +187,7 @@ const asignarGrado = async (req, res) => {
     res.json({ message: "Grado asignado correctamente", estudiante });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error al grado el apoderado" });
+    res.status(500).json({ error: "Error al asignar grado el apoderado" });
   }
 };
 

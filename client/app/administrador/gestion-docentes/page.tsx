@@ -12,6 +12,7 @@ import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
 import { Rating } from 'primereact/rating';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
+import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { Demo } from '@/types';
@@ -25,15 +26,19 @@ export default function GestionDocente() {
         Email: '',
         Telefono: '',
         FechaNacimiento: new Date(),
-        Grupo: {
-            Nombre: ''
-        },
         Persona: {
             Codigo: 0,
             Nombres: '',
             ApellidoPaterno: '',
             ApellidoMaterno: '',
             DNI: '',
+            Estudiante:{
+                Codigo: 0,
+                CodigoGrupo: 0,
+                Grupo: {
+                    Nombre: ''
+                }
+            },
             Usuario:{
                 Password: ""
             }
@@ -41,9 +46,20 @@ export default function GestionDocente() {
         
     };
 
+    const grupoVacio = {
+        Codigo: 0,
+        Nombre: " ",
+    }
+
     const [docentes, setDocentes] = useState<(typeof docenteVacio)[]>([]);
     const [docente, setDocente] = useState(docenteVacio);
     const [docenteDialog, setDocenteDialog] = useState(false);
+
+    const [grupos, setGrupos] = useState<(typeof grupoVacio)[]>([]);
+    const [grupoDialog, setGrupoDialog] = useState(false);
+
+    const [grupo, setGrupo] = useState(grupoVacio);
+
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -53,6 +69,7 @@ export default function GestionDocente() {
 
     useEffect(() => {
         cargarDatos();
+        cargarGrupos();
     }, []);
 
     const cargarDatos = async () => {
@@ -65,16 +82,36 @@ export default function GestionDocente() {
             console.error(error);
         }
     };
+    const cargarGrupos = async () => {
+        console.log("aaaaa");
 
+       const { data } = await axios.get('http://localhost:3001/api/docente/cargarGrados', {});
+       const { grupos } = data;
+       console.log("iiiiiiiiii");
+
+        console.log('Adios', data);
+        setGrupos(grupos);
+
+    };
     const openNew = () => {
         setDocente(docenteVacio);
         setSubmitted(false);
         setDocenteDialog(true);
     };
 
+    const openAsignarGrado = (docente: typeof docenteVacio) => {
+        setSubmitted(false);
+        setGrupoDialog(true);
+        setDocente(docente);
+    };
     const hideDialog = () => {
         setSubmitted(false);
         setDocenteDialog(false);
+    };
+    const hideAsignarGrupoDialog = () => {
+        setSubmitted(false);
+        setGrupoDialog(false);
+        setDocente(docenteVacio);
     };
 
     const guardarDocente = () => {
@@ -131,6 +168,41 @@ export default function GestionDocente() {
         }
     };
 
+    const asignarGrupo = async () => {
+        console.log('GrupoRecibidoParaAsignar:', docente.Persona.Estudiante);
+
+        if (docente.Persona.Estudiante.CodigoGrupo === null) {
+            return;
+        }
+
+        await axios.put(
+            'http://localhost:3001/api/docente/asignarGrado',
+            {
+                Codigo: docente.Persona.Estudiante.Codigo,
+                CodigoGrupo: docente.Persona.Estudiante.CodigoGrupo,
+            }
+        ).then((response) => {
+            console.log(response.data)
+            cargarDatos();
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Operacion exitosa',
+                detail: response.data.message,
+                life: 3000
+            });
+            hideAsignarGrupoDialog();
+        })
+            .catch((error) => {
+                console.error(error.response);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Operacion fallida',
+                    detail: 'Ha ocurrido un error al procesar la solicitud',
+                    life: 3000
+                });
+            });
+    };
+
     const editDocente = (docente: typeof docenteVacio) => {
         setDocente({ ...docente });
         setDocenteDialog(true);
@@ -159,6 +231,16 @@ export default function GestionDocente() {
                 <Button label="Export" icon="pi pi-upload" severity="help" onClick={exportCSV} />
             </React.Fragment>
         );
+    };
+
+    const onGrupoSelect = (e: any) => {
+        const val = (e.target && e.target.value) || '';
+        let _docente = { ...docente};
+
+        _docente.Persona.Estudiante['CodigoGrupo'] = val;
+
+        setDocente(_docente);
+        console.log('Tutor asignado al grado', _docente);
     };
 
     const nombresBodyTemplate = (rowData: typeof docenteVacio) => {
@@ -192,10 +274,22 @@ export default function GestionDocente() {
         return rowData.Telefono;
     };
     const grupoNombreBodyTemplate = (rowData: typeof docenteVacio) => {
-        return rowData.Grupo?.Nombre;
+        return rowData.Persona?.Estudiante?.Grupo?.Nombre;
     };
     const passwordBodyTemplate = (rowData: typeof docenteVacio) => {
         return rowData.Persona?.Usuario?.Password;
+    };
+    const gradoBodyTemplate = (rowData: typeof docenteVacio) => {
+        return (
+            <div className="flex align-content-center">
+                <div className="flex align-items-center justify-content-center">
+                    <p>{rowData?.Persona?.Estudiante?.Grupo?.Nombre}</p>
+                </div>
+                <div className="flex align-items-center justify-content-center">
+                    <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.Persona?.Estudiante?.CodigoGrupo? 'Reasignar grado' : 'Asignar grado'} />
+                </div>
+            </div>
+        );
     };
 
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
@@ -257,6 +351,13 @@ export default function GestionDocente() {
         </>
     );
 
+    const asignarGrupoDialogFooter = (
+        <>
+            <Button label="Cancelar" icon="pi pi-times" text onClick={hideAsignarGrupoDialog} />
+            <Button label="Asignar" icon="pi pi-check" text onClick={asignarGrupo} />
+        </>
+    );
+
     return (
         <div className="grid crud-demo">
             <div className="col-12">
@@ -284,10 +385,11 @@ export default function GestionDocente() {
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         {/* <Column field="FechaNacimiento" header="Fecha de Nacimiento" sortable body={fechaNacimientoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column> */}
-                        <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Persona.Estudiante.Grupo.Nombre" header="Tutor de" sortable body={gradoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+
+                       {/* <Column field="Persona.Estudiante.Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>*/}
                         <Column field="Persona.Usuario.Password" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
-                        {/* <Column field="Grupo.Nombre" header="Tutor de" sortable body={grupoNombreBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column> */}
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
 
@@ -420,6 +522,25 @@ export default function GestionDocente() {
                             />
                             {submitted && !docente.Persona.ApellidoMaterno && <small className="p-error">Seleccione la fecha de nacimiento del docente.</small>}
                         </div>
+                        </div>
+                    </Dialog>
+                    <Dialog visible={grupoDialog} style={{ width: '450px' }} header="Asignar o reasignar grupo" modal className="p-fluid" footer={asignarGrupoDialogFooter} onHide={hideAsignarGrupoDialog}>
+                        <div className="field">
+                            <label htmlFor="Estudiante">Grupo</label>
+                            <Dropdown
+                                id="grupo"
+                                value={docente?.Persona?.Estudiante?.CodigoGrupo}
+                                options={grupos}
+                                optionLabel="Nombre"
+                                optionValue="Codigo"
+                                placeholder="Seleccione un grupo"
+                                onChange={(e) => onGrupoSelect(e)}
+                                required
+                                autoFocus
+                                showClear
+                                itemTemplate={(option) => <div>{`${option.Nombre}`}</div>}
+
+                            />
                         </div>
                     </Dialog>
                 </div>

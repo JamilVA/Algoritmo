@@ -124,7 +124,7 @@ export default function GestionEstudiante() {
     const cargarGrupos = async () => {
         console.log("aaaaa");
 
-        const { data } = await axios.get('http://localhost:3001/api/estudiante/cargarGrados', {});
+       const { data } = await axios.get('http://localhost:3001/api/estudiante/cargarGrados', {});
        const { grupos } = data;
        console.log("iiiiiiiiii");
 
@@ -311,11 +311,15 @@ export default function GestionEstudiante() {
                     <p>{rowData?.Grupo?.Nombre}</p>
                 </div>
                 <div className="flex align-items-center justify-content-center">
-                    <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.CodigoApoderado ? 'Reasignar docente' : 'Asignar docente'} />
+                    <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.CodigoApoderado ? 'Reasignar apoderado' : 'Asignar apoderado'} />
                 </div>
             </div>
         );
     };
+    const passwordBodyTemplate = (rowData: typeof estudianteVacio) => {
+        return rowData.Persona?.Usuario?.Password;
+    };
+
 
     const apoderadoBodyTemplate = (rowData: typeof estudianteVacio) => {
         let apoderado = rowData.Apoderado?.Persona?.Nombres + ' ' + rowData.Apoderado?.Persona?.ApellidoPaterno + ' ' + rowData.Apoderado?.Persona?.ApellidoPaterno;
@@ -475,6 +479,7 @@ export default function GestionEstudiante() {
                         <Column field="Persona.Nombres" header="Nombres Completos" sortable body={nombresBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Grupo.Nombre" header="Grado" sortable body={gradoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Persona.Usuario.Password" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Apoderado.Codigo" header="Apoderado" sortable body={apoderadoBodyTemplate} headerStyle={{ minWidth: '4rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
