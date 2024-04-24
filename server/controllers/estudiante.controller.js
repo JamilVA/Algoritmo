@@ -1,12 +1,14 @@
-const { Sequelize, json } = require("sequelize");
 const {
-  TipoUsuario,
   Usuario,
   Persona,
   Estudiante,
-  Grupo,
   Apoderado,
+  Grado,
+  CursoEstudiante,
+  Curso,
 } = require("../config/relations");
+
+const { sequelize } = require("../config/database");
 
 const getEstudiantes = async (req, res) => {
   const estudiantes = await Estudiante.findAll({
@@ -20,7 +22,7 @@ const getEstudiantes = async (req, res) => {
         ],
       },
       {
-        model: Grupo,
+        model: Grado,
         attributes: ["Nombre"],
       },
       {
@@ -38,32 +40,6 @@ const getEstudiantes = async (req, res) => {
   res.json({
     ok: true,
     estudiantes,
-  });
-};
-
-const BUSCAREstudiante = async (req, res) => {
-  const { DNI } = req.query;
-  const estudiante = await Estudiante.findOne({
-    include: [
-      {
-        model: Persona,
-        include: [
-          {
-            model: Usuario,
-          },
-        ],
-      },
-      {
-        model: Grupo,
-        attributes: ["Nombre"],
-      },
-    ],
-    where: { DNI: DNI },
-  });
-
-  res.json({
-    ok: true,
-    estudiante,
   });
 };
 
@@ -100,21 +76,18 @@ const crearEstudiante = async (req, res) => {
     console.error(error);
   }
 };
-const cargarGrados = async(req, res) => {
+const cargarGrados = async (req, res) => {
   try {
-    const grupos = await Grupo.findAll(
-      {}
-    )
-    console.log("cualquiercosa", grupos)
+    const grados = await Grado.findAll({});
+    console.log("cualquiercosa", grados);
     res.json({
       ok: true,
-      grupos,
+      grados,
     });
   } catch (error) {
     console.error(error);
-    }
-
-}
+  }
+};
 const actualizarEstudiante = async (req, res) => {
   try {
     const persona = await Persona.update(
@@ -142,10 +115,17 @@ const actualizarEstudiante = async (req, res) => {
         },
       }
     );
-    const usuario = await Usuario.update({
-      Password: req.body.Password,
-      Email: req.body.Email,
-    });
+    const usuario = await Usuario.update(
+      {
+        Password: req.body.Password,
+        Email: req.body.Email,
+      },
+      {
+        where: {
+          CodigoPersona: req.body.CodigoPersona,
+        },
+      }
+    );
 
     res.json({
       ok: true,
@@ -160,7 +140,6 @@ const actualizarEstudiante = async (req, res) => {
 
 const asignarApoderado = async (req, res) => {
   try {
-
     const estudiante = await Estudiante.update(
       { CodigoApoderado: req.body.CodigoApoderado },
       {
@@ -176,9 +155,8 @@ const asignarApoderado = async (req, res) => {
 };
 const asignarGrado = async (req, res) => {
   try {
-
     const estudiante = await Estudiante.update(
-      { CodigoGrupo: req.body.CodigoGrupo },
+      { CodigoGrado: req.body.CodigoGrado },
       {
         where: { Codigo: req.body.Codigo },
       }
@@ -191,11 +169,40 @@ const asignarGrado = async (req, res) => {
   }
 };
 
+const matricularEstudiante = async (req, res) => {
+  try {
+    const cursos = await Curso.findAll({
+      where: {
+        CodigoGrado: req.body.CodigoGrado,
+      },
+    });
+
+    const matriculas = cursos.map((curso) => ({
+      CodigoEstudiante: req.body.Codigo,
+      CodigoCurso: curso.Codigo,
+      Nota1: 0,
+    }));
+
+    await sequelize.transaction(async (t) => {
+      await CursoEstudiante.bulkCreate(matriculas, {
+        ignoreDuplicates: true,
+        transaction: t,
+      });
+    });
+
+    res.json({ message: "Matrícula generada correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al genera las matrícula" });
+  }
+};
+
 module.exports = {
   getEstudiantes,
   crearEstudiante,
   actualizarEstudiante,
   asignarApoderado,
   asignarGrado,
+  matricularEstudiante,
   cargarGrados,
 };

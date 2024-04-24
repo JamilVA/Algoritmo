@@ -1,4 +1,4 @@
-const { TipoUsuario, Usuario, Persona, Docente, Grupo} = require('../config/relations');
+const { TipoUsuario, Usuario, Persona, Docente, Grado} = require('../config/relations');
 
 const getDocentes = async(req,res) => {
     const docentes = await Docente.findAll({
@@ -11,7 +11,7 @@ const getDocentes = async(req,res) => {
                     }
                 ]
             },{
-                model: Grupo,
+                model: Grado,
                 attributes: ['Nombre']
             }
         ]
@@ -102,7 +102,7 @@ const actualizarDocente = async(req,res) =>{
 const asignarGrado = async (req, res) => {
     try {
   
-      const docente = await Grupo.update(
+      const docente = await Grado.update(
         { CodigoDocente: req.body.CodigoDocente },
         {
           where: { Codigo: req.body.CodigoGrupo },
@@ -118,7 +118,7 @@ const asignarGrado = async (req, res) => {
 
   const cargarGrados = async(req, res) => {
     try {
-      const grupos = await Grupo.findAll(
+      const grupos = await Grado.findAll(
         {}
       )
       console.log("cualquiercosa", grupos)

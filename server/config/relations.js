@@ -1,108 +1,111 @@
-const Usuario = require('../models/usuario.model');
-const Persona = require('../models/persona.model');
-const TipoUsuario = require('../models/tipoUsuario.model');
-const Apoderado = require('../models/apoderado.model');
-const Estudiante = require('../models/estudiante.model');
-const Docente = require('../models/docente.model');
-const Grupo = require('../models/grupo.model');
-const Pago = require('../models/pago.model');
-const ConceptoPago = require('../models/conceptoPago.model');
-const Nivel = require('../models/nivel.model');
-const Grado = require('../models/grado.model');
-const Curso = require('../models/curso.model');
-const Horario = require('../models/horario.model');
-const Tema = require('../models/tema.model');
-const Pregunta = require('../models/pregunta.model');
-const Respuesta = require('../models/respuesta.model');
-//const Asistencia = require('../models/asistencia.model');
-//const CursoEstudiante = require('../models/cursoestudiante.model');
-//const EstudianteExamenDiario = require('../models/estudianteexamendiario.model');
-//const ExamenDiario = require('../models/examendiario.model');
-//const PreguntaExamenDiarioEstudiante = require('../models/preguntaexamendiarioestudiante.model');
-//const Sesion = require('../models/sesion.model');
+const Usuario = require("../models/usuario.model");
+const Persona = require("../models/persona.model");
+const TipoUsuario = require("../models/tipoUsuario.model");
+const Apoderado = require("../models/apoderado.model");
+const Estudiante = require("../models/estudiante.model");
+const Docente = require("../models/docente.model");
+const Pago = require("../models/pago.model");
+const ConceptoPago = require("../models/conceptoPago.model");
+const Nivel = require("../models/nivel.model");
+const Grado = require("../models/grado.model");
+const Curso = require("../models/curso.model");
+const Horario = require("../models/horario.model");
+const Tema = require("../models/tema.model");
+const Pregunta = require("../models/pregunta.model");
+const Respuesta = require("../models/respuesta.model");
 
 
-Persona.hasOne(Usuario, {foreignKey:'CodigoPersona'});
-Usuario.belongsTo(Persona, {foreignKey:'CodigoPersona'});
+const Asistencia = require('../models/asistencia.model');
+const CursoEstudiante = require('../models/cursoestudiante.model');
+const EstudianteExamenDiario = require('../models/estudianteexamendiario.model');
+const PreguntaExamenDiarioEstudiante = require('../models/preguntaexamendiarioestudiante.model');
+const Sesion = require('../models/sesion.model');
+const ExamenDiario = require("../models/examendiario.model");
 
-TipoUsuario.hasMany(Usuario, {foreignKey:'CodigoTipoUsuario'})
-Usuario.belongsTo(TipoUsuario, {foreignKey:'CodigoTipoUsuario'})
 
-Persona.hasOne(Apoderado, {foreignKey:'CodigoPersona'})
-Apoderado.belongsTo(Persona, {foreignKey:'CodigoPersona'})
+Persona.hasOne(Usuario, { foreignKey: "CodigoPersona" });
+Usuario.belongsTo(Persona, { foreignKey: "CodigoPersona" });
 
-Persona.hasOne(Docente, {foreignKey:'CodigoPersona'})
-Docente.belongsTo(Persona, {foreignKey:'CodigoPersona'})
+TipoUsuario.hasMany(Usuario, { foreignKey: "CodigoTipoUsuario" });
+Usuario.belongsTo(TipoUsuario, { foreignKey: "CodigoTipoUsuario" });
 
-Persona.hasOne(Estudiante, {foreignKey:'CodigoPersona'})
-Estudiante.belongsTo(Persona, {foreignKey:'CodigoPersona'})
+Persona.hasOne(Apoderado, { foreignKey: "CodigoPersona" });
+Apoderado.belongsTo(Persona, { foreignKey: "CodigoPersona" });
 
-Apoderado.hasMany(Estudiante, {foreignKey:'CodigoApoderado'})
-Estudiante.belongsTo(Apoderado, {foreignKey:'CodigoApoderado'})
+Persona.hasOne(Docente, { foreignKey: "CodigoPersona" });
+Docente.belongsTo(Persona, { foreignKey: "CodigoPersona" });
 
-Grupo.hasMany(Estudiante, {foreignKey:'CodigoGrupo'})
-Estudiante.belongsTo(Grupo, {foreignKey:'CodigoGrupo'})
+Persona.hasOne(Estudiante, { foreignKey: "CodigoPersona" });
+Estudiante.belongsTo(Persona, { foreignKey: "CodigoPersona" });
 
-Docente.hasOne(Grupo, {foreignKey:'CodigoDocente'})
-Grupo.belongsTo(Docente, {foreignKey:'CodigoDocente'})
+Apoderado.hasMany(Estudiante, { foreignKey: "CodigoApoderado" });
+Estudiante.belongsTo(Apoderado, { foreignKey: "CodigoApoderado" });
 
-Docente.hasMany(Curso, {foreignKey:'CodigoDocente'})
-Curso.belongsTo(Docente, {foreignKey:'CodigoDocente'})
+Grado.hasMany(Estudiante, { foreignKey: "CodigoGrado" });
+Estudiante.belongsTo(Grado, { foreignKey: "CodigoGrado" });
 
-Estudiante.hasMany(Pago, {foreignKey:'CodigoEstudiante'})
-Pago.belongsTo(Estudiante, {foreignKey:'CodigoEstudiante'})
+Docente.hasOne(Grado, { foreignKey: "CodigoDocente" });
+Grado.belongsTo(Docente, { foreignKey: "CodigoDocente" });
 
-ConceptoPago.hasMany(Pago, {foreignKey:'CodigoConceptoPago'})
-Pago.belongsTo(ConceptoPago, {foreignKey:'CodigoConceptoPago'})
+Docente.hasMany(Curso, { foreignKey: "CodigoDocente" });
+Curso.belongsTo(Docente, { foreignKey: "CodigoDocente" });
 
-Nivel.hasMany(Grado, {foreignKey: 'CodigoNivel'})
-Grado.belongsTo(Nivel, {foreignKey: 'CodigoNivel'})
+Estudiante.hasMany(Pago, { foreignKey: "CodigoEstudiante" });
+Pago.belongsTo(Estudiante, { foreignKey: "CodigoEstudiante" });
 
-Grado.hasMany(Curso, {foreignKey: 'CodigoGrado'})
-Curso.belongsTo(Grado, {foreignKey: 'CodigoGrado'})
+ConceptoPago.hasMany(Pago, { foreignKey: "CodigoConceptoPago" });
+Pago.belongsTo(ConceptoPago, { foreignKey: "CodigoConceptoPago" });
 
-Curso.hasMany(Horario, {foreignKey: 'CodigoCurso'})
-Horario.belongsTo(Curso, {foreignKey: 'CodigoCurso'})
+Nivel.hasMany(Grado, { foreignKey: "CodigoNivel" });
+Grado.belongsTo(Nivel, { foreignKey: "CodigoNivel" });
 
-Curso.hasMany(Tema, {foreignKey: 'CodigoCurso'})
-Tema.belongsTo(Curso, {foreignKey: 'CodigoCurso'})
+Grado.hasMany(Curso, { foreignKey: "CodigoGrado" });
+Curso.belongsTo(Grado, { foreignKey: "CodigoGrado" });
 
-Tema.hasMany(Pregunta, {foreignKey: 'CodigoTema'})
-Pregunta.belongsTo(Tema, {foreignKey: 'CodigoTema'})
+Curso.hasMany(Horario, { foreignKey: "CodigoCurso" });
+Horario.belongsTo(Curso, { foreignKey: "CodigoCurso" });
 
-Pregunta.hasMany(Respuesta, {foreignKey: 'CodigoPregunta'})
-Respuesta.belongsTo(Pregunta, {foreignKey: 'CodigoPregunta'})
+Curso.hasMany(Tema, { foreignKey: "CodigoCurso" });
+Tema.belongsTo(Curso, { foreignKey: "CodigoCurso" });
 
+Tema.hasMany(Pregunta, { foreignKey: "CodigoTema" });
+Pregunta.belongsTo(Tema, { foreignKey: "CodigoTema" });
+
+Pregunta.hasMany(Respuesta, { foreignKey: "CodigoPregunta" });
+Respuesta.belongsTo(Pregunta, { foreignKey: "CodigoPregunta" });
+
+Estudiante.hasMany(CursoEstudiante, { foreignKey: "CodigoEstudiante" });
+CursoEstudiante.belongsTo(Estudiante, { foreignKey: "CodigoEstudiante" });
+
+Curso.hasMany(CursoEstudiante, { foreignKey: "CodigoCurso" });
+CursoEstudiante.belongsTo(Curso, { foreignKey: "CodigoCurso" });
+
+Tema.hasMany(ExamenDiario, { foreignKey: "CodigoTema" });
+ExamenDiario.belongsTo(Tema, { foreignKey: "CodigoTema" });
+
+ExamenDiario.hasMany(EstudianteExamenDiario, { foreignKey: "CodigoExamenDiario" });
+EstudianteExamenDiario.belongsTo(ExamenDiario, { foreignKey: "CodigoExamenDiario" });
+
+Estudiante.hasMany(EstudianteExamenDiario, { foreignKey: "CodigoEstudiante" });
+EstudianteExamenDiario.belongsTo(Estudiante, { foreignKey: "CodigoEstudiante" });
 
 module.exports = {
-    Persona,
-    Usuario,
-    TipoUsuario,
-    Apoderado,
-    Estudiante,
-    Docente,
-    Grupo,
-    Pago,
-    ConceptoPago,
-    Nivel,
-    Grado,
-    Curso,
-    Horario,
-    Tema,
-    Persona,
-    Usuario,
-    TipoUsuario,
-    Apoderado,
-    Estudiante,
-    Docente,
-    Grupo,
-    Pago,
-    ConceptoPago,
-    Nivel,
-    Grado,
-    Curso,
-    Horario,
-    Tema,
-    Pregunta,
-    Respuesta
-}
+  Persona,
+  Usuario,
+  TipoUsuario,
+  Apoderado,
+  Estudiante,
+  CursoEstudiante,
+  EstudianteExamenDiario,
+  ExamenDiario,
+  Docente,
+  Pago,
+  ConceptoPago,
+  Nivel,
+  Grado,
+  Curso,
+  Horario,
+  Tema,
+  Pregunta,
+  Respuesta,
+};

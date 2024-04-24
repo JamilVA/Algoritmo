@@ -62,9 +62,11 @@ const GestionCursos = () => {
 
     const [niveles, setNiveles] = useState<(typeof nivelVacio)[]>([]);
     const [grados, setGrados] = useState<(typeof gradoVacio)[]>([]);
+    const [gradosx, setGradosx] = useState<(typeof gradoVacio)[]>([]);
     const [docentes, setDocentes] = useState<(typeof docenteVacio)[]>([]);
     const [cursos, setCursos] = useState<(typeof cursoVacio)[]>([]);
     const [nivel, setNivel] = useState(nivelVacio);
+    const [grado, setGrado] = useState(nivelVacio);
     const [curso, setCurso] = useState(cursoVacio);
     const [cursoDialog, setCursoDialog] = useState(false);
     const [asignarDocenteDialog, setAsignarDocenteDialog] = useState(false);
@@ -92,11 +94,11 @@ const GestionCursos = () => {
         }
     };
 
-    const cargarCursos = async (CodigoNivel: number) => {
-        console.log('CodigoRecibido', CodigoNivel);
+    const cargarCursos = async (CodigoGrado: number) => {
+        console.log('CodigoRecibido', CodigoGrado);
         try {
             const { data } = await axios.get('http://localhost:3001/api/curso', {
-                params: { CodigoNivel: CodigoNivel }
+                params: { CodigoGrado: CodigoGrado }
             });
             const { cursos } = data;
             console.log('Hola', cursos);
@@ -122,7 +124,7 @@ const GestionCursos = () => {
                     .then((response) => {
                         console.log(response.data);
                         toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Curso creado correctamente', life: 3000 });
-                        cargarCursos(nivel.Codigo);
+                        cargarCursos(grado.Codigo);
                     });
                 setCurso(cursoVacio);
                 hideDialog();
@@ -146,7 +148,7 @@ const GestionCursos = () => {
                     .then((response) => {
                         console.log(response.data);
                         toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Curso modificado correctamente', life: 3000 });
-                        cargarCursos(nivel.Codigo);
+                        cargarCursos(grado.Codigo);
                     });
                 setCurso(cursoVacio);
                 hideDialog();
@@ -171,17 +173,12 @@ const GestionCursos = () => {
         }
         hideAsignarDocenteDialog();
         await axios
-            .put(
-                'http://localhost:3001/api/curso/asignarDocente',
-                {
-                    params: {
-                        Codigo: curso.Codigo,
-                        CodigoDocente: curso.CodigoDocente
-                    }
-                }
-            )
+            .put('http://localhost:3001/api/curso/asignarDocente', {
+                Codigo: curso.Codigo,
+                CodigoDocente: curso.CodigoDocente
+            })
             .then((response) => {
-                cargarCursos(nivel.Codigo);
+                cargarCursos(grado.Codigo);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Operacion exitosa',
@@ -217,7 +214,7 @@ const GestionCursos = () => {
         setCurso({ ...curso });
         setCursoDialog(true);
 
-        console.log('Edtudiante recibido para editar:', curso)
+        console.log('Edtudiante recibido para editar:', curso);
     };
 
     const onNivelSelect = (e: any) => {
@@ -227,6 +224,22 @@ const GestionCursos = () => {
         _nivel['Codigo'] = val;
 
         setNivel(_nivel);
+        setGradosx(grados.filter((g) => g.CodigoNivel == val));
+        console.log('Nivel:', val);
+        console.log('Grados:', grados);
+        console.log(
+            'Filtados',
+            grados.filter((g) => g.CodigoNivel == val)
+        );
+    };
+
+    const onGradoxSelect = (e: any) => {
+        const val = (e.target && e.target.value) || '';
+        let _grado = { ...grado };
+
+        _grado['Codigo'] = val;
+
+        setGrado(_grado);
         cargarCursos(val);
     };
 
@@ -255,7 +268,7 @@ const GestionCursos = () => {
 
         let _curso = { ...curso };
 
-        _curso['Nombre'] = val
+        _curso['Nombre'] = val;
 
         setCurso(_curso);
     };
@@ -287,6 +300,20 @@ const GestionCursos = () => {
                         }}
                         placeholder="Seleccione un nivel"
                         id="Nivel"
+                        required
+                        className="mr-2"
+                    />
+                    <Dropdown
+                        value={grado.Codigo}
+                        options={gradosx}
+                        optionLabel="Nombre"
+                        optionValue="Codigo"
+                        name="Grado"
+                        onChange={(e) => {
+                            onGradoxSelect(e);
+                        }}
+                        placeholder="Seleccione un grado"
+                        id="Grado"
                         required
                     />
                 </div>{' '}

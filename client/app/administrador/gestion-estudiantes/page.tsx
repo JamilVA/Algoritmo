@@ -23,9 +23,9 @@ export default function GestionEstudiante() {
         Codigo: 0,
         FechaNacimiento: new Date(),
         CodigoPersona: 0,
-        CodigoGrupo: 0,
+        CodigoGrado: 0,
         CodigoApoderado: 0,
-        Grupo: {
+        Grado: {
             Nombre: ''
         },
         Persona: {
@@ -35,7 +35,8 @@ export default function GestionEstudiante() {
             ApellidoMaterno: '',
             DNI: '',
             Usuario: {
-                Password: ''
+                Password: '',
+                Email: ''
             }
         },
         Apoderado: {
@@ -60,29 +61,30 @@ export default function GestionEstudiante() {
             ApellidoMaterno: '',
             DNI: '',
             Usuario: {
-                Password: ""
+                Password: ''
             }
         }
     };
-    const grupoVacio = {
+    const gradoVacio = {
         Codigo: 0,
-        Nombre: " ",
-    }
+        Nombre: ' ',
+        CodigoNivel: 0
+    };
 
     const [estudiantes, setEstudiantes] = useState<(typeof estudianteVacio)[]>([]);
     const [estudiante, setEstudiante] = useState(estudianteVacio);
 
     const [apoderados, setApoderados] = useState<(typeof apoderadoVacio)[]>([]);
 
-    const [grupos, setGrupos] = useState<(typeof grupoVacio)[]>([]);
-    const [grupoDialog, setGrupoDialog] = useState(false);
+    const [grados, setGrados] = useState<(typeof gradoVacio)[]>([]);
+    const [gradoDialog, setGradoDialog] = useState(false);
 
     const [estudianteDialog, setEstudianteDialog] = useState(false);
 
     const [apoderado, setApoderado] = useState(apoderadoVacio);
     const [apoderadoDialog, setApoderadoDialog] = useState(false);
 
-    const [grupo, setGrupo] = useState(grupoVacio);
+    const [grado, setGrado] = useState(gradoVacio);
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -93,14 +95,13 @@ export default function GestionEstudiante() {
     useEffect(() => {
         cargarDatos();
         cargarApoderados();
-        cargarGrupos();
+        cargarGrados();
     }, []);
 
     const cargarDatos = async () => {
         try {
             const { data } = await axios.get('http://localhost:3001/api/estudiante', {});
             const { estudiantes } = data;
-
 
             console.log('Hola', estudiantes);
             setEstudiantes(estudiantes);
@@ -121,16 +122,15 @@ export default function GestionEstudiante() {
         }
     };
 
-    const cargarGrupos = async () => {
-        console.log("aaaaa");
+    const cargarGrados = async () => {
+        console.log('aaaaa');
 
-       const { data } = await axios.get('http://localhost:3001/api/estudiante/cargarGrados', {});
-       const { grupos } = data;
-       console.log("iiiiiiiiii");
+        const { data } = await axios.get('http://localhost:3001/api/estudiante/cargarGrados', {});
+        const { grados } = data;
+        console.log('iiiiiiiiii');
 
         console.log('Adios', data);
-        setGrupos(grupos);
-
+        setGrados(grados);
     };
 
     const openNew = () => {
@@ -158,6 +158,7 @@ export default function GestionEstudiante() {
                         ApellidoPaterno: _estudiante.Persona.ApellidoPaterno,
                         ApellidoMaterno: _estudiante.Persona.ApellidoMaterno,
                         DNI: _estudiante.Persona.DNI,
+                        Email: _estudiante.Persona.Usuario.Email,
                         Password: _estudiante.Persona.Usuario.Password,
                         FechaNacimiento: _estudiante.FechaNacimiento
                     })
@@ -176,11 +177,12 @@ export default function GestionEstudiante() {
                 axios
                     .put('http://localhost:3001/api/estudiante', {
                         Codigo: _estudiante.Codigo,
-                        CodigoPersona: _estudiante.CodigoPersona,
                         Nombres: _estudiante.Persona.Nombres,
                         ApellidoPaterno: _estudiante.Persona.ApellidoPaterno,
                         ApellidoMaterno: _estudiante.Persona.ApellidoMaterno,
                         DNI: _estudiante.Persona.DNI,
+                        Email: _estudiante.Persona.Usuario.Email,
+                        Password: _estudiante.Persona.Usuario.Password,
                         FechaNacimiento: _estudiante.FechaNacimiento
                     })
                     .then((response) => {
@@ -203,23 +205,22 @@ export default function GestionEstudiante() {
             return;
         }
 
-        await axios.put(
-            'http://localhost:3001/api/estudiante/asignarApoderado',
-            {
+        await axios
+            .put('http://localhost:3001/api/estudiante/asignarApoderado', {
                 Codigo: estudiante.Codigo,
                 CodigoApoderado: estudiante.CodigoApoderado
-            }
-        ).then((response) => {
-            console.log(response.data)
-            cargarDatos();
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Operacion exitosa',
-                detail: response.data.message,
-                life: 3000
-            });
-            hideAsignarDocenteDialog();
-        })
+            })
+            .then((response) => {
+                console.log(response.data);
+                cargarDatos();
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Operacion exitosa',
+                    detail: response.data.message,
+                    life: 3000
+                });
+                hideAsignarDocenteDialog();
+            })
             .catch((error) => {
                 console.error(error.response);
                 toast.current?.show({
@@ -231,30 +232,60 @@ export default function GestionEstudiante() {
             });
     };
 
-    const asignarGrupo = async () => {
-        console.log('GrupoRecibidoParaAsignar:', estudiante);
+    const asignarGrado = async () => {
+        console.log('GradoRecibidoParaAsignar:', estudiante);
 
-        if (estudiante.CodigoGrupo === null) {
+        if (estudiante.CodigoGrado === null) {
             return;
         }
 
-        await axios.put(
-            'http://localhost:3001/api/estudiante/asignarGrado',
-            {
+        await axios
+            .put('http://localhost:3001/api/estudiante/asignarGrado', {
                 Codigo: estudiante.Codigo,
-                CodigoGrupo: estudiante.CodigoGrupo,
-            }
-        ).then((response) => {
-            console.log(response.data)
-            cargarDatos();
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Operacion exitosa',
-                detail: response.data.message,
-                life: 3000
+                CodigoGrado: estudiante.CodigoGrado
+            })
+            .then((response) => {
+                console.log(response.data);
+                cargarDatos();
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Operacion exitosa',
+                    detail: response.data.message,
+                    life: 3000
+                });
+                hideAsignarGradoDialog();
+            })
+            .catch((error) => {
+                console.error(error.response);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Operacion fallida',
+                    detail: 'Ha ocurrido un error al procesar la solicitud',
+                    life: 3000
+                });
             });
-            hideAsignarGrupoDialog();
-        })
+    };
+
+    const matricular = async (estudiante: typeof estudianteVacio) => {
+        console.log('Estudiante a matricular:', estudiante);
+
+        if (estudiante.CodigoGrado === null) {
+            return;
+        }
+
+        await axios
+            .post('http://localhost:3001/api/estudiante/matricular', {
+                Codigo: estudiante.Codigo,
+                CodigoGrado: estudiante.CodigoGrado
+            })
+            .then((response) => {
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Operacion exitosa',
+                    detail: response.data.message,
+                    life: 3000
+                });
+            })
             .catch((error) => {
                 console.error(error.response);
                 toast.current?.show({
@@ -308,18 +339,17 @@ export default function GestionEstudiante() {
         return (
             <div className="flex align-content-center">
                 <div className="flex align-items-center justify-content-center">
-                    <p>{rowData?.Grupo?.Nombre}</p>
+                    <p>{rowData?.Grado?.Nombre}</p>
                 </div>
                 <div className="flex align-items-center justify-content-center">
-                    <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.CodigoApoderado ? 'Reasignar apoderado' : 'Asignar apoderado'} />
+                    <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.CodigoApoderado ? 'Reasignar grado' : 'Asignar grado'} />
                 </div>
             </div>
         );
     };
     const passwordBodyTemplate = (rowData: typeof estudianteVacio) => {
-        return rowData.Persona?.Usuario?.Password;
+        return rowData.Persona?.Usuario?.Email;
     };
-
 
     const apoderadoBodyTemplate = (rowData: typeof estudianteVacio) => {
         let apoderado = rowData.Apoderado?.Persona?.Nombres + ' ' + rowData.Apoderado?.Persona?.ApellidoPaterno + ' ' + rowData.Apoderado?.Persona?.ApellidoPaterno;
@@ -343,7 +373,7 @@ export default function GestionEstudiante() {
 
     const openAsignarGrado = (estudiante: typeof estudianteVacio) => {
         setSubmitted(false);
-        setGrupoDialog(true);
+        setGradoDialog(true);
         setEstudiante(estudiante);
     };
 
@@ -353,9 +383,9 @@ export default function GestionEstudiante() {
         setEstudiante(estudianteVacio);
     };
 
-    const hideAsignarGrupoDialog = () => {
+    const hideAsignarGradoDialog = () => {
         setSubmitted(false);
-        setGrupoDialog(false);
+        setGradoDialog(false);
         setEstudiante(estudianteVacio);
     };
 
@@ -378,6 +408,10 @@ export default function GestionEstudiante() {
         }
         if (name == 'Password') {
             _estudiante.Persona.Usuario.Password = val;
+        }
+
+        if (name == 'Email') {
+            _estudiante.Persona.Usuario.Email = val;
         }
 
         setEstudiante(_estudiante);
@@ -404,20 +438,21 @@ export default function GestionEstudiante() {
         console.log('Docente asignado a', _estudiante);
     };
 
-    const onGrupoSelect = (e: any) => {
+    const onGradoSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
         let _estudiante = { ...estudiante };
 
-        _estudiante['CodigoGrupo'] = val;
+        _estudiante['CodigoGrado'] = val;
 
         setEstudiante(_estudiante);
-        console.log('Grupo asignado a', _estudiante);
+        console.log('Grado asignado a', _estudiante);
     };
 
     const actionBodyTemplate = (rowData: typeof estudianteVacio) => {
         return (
             <>
                 <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editarEstudiante(rowData)} />
+                <Button icon="pi pi-book" rounded severity="help" outlined tooltip="Matricular" className="mr-2" onClick={() => matricular(rowData)} />
             </>
         );
     };
@@ -446,10 +481,10 @@ export default function GestionEstudiante() {
         </>
     );
 
-    const asignarGrupoDialogFooter = (
+    const asignarGradoDialogFooter = (
         <>
-            <Button label="Cancelar" icon="pi pi-times" text onClick={hideAsignarGrupoDialog} />
-            <Button label="Asignar" icon="pi pi-check" text onClick={asignarGrupo} />
+            <Button label="Cancelar" icon="pi pi-times" text onClick={hideAsignarGradoDialog} />
+            <Button label="Asignar" icon="pi pi-check" text onClick={asignarGrado} />
         </>
     );
 
@@ -478,8 +513,8 @@ export default function GestionEstudiante() {
                         {/* <Column header="Codigo" sortable body={codeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column> */}
                         <Column field="Persona.Nombres" header="Nombres Completos" sortable body={nombresBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
-                        <Column field="Grupo.Nombre" header="Grado" sortable body={gradoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
-                        <Column field="Persona.Usuario.Password" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Grado.Nombre" header="Grado" sortable body={gradoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Persona.Usuario.Email" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Apoderado.Codigo" header="Apoderado" sortable body={apoderadoBodyTemplate} headerStyle={{ minWidth: '4rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
@@ -555,19 +590,6 @@ export default function GestionEstudiante() {
                                 {submitted && !estudiante.Persona.DNI && <small className="p-error">Ingrese el DNI del estudiante.</small>}
                             </div>
                             <div className="field col">
-                                <label htmlFor="Persona.Usuario.Password" className="font-bold">
-                                    Password
-                                </label>
-                                <Password
-                                    value={estudiante?.Persona?.Usuario?.Password}
-                                    onChange={(e) => {
-                                        onInputChange(e, 'Password');
-                                    }}
-                                    toggleMask
-                                />
-                                {submitted && !estudiante?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una contraseña para estudiante.</small>}
-                            </div>
-                            <div className="field col">
                                 <label htmlFor="FechaNacimiento" className="font-bold">
                                     Fecha Nacimiento
                                 </label>
@@ -582,6 +604,34 @@ export default function GestionEstudiante() {
                                     className={classNames({ 'p-invalid': submitted && !estudiante.FechaNacimiento })}
                                 />
                                 {submitted && !estudiante.Persona.ApellidoMaterno && <small className="p-error">Seleccione la fecha de nacimiento del estudiante.</small>}
+                            </div>
+                        </div>
+
+                        <div className="form grid">
+                            <div className="field col">
+                                <label htmlFor="Persona.Usuario.Email" className="font-bold">
+                                    Email
+                                </label>
+                                <InputText
+                                    value={estudiante?.Persona?.Usuario?.Email}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Email');
+                                    }}
+                                />
+                                {submitted && !estudiante?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una email para el estudiante.</small>}
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="Persona.Usuario.Password" className="font-bold">
+                                    Contraseña
+                                </label>
+                                <Password
+                                    value={estudiante?.Persona?.Usuario?.Password}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Password');
+                                    }}
+                                    toggleMask
+                                />
+                                {submitted && !estudiante?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una contraseña para el estudiante.</small>}
                             </div>
                         </div>
                     </Dialog>
@@ -608,22 +658,20 @@ export default function GestionEstudiante() {
                             {submitted && !estudiante.Apoderado && <small className="p-invalid">Seleccione un docente para asignarlo</small>}
                         </div>
                     </Dialog>
-                    <Dialog visible={grupoDialog} style={{ width: '450px' }} header="Asignar o reasignar grupo" modal className="p-fluid" footer={asignarGrupoDialogFooter} onHide={hideAsignarGrupoDialog}>
+                    <Dialog visible={gradoDialog} style={{ width: '450px' }} header="Asignar o reasignar grado" modal className="p-fluid" footer={asignarGradoDialogFooter} onHide={hideAsignarGradoDialog}>
                         <div className="field">
-                            <label htmlFor="Estudiante">Grupo</label>
+                            <label htmlFor="Estudiante">Grado</label>
                             <Dropdown
-                                id="grupo"
-                                value={estudiante.CodigoGrupo}
-                                options={grupos}
+                                id="grado"
+                                value={estudiante.CodigoGrado}
+                                options={grados}
                                 optionLabel="Nombre"
                                 optionValue="Codigo"
-                                placeholder="Seleccione un grupo"
-                                onChange={(e) => onGrupoSelect(e)}
+                                placeholder="Seleccione un grado"
+                                onChange={(e) => onGradoSelect(e)}
                                 required
                                 autoFocus
                                 showClear
-                                itemTemplate={(option) => <div>{`${option.Nombre}`}</div>}
-
                             />
                         </div>
                     </Dialog>

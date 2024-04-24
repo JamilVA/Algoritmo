@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     icons: {
         icon: '/favicon.ico'
     }
-};
+}; 
 
 export default function AppLayout({ children }: AppLayoutProps) {
     return <Layout>{children}</Layout>;

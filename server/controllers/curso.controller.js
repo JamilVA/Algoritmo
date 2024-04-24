@@ -35,13 +35,13 @@ const getGrados = async (req, res) => {
 };
 
 const getCursos = async (req, res) => {
-  const { CodigoNivel } = req.query;
+  const { CodigoGrado } = req.query;
 
   const cursos = await Curso.findAll({
     include: [
       {
         model: Grado,
-        where: { CodigoNivel: CodigoNivel },
+        where: { Codigo: CodigoGrado },
         required: true,
       },
       {
@@ -104,13 +104,18 @@ const editarCurso = async (req, res) => {
 
 const asignarDocente = async (req, res) => {
   try {
-    await Curso.update(
+    const curso = await Curso.update(
       { CodigoDocente: req.body.CodigoDocente },
       {
         where: { Codigo: req.body.Codigo },
       }
     );
-    res.json({ message: "Docente asignado correctamente" });
+    console.log('Docente',req.body.CodigoDocente)
+    console.log('Curso',req.body.Codigo)
+
+    console.log('Curso', curso)
+    
+    res.json({ message: "Docente asignado correctamente", curso });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al asignar el docente" });
