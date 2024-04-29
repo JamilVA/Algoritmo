@@ -151,27 +151,23 @@ export default function GestionEstudiante() {
         setSubmitted(true);
 
         if (!estudiante.Codigo) {
-            try {
-                axios
-                    .post('http://localhost:3001/api/estudiante', {
-                        Nombres: _estudiante.Persona.Nombres,
-                        ApellidoPaterno: _estudiante.Persona.ApellidoPaterno,
-                        ApellidoMaterno: _estudiante.Persona.ApellidoMaterno,
-                        DNI: _estudiante.Persona.DNI,
-                        Email: _estudiante.Persona.Usuario.Email,
-                        Password: _estudiante.Persona.Usuario.Password,
-                        FechaNacimiento: _estudiante.FechaNacimiento
-                    })
-                    .then((response) => {
-                        console.log(response.data);
-                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Estudiante creado correctamente', life: 3000 });
-                        cargarDatos();
-                    });
-                setEstudiante(estudianteVacio);
-                hideDialog();
-            } catch (error) {
-                console.error(error);
-            }
+            axios
+                .post('http://localhost:3001/api/estudiante', {
+                    Nombres: _estudiante.Persona.Nombres,
+                    ApellidoPaterno: _estudiante.Persona.ApellidoPaterno,
+                    ApellidoMaterno: _estudiante.Persona.ApellidoMaterno,
+                    DNI: _estudiante.Persona.DNI,
+                    Email: _estudiante.Persona.Usuario.Email,
+                    Password: _estudiante.Persona.Usuario.Password,
+                    FechaNacimiento: _estudiante.FechaNacimiento
+                })
+                .then((response) => {
+                    console.log(response.data);
+                    toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Estudiante creado correctamente', life: 3000 });
+                    cargarDatos();
+                });
+            setEstudiante(estudianteVacio);
+            hideDialog();
         } else {
             try {
                 axios
@@ -661,18 +657,7 @@ export default function GestionEstudiante() {
                     <Dialog visible={gradoDialog} style={{ width: '450px' }} header="Asignar o reasignar grado" modal className="p-fluid" footer={asignarGradoDialogFooter} onHide={hideAsignarGradoDialog}>
                         <div className="field">
                             <label htmlFor="Estudiante">Grado</label>
-                            <Dropdown
-                                id="grado"
-                                value={estudiante.CodigoGrado}
-                                options={grados}
-                                optionLabel="Nombre"
-                                optionValue="Codigo"
-                                placeholder="Seleccione un grado"
-                                onChange={(e) => onGradoSelect(e)}
-                                required
-                                autoFocus
-                                showClear
-                            />
+                            <Dropdown id="grado" value={estudiante.CodigoGrado} options={grados} optionLabel="Nombre" optionValue="Codigo" placeholder="Seleccione un grado" onChange={(e) => onGradoSelect(e)} required autoFocus showClear />
                         </div>
                     </Dialog>
                 </div>

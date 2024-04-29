@@ -66,7 +66,7 @@ const GestionCursos = () => {
     const [docentes, setDocentes] = useState<(typeof docenteVacio)[]>([]);
     const [cursos, setCursos] = useState<(typeof cursoVacio)[]>([]);
     const [nivel, setNivel] = useState(nivelVacio);
-    const [grado, setGrado] = useState(nivelVacio);
+    const [grado, setGrado] = useState(gradoVacio);
     const [curso, setCurso] = useState(cursoVacio);
     const [cursoDialog, setCursoDialog] = useState(false);
     const [asignarDocenteDialog, setAsignarDocenteDialog] = useState(false);

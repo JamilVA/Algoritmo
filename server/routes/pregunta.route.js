@@ -10,7 +10,7 @@ router.get('/cargarPreguntas', cargarPreguntas);
 
 router.post('/', crearTema);
 
-router.post('/', crearPregunta);
+router.post('/crearPregunta', crearPregunta);
 
 router.put('/', editarTema);
 

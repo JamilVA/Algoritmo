@@ -9,7 +9,6 @@ const Pregunta = sequelize.define('Pregunta', {
     },
     Descripcion: DataTypes.TEXT,
     RutaImagen: DataTypes.STRING(60),
-    
 })
 
 module.exports = Pregunta

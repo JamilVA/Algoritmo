@@ -1,5 +1,7 @@
 const { Curso, Tema, Pregunta, Respuesta } = require("../config/relations");
 
+const { sequelize } = require("../config/database");
+
 const getTemas = async (req, res) => {
   try {
     const { CodigoCurso } = req.query;
@@ -25,7 +27,7 @@ const cargarPreguntas = async (req, res) => {
   try {
     const { CodigoTema } = req.query;
 
-    const preguntas = Pregunta.findAll({
+    const preguntas = await Pregunta.findAll({
       include: [
         {
           model: Respuesta,
@@ -38,6 +40,8 @@ const cargarPreguntas = async (req, res) => {
       ok: true,
       preguntas,
     });
+
+    console.log(preguntas);
   } catch (error) {
     console.log(error);
   }
@@ -62,49 +66,43 @@ const crearTema = async (req, res) => {
 
 const crearPregunta = async (req, res) => {
   try {
-    const { CodigoPregunta } = req.body;
+    const { pregunta } = req.body;
     const { respuestas } = req.body;
-    let pregunta;
+    let preguntaNew;
 
-    if (CodigoPregunta != 0) {
-      pregunta = await Pregunta.update(
+    if (pregunta.Codigo != 0) {
+      preguntaNew = await Pregunta.update(
         {
-          Descripcion: req.body.Descripcion,
+          Descripcion: pregunta.Descripcion,
+          CodigoTema: pregunta.CodigoTema,
         },
         {
           where: {
-            Codigo: req.body.Codigo,
+            Codigo: pregunta.Codigo,
           },
         }
       );
     } else {
-      pregunta = await Pregunta.create({
+      preguntaNew = await Pregunta.create({
         Codigo: null,
-        Descripcion: req.body.Descripcion,
+        Descripcion: pregunta.Descripcion,
         CodigoTema: req.body.CodigoTema,
       });
-
-      console.log(respuestas)
     }
+    const listaRespuestas = respuestas.map((respuesta) => ({
+      ...respuesta,
+      CodigoPregunta: preguntaNew.Codigo,
+    }));
 
-    // const actividadE = await ActividadEstudiante.findOne({
-    //   where: {
-    //     CodigoActividad: req.body.CodigoActividad,
-    //     CodigoEstudiante: req.body.CodigoEstudiante,
-    //   },
-    // });
-
-    // let actividadEstudiante;
-
-    // if (!actividadE) {
-    //   actividadEstudiante = await ActividadEstudiante.create(req.body);
-    // } else {
-    //   actividadE.RutaTarea = req.body.RutaTarea;
-    //   actividadEstudiante = actividadE.save();
-    // }
-
+    await sequelize.transaction(async (t) => {
+      await Respuesta.bulkCreate(listaRespuestas, {
+        transaction: t,
+      });
+    });
+    console.log("Resp: ", listaRespuestas);
     res.json({
-      pregunta,
+      preguntaNew,
+      listaRespuestas,
       message: "Pregunta Creada Correctamente",
     });
   } catch (error) {
@@ -140,5 +138,5 @@ module.exports = {
   crearTema,
   editarTema,
   cargarPreguntas,
-  crearPregunta
+  crearPregunta,
 };

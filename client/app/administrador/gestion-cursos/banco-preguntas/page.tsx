@@ -52,7 +52,8 @@ export default function BancoPreguntas() {
         Codigo: 0,
         Descripcion: '',
         RutaImagen: '',
-        CodigoTema: 0
+        CodigoTema: 0,
+        Respuesta: []
     };
 
     const respuestaVacia = {
@@ -69,7 +70,7 @@ export default function BancoPreguntas() {
     const [respuesta2, setRespuesta2] = useState(respuestaVacia);
     const [respuesta3, setRespuesta3] = useState(respuestaVacia);
     const [respuesta4, setRespuesta4] = useState(respuestaVacia);
-    
+
     const [curso, setCurso] = useState(cursoVacio);
     const [tema, setTema] = useState(temaVacio);
     const [pregunta, setPregunta] = useState(preguntaVacia);
@@ -111,9 +112,7 @@ export default function BancoPreguntas() {
             });
             const { preguntas } = data;
             console.log('Preguntas', data);
-            if(preguntas!.length()>0){
-                setPreguntas(preguntas);
-            }
+            setPreguntas(preguntas);
         } catch (error) {
             console.error(error);
         }
@@ -126,7 +125,7 @@ export default function BancoPreguntas() {
     };
 
     const openNewPregunta = () => {
-        setPregunta(preguntaVacia)
+        setPregunta(preguntaVacia);
         setNewPreguntaDialog(true);
     };
 
@@ -141,12 +140,39 @@ export default function BancoPreguntas() {
 
     const exportarCursos = () => {};
 
-    const guardarPregunta = () => {
-        let _pregunta = {...pregunta};
-        
-        console.log('Crear pregunta', pregunta)
-        console.log('Add Respuestas', respuesta1, respuesta2, respuesta3, respuesta4)
-    }
+    const guardarPregunta = async () => {
+        let _pregunta = { ...pregunta };
+
+        console.log('Crear pregunta', pregunta);
+        console.log('Add Respuestas', respuesta1, respuesta2, respuesta3, respuesta4);
+
+        await axios
+            .post('http://localhost:3001/api/pregunta/crearPregunta', {
+                CodigoTema: tema.Codigo,
+                pregunta: _pregunta,
+                respuestas: [respuesta1, respuesta2, respuesta3, respuesta4]
+            })
+            .then((response) => {
+                console.log(response.data);
+                cargarPreguntas(tema.Codigo);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Operacion exitosa',
+                    detail: response.data.message,
+                    life: 3000
+                });
+                hidePreguntasDialog();
+            })
+            .catch((error) => {
+                console.error(error.response);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Operacion fallida',
+                    detail: 'Ha ocurrido un error al procesar la solicitud',
+                    life: 3000
+                });
+            });
+    };
 
     const guardarTema = () => {
         let _tema = { ...tema };
@@ -213,7 +239,7 @@ export default function BancoPreguntas() {
 
     const verPreguntas = (tema: typeof temaVacio) => {
         cargarPreguntas(tema.Codigo);
-        setTema({ ...tema });
+        setTema(tema);
         setPreguntasDialog(true);
     };
 
@@ -239,19 +265,19 @@ export default function BancoPreguntas() {
 
     const onRespuestaChange = (e: React.ChangeEvent<HTMLInputElement>, respuesta: number) => {
         const val = e.target.value || '';
-    
+
         switch (respuesta) {
             case 1:
-                setRespuesta1({ ...respuesta1, Valor: val });
+                setRespuesta1({ ...respuesta1, Valor: val, Tipo: true });
                 break;
             case 2:
-                setRespuesta2({ ...respuesta2, Valor: val });
+                setRespuesta2({ ...respuesta2, Valor: val, Tipo: false  });
                 break;
             case 3:
-                setRespuesta3({ ...respuesta3, Valor: val });
+                setRespuesta3({ ...respuesta3, Valor: val, Tipo: false  });
                 break;
             case 4:
-                setRespuesta4({ ...respuesta4, Valor: val });
+                setRespuesta4({ ...respuesta4, Valor: val, Tipo: false  });
                 break;
             default:
                 break;
@@ -305,7 +331,19 @@ export default function BancoPreguntas() {
 
     const newPreguntaDialogFooter = (
         <>
-            <Button label="Cancelar" icon="pi pi-times" text onClick={()=>{setNewPreguntaDialog(false); setPregunta(preguntaVacia); setRespuesta1(respuestaVacia); setRespuesta2(respuestaVacia); setRespuesta3(respuestaVacia); setRespuesta4(respuestaVacia)}} />
+            <Button
+                label="Cancelar"
+                icon="pi pi-times"
+                text
+                onClick={() => {
+                    setNewPreguntaDialog(false);
+                    setPregunta(preguntaVacia);
+                    setRespuesta1(respuestaVacia);
+                    setRespuesta2(respuestaVacia);
+                    setRespuesta3(respuestaVacia);
+                    setRespuesta4(respuestaVacia);
+                }}
+            />
             <Button label="Guardar" icon="pi pi-check" text onClick={guardarPregunta} />
         </>
     );
@@ -341,13 +379,15 @@ export default function BancoPreguntas() {
     };
 
     const filtrarRespuestas = (Respuestas: (typeof respuestaVacia)[], Codigo: number) => {
-        return Respuestas.filter((s) => s.CodigoPregunta === Codigo);
+        console.log(Respuestas)
+        console.log(Respuestas.filter((s) => s.CodigoPregunta == Codigo))
+        return Respuestas.filter((s) => s.CodigoPregunta == Codigo);
     };
 
     const respuestasBodyTemplate = (rowData: typeof preguntaVacia) => {
         return (
             <React.Fragment>
-                <DataTable ref={dt} value={filtrarRespuestas(respuestas, rowData.Codigo)} header={pregunta?.Descripcion ?? ''} dataKey="Codigo">
+                <DataTable ref={dt} value={filtrarRespuestas(rowData.Respuesta, rowData.Codigo)} header={rowData?.Descripcion ?? ''} dataKey="Codigo" emptyMessage="Este pregunta no tiene respuestas registradas.">
                     <Column headerStyle={{ display: 'none' }} body={respuestaBodyTemplate} style={{ minWidth: '1rem' }}></Column>
                     <Column headerStyle={{ display: 'none' }} body={correctaBodyTemplate} style={{ minWidth: '8rem' }}></Column>
                 </DataTable>
@@ -367,7 +407,7 @@ export default function BancoPreguntas() {
                     <DataTable
                         ref={dt}
                         value={temas}
-                        dataKey="id"
+                        dataKey="Codigo"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
@@ -404,7 +444,18 @@ export default function BancoPreguntas() {
                         </div>
                     </Dialog>
 
-                    <Dialog visible={newPreguntaDialog} style={{ width: '600px' }} header="Nueva Pregunta" modal className="p-fluid" footer={newPreguntaDialogFooter} onHide={() =>{setNewPreguntaDialog(false); setPregunta(preguntaVacia)}}>
+                    <Dialog
+                        visible={newPreguntaDialog}
+                        style={{ width: '600px' }}
+                        header="Nueva Pregunta"
+                        modal
+                        className="p-fluid"
+                        footer={newPreguntaDialogFooter}
+                        onHide={() => {
+                            setNewPreguntaDialog(false);
+                            setPregunta(preguntaVacia);
+                        }}
+                    >
                         <div className="field">
                             <label htmlFor="Descripcion" className="font-bold">
                                 Pregunta:
@@ -454,7 +505,8 @@ export default function BancoPreguntas() {
                                 maxLength={100}
                                 className={classNames({ 'p-invalid': submitted && !respuesta2.Valor })}
                             />
-                            <br /><br />
+                            <br />
+                            <br />
                             <InputText
                                 id="respuesta3.Valor"
                                 value={respuesta3.Valor ?? ''}
@@ -466,7 +518,8 @@ export default function BancoPreguntas() {
                                 maxLength={100}
                                 className={classNames({ 'p-invalid': submitted && !respuesta3.Valor })}
                             />
-                            <br /><br />
+                            <br />
+                            <br />
                             <InputText
                                 id="respuesta4.Valor"
                                 value={respuesta4.Valor ?? ''}
@@ -479,7 +532,6 @@ export default function BancoPreguntas() {
                                 className={classNames({ 'p-invalid': submitted && !respuesta4.Valor })}
                             />
                         </div>
-                        
                     </Dialog>
 
                     <Dialog visible={preguntasDialog} style={{ width: '800px' }} header={'Lista de preguntas del tema'} modal className="p-fluid" onHide={hidePreguntasDialog}>
