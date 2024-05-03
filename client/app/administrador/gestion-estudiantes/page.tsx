@@ -448,7 +448,7 @@ export default function GestionEstudiante() {
         return (
             <>
                 <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editarEstudiante(rowData)} />
-                <Button icon="pi pi-book" rounded severity="help" outlined tooltip="Matricular" className="mr-2" onClick={() => matricular(rowData)} />
+                <Button icon="pi pi-user-plus" rounded severity="help" outlined tooltip="Matricular" className="mr-2" onClick={() => matricular(rowData)} />
             </>
         );
     };

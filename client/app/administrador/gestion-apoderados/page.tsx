@@ -17,7 +17,6 @@ import { Demo } from '@/types';
 import axios from 'axios';
 import { Password } from 'primereact/password';
 
-
 export default function GestionApoderado() {
     const apoderadoVacio = {
         Codigo: 0,
@@ -30,8 +29,9 @@ export default function GestionApoderado() {
             ApellidoPaterno: '',
             ApellidoMaterno: '',
             DNI: '',
-            Usuario:{
-                Password: ""
+            Usuario: {
+                Email:'',
+                Password: ''
             }
         }
     };
@@ -73,7 +73,7 @@ export default function GestionApoderado() {
     };
 
     const guardarApoderado = () => {
-        let _apoderado = { ...apoderado};
+        let _apoderado = { ...apoderado };
         console.log('Apoderado a guardar:', _apoderado);
 
         setSubmitted(true);
@@ -89,6 +89,7 @@ export default function GestionApoderado() {
                         Telefono: _apoderado.Telefono,
                         DNI: _apoderado.Persona.DNI,
                         Password: _apoderado.Persona.Usuario.Password,
+                        Email: _apoderado.Persona.Usuario.Email
                     })
                     .then((response) => {
                         console.log(response.data);
@@ -108,7 +109,8 @@ export default function GestionApoderado() {
             }
         } else {
             try {
-                axios.put('http://localhost:3001/api/apoderado', {
+                axios
+                    .put('http://localhost:3001/api/apoderado', {
                         Codigo: _apoderado.Codigo,
                         CodigoPersona: _apoderado.CodigoPersona,
                         Nombres: _apoderado.Persona.Nombres,
@@ -180,13 +182,13 @@ export default function GestionApoderado() {
     const direccionBodyTemplate = (rowData: typeof apoderadoVacio) => {
         return rowData.Direccion;
     };
-    
+
     const telefonoBodyTemplate = (rowData: typeof apoderadoVacio) => {
         return rowData.Telefono;
     };
 
     const passwordBodyTemplate = (rowData: typeof apoderadoVacio) => {
-        return rowData.Persona?.Usuario?.Password;
+        return rowData.Persona?.Usuario?.Email;
     };
 
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
@@ -212,13 +214,15 @@ export default function GestionApoderado() {
         if (name == 'Password') {
             _apoderado.Persona.Usuario.Password = val;
         }
+        if (name == 'Email') {
+            _apoderado.Persona.Usuario.Email = val;
+        }
         if (name == 'Telefono') {
             _apoderado.Telefono = val;
         }
 
         setApoderado(_apoderado);
     };
-
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -263,7 +267,7 @@ export default function GestionApoderado() {
                         <Column field="Persona.Nombres" header="Nombres Completos" sortable body={nombresBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Direccion" header="Direccion" sortable body={direccionBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
-                        <Column field="Persona.Usuario.Password" header="Password" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Persona.Usuario.Email" header="Email" sortable body={passwordBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Telefono" header="Telefono" sortable body={telefonoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
@@ -311,7 +315,7 @@ export default function GestionApoderado() {
                                     id="Persona.ApellidoMaterno"
                                     value={apoderado.Persona.ApellidoMaterno}
                                     onChange={(e) => {
-                                        onInputChange(e, 'Materno');
+                                        onInputChange(e, 'Email');
                                     }}
                                     required
                                     maxLength={45}
@@ -321,6 +325,35 @@ export default function GestionApoderado() {
                             </div>
                         </div>
 
+                        <div className="form grid">
+                            <div className="field col">
+                                <label htmlFor="Email" className="font-bold">
+                                    Email
+                                </label>
+                                <InputText
+                                    id="Email"
+                                    value={apoderado?.Persona?.Usuario?.Email}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Email');
+                                    }}
+                                    required
+                                    maxLength={45}
+                                />
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="Persona.Usuario.Password" className="font-bold">
+                                    Password
+                                </label>
+                                <Password
+                                    value={apoderado?.Persona?.Usuario?.Password}
+                                    onChange={(e) => {
+                                        onInputChange(e, 'Password');
+                                    }}
+                                    toggleMask
+                                />
+                                {submitted && !apoderado?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una contraseña para apoderado.</small>}
+                            </div>
+                        </div>
                         <div className="form grid">
                             <div className="field col">
                                 <label htmlFor="Persona.DNI" className="font-bold">
@@ -339,17 +372,6 @@ export default function GestionApoderado() {
                                 {submitted && !apoderado.Persona.DNI && <small className="p-error">Ingrese el DNI del apoderado.</small>}
                             </div>
                             <div className="field col">
-                                <label htmlFor="Persona.Usuario.Password" className="font-bold">
-                                    Password
-                                </label>
-                                <Password value={apoderado?.Persona?.Usuario?.Password} onChange={(e) => {
-                                        onInputChange(e, 'Password');
-                                    }} toggleMask />
-                                {submitted && !apoderado?.Persona?.Usuario?.Password && <small className="p-error">Ingrese una contraseña para apoderado.</small>}
-                            </div>
-                        </div>
-                        <div className="form grid">
-                            <div className="field col">
                                 <label htmlFor="Telefono" className="font-bold">
                                     Telefono
                                 </label>
@@ -363,7 +385,7 @@ export default function GestionApoderado() {
                                     maxLength={9}
                                     className={classNames({ 'p-invalid': submitted && !apoderado.Telefono })}
                                 />
-                                {submitted && !apoderado.Telefono && <small className="p-error">Ingrese el telefono del docente.</small>}
+                                {submitted && !apoderado.Telefono && <small className="p-error">Ingrese el telefono del apoderado.</small>}
                             </div>
                             <div className="field col">
                                 <label htmlFor="Direccion" className="font-bold">
@@ -379,7 +401,7 @@ export default function GestionApoderado() {
                                     maxLength={45}
                                     className={classNames({ 'p-invalid': submitted && !apoderado.Direccion })}
                                 />
-                                {submitted && !apoderado.Direccion && <small className="p-error">Ingrese la direccion del docente.</small>}
+                                {submitted && !apoderado.Direccion && <small className="p-error">Ingrese la direccion del apoderado.</small>}
                             </div>
                         </div>
                     </Dialog>

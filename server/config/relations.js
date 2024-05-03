@@ -20,7 +20,7 @@ const CursoEstudiante = require('../models/cursoestudiante.model');
 const EstudianteExamenDiario = require('../models/estudianteexamendiario.model');
 const PreguntaExamenDiarioEstudiante = require('../models/preguntaexamendiarioestudiante.model');
 const Sesion = require('../models/sesion.model');
-const ExamenDiario = require("../models/examendiario.model");
+const ExamenDiario = require("../models/examenDiario.model");
 
 
 Persona.hasOne(Usuario, { foreignKey: "CodigoPersona" });

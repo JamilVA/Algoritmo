@@ -161,7 +161,12 @@ export default function BancoPreguntas() {
                     detail: response.data.message,
                     life: 3000
                 });
-                hidePreguntasDialog();
+                setNewPreguntaDialog(false);
+                setPregunta(preguntaVacia);
+                setRespuesta1(respuestaVacia)
+                setRespuesta2(respuestaVacia)
+                setRespuesta3(respuestaVacia)
+                setRespuesta4(respuestaVacia)
             })
             .catch((error) => {
                 console.error(error.response);
@@ -271,13 +276,13 @@ export default function BancoPreguntas() {
                 setRespuesta1({ ...respuesta1, Valor: val, Tipo: true });
                 break;
             case 2:
-                setRespuesta2({ ...respuesta2, Valor: val, Tipo: false  });
+                setRespuesta2({ ...respuesta2, Valor: val, Tipo: false });
                 break;
             case 3:
-                setRespuesta3({ ...respuesta3, Valor: val, Tipo: false  });
+                setRespuesta3({ ...respuesta3, Valor: val, Tipo: false });
                 break;
             case 4:
-                setRespuesta4({ ...respuesta4, Valor: val, Tipo: false  });
+                setRespuesta4({ ...respuesta4, Valor: val, Tipo: false });
                 break;
             default:
                 break;
@@ -379,17 +384,18 @@ export default function BancoPreguntas() {
     };
 
     const filtrarRespuestas = (Respuestas: (typeof respuestaVacia)[], Codigo: number) => {
-        console.log(Respuestas)
-        console.log(Respuestas.filter((s) => s.CodigoPregunta == Codigo))
+        console.log(Respuestas);
+        console.log(Respuestas.filter((s) => s.CodigoPregunta == Codigo));
         return Respuestas.filter((s) => s.CodigoPregunta == Codigo);
     };
 
     const respuestasBodyTemplate = (rowData: typeof preguntaVacia) => {
+        
         return (
             <React.Fragment>
                 <DataTable ref={dt} value={filtrarRespuestas(rowData.Respuesta, rowData.Codigo)} header={rowData?.Descripcion ?? ''} dataKey="Codigo" emptyMessage="Este pregunta no tiene respuestas registradas.">
-                    <Column headerStyle={{ display: 'none' }} body={respuestaBodyTemplate} style={{ minWidth: '1rem' }}></Column>
-                    <Column headerStyle={{ display: 'none' }} body={correctaBodyTemplate} style={{ minWidth: '8rem' }}></Column>
+                    <Column headerStyle={{ display: 'none' }} body={respuestaBodyTemplate} style={{ minWidth: '8rem' }}></Column>
+                    <Column headerStyle={{ display: 'none' }} body={correctaBodyTemplate} style={{ minWidth: '2rem' }}></Column>
                 </DataTable>
                 {/* <Button tooltip="Nueva Sesion" icon="pi pi-plus" className="p-button-success p-button-sm m-2" style={{ padding: '0.75em' }} onClick={() => openNew(rowData)} outlined /> */}
             </React.Fragment>
@@ -541,6 +547,7 @@ export default function BancoPreguntas() {
                             ref={dt}
                             value={preguntas}
                             dataKey="Codigo"
+                            header={tema?.Descripcion}
                             paginator
                             rows={10}
                             rowsPerPageOptions={[5, 10, 25]}
@@ -551,7 +558,7 @@ export default function BancoPreguntas() {
                             emptyMessage="Este tema aún no tiene preguntas registradas."
                             responsiveLayout="scroll"
                         >
-                            <Column body={respuestasBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
+                            <Column body={respuestasBodyTemplate} headerStyle={{ display: 'none' }}></Column>
                         </DataTable>
                     </Dialog>
                 </div>
