@@ -4,7 +4,12 @@ const {
   Tema,
   Curso,
   Grado,
+  Pregunta,
+  Respuesta,
+  PreguntaExamenDiarioEstudiante,
 } = require("../config/relations");
+
+const { sequelize } = require("../config/database");
 
 const getExamenes = async (req, res) => {
   try {
@@ -44,6 +49,37 @@ const getCursos = async (req, res) => {
   }
 };
 
+const getExamen = async (req, res) => {
+  try {
+    const { CodigoExamen } = req.query;
+
+    const examen = await ExamenDiario.findOne({
+      where: { Codigo: CodigoExamen },
+    });
+
+    // const preguntas = await Pregunta.findAll({
+    //   where: { CodigoTema: examenDiario.CodigoTema },
+    // });
+
+    const preguntas = await Pregunta.findAll({
+      include: [
+        {
+          model: Respuesta,
+          order: sequelize.literal("RAND()"),
+        },
+      ],
+      where: { CodigoTema: examen.CodigoTema },
+      order: sequelize.literal("RAND()"), // Orden aleatorio
+      limit: 10, // Limitar a 10 registros
+    });
+
+    res.json({ message: "Examen cargado correctamente", examen, preguntas });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar el examen" });
+  }
+};
+
 const getTemas = async (req, res) => {
   try {
     const { CodigoCurso } = req.query;
@@ -77,30 +113,42 @@ const crearExamen = async (req, res) => {
   }
 };
 
-const asignarDocente = async (req, res) => {
+const guardarExamen = async (req, res) => {
   try {
-    const curso = await Curso.update(
-      { CodigoDocente: req.body.CodigoDocente },
-      {
-        where: { Codigo: req.body.Codigo },
-      }
+    const { estudianteExamenDiario, preguntaEstudianteExamenDiario } = req.body;
+
+    console.log(
+      "Examen GGG",
+      estudianteExamenDiario,
+      preguntaEstudianteExamenDiario
     );
-    console.log("Docente", req.body.CodigoDocente);
-    console.log("Curso", req.body.Codigo);
 
-    console.log("Curso", curso);
+    await sequelize.transaction(async (t) => {
+      await EstudianteExamenDiario.create(estudianteExamenDiario, {
+        transaction: t,
+      });
 
-    res.json({ message: "Docente asignado correctamente", curso });
+      await PreguntaExamenDiarioEstudiante.bulkCreate(
+        preguntaEstudianteExamenDiario,
+        {
+          transaction: t,
+        }
+      );
+    });
+
+
+    res.json({ message: "Examen guardado correctamente" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error al asignar el docente" });
+    res.status(500).json({ error: "Error al guardar el examen" });
   }
 };
 
 module.exports = {
   getExamenes,
+  getExamen,
   getCursos,
   getTemas,
   crearExamen,
-  asignarDocente,
+  guardarExamen,
 };

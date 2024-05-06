@@ -16,9 +16,9 @@ const Respuesta = require("../models/respuesta.model");
 
 
 const Asistencia = require('../models/asistencia.model');
-const CursoEstudiante = require('../models/cursoestudiante.model');
+const CursoEstudiante = require('../models/cursoEstudiante.model');
 const EstudianteExamenDiario = require('../models/estudianteexamendiario.model');
-const PreguntaExamenDiarioEstudiante = require('../models/preguntaexamendiarioestudiante.model');
+const PreguntaExamenDiarioEstudiante = require('../models/preguntaExamenDiarioEstudiante.model');
 const Sesion = require('../models/sesion.model');
 const ExamenDiario = require("../models/examenDiario.model");
 
@@ -89,6 +89,11 @@ EstudianteExamenDiario.belongsTo(ExamenDiario, { foreignKey: "CodigoExamenDiario
 Estudiante.hasMany(EstudianteExamenDiario, { foreignKey: "CodigoEstudiante" });
 EstudianteExamenDiario.belongsTo(Estudiante, { foreignKey: "CodigoEstudiante" });
 
+EstudianteExamenDiario.hasMany(PreguntaExamenDiarioEstudiante, { foreignKey: "CodigoExamenDiario" });
+PreguntaExamenDiarioEstudiante.belongsTo(EstudianteExamenDiario, { foreignKey: "CodigoExamenDiario" });
+EstudianteExamenDiario.hasMany(PreguntaExamenDiarioEstudiante, { foreignKey: "CodigoEstudiante" });
+PreguntaExamenDiarioEstudiante.belongsTo(EstudianteExamenDiario, { foreignKey: "CodigoEstudiante" });
+
 module.exports = {
   Persona,
   Usuario,
@@ -97,6 +102,7 @@ module.exports = {
   Estudiante,
   CursoEstudiante,
   EstudianteExamenDiario,
+  PreguntaExamenDiarioEstudiante,
   ExamenDiario,
   Docente,
   Pago,

@@ -14,19 +14,44 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
+import { Demo } from '@/types';
 import axios from 'axios';
 
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { Calendar } from 'primereact/calendar';
+import Link from 'next/link';
 
-export default function BancoPreguntas() {
-    const searchParams = useSearchParams();
-    const codigoCurso = searchParams.get('codigoCurso');
+const GestionCursos = () => {
+    const router = useRouter();
 
     const cursoVacio = {
         Codigo: 0,
         CodigoGrado: 0,
         CodigoDocente: 0,
         Nombre: '',
+        Grado: {
+            Codigo: 0,
+            Nombre: ''
+        },
+        Docente: {
+            Codigo: 0,
+            Persona: {
+                Nombres: '',
+                ApellidoPaterno: '',
+                ApellidoMaterno: ''
+            }
+        }
+    };
+
+    const nivelVacio = {
+        Codigo: 0,
+        Nombre: ''
+    };
+
+    const gradoVacio = {
+        Codigo: 0,
+        Nombre: '',
+        CodigoNivel: 0
     };
 
     const temaVacio = {
@@ -35,140 +60,137 @@ export default function BancoPreguntas() {
         CodigoCurso: 0
     };
 
-    const preguntaVacia = {
+    const examenDiarioVacio = {
         Codigo: 0,
-        Descripcion: '',
-        RutaImagen: '',
+        Fecha: new Date(),
+        HoraInicio: '08:00',
+        HoraFin: '09:00',
+        Duracion: 0,
         CodigoTema: 0
     };
 
-    const respuestaVacia = {
-        Codigo: 0,
-        Tipo: false,
-        Valor: '',
-        CodigoPregunta: 0
-    };
-
-    const [temas, setTemas] = useState<(typeof temaVacio)[]>([]);
-    const [preguntas, setPreguntas] = useState<(typeof preguntaVacia)[]>([]);
-    const [respuestas, setRespuestas] = useState<(typeof respuestaVacia)[]>([]);
-
+    const [grado, setGrado] = useState(gradoVacio);
     const [curso, setCurso] = useState(cursoVacio);
-    const [tema, setTema] = useState(temaVacio);
-    const [pregunta, setPregunta] = useState(preguntaVacia);
-    const [respuesta, setRespuesta] = useState(respuestaVacia);
-    const [temaDialog, setTemaDialog] = useState(false);
 
-    const [submitted, setSubmitted] = useState(false);
+    const [cursos, setCursos] = useState<(typeof cursoVacio)[]>([]);
+    const [temas, setTemas] = useState<(typeof temaVacio)[]>([]);
+    const [examenes, setExamenes] = useState<(typeof examenDiarioVacio)[]>([]);
+
+    const [examen, setExamen] = useState(examenDiarioVacio);
 
     const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
+    const user = {
+        Codigo: 1,
+        FechaNacimiento: new Date(),
+        CodigoPersona: 1,
+        CodigoGrado: 4,
+        CodigoApoderado: 0,
+        TipoUsuario: 3
+    };
+
+    const [session, setSession] = useState(user);
+
     useEffect(() => {
-        console.log('x');
-        cargarPreguntas(codigoCurso);
+        cargarExamenes();
     }, []);
 
-    const cargarPreguntas = async (CodigoCurso: any) => {
-        console.log('Hola');
+    const cargarExamenes = async () => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/pregunta', {
-                params: { CodigoCurso }
+            const { data } = await axios.get('http://localhost:3001/api/examen', {
+                params: { CodigoGrado: session.CodigoGrado }
             });
-            const { curso, temas } = data;
-            console.log('Hola', data);
-            setCurso(curso);
+            const { examenes } = data;
+            console.log('Hola', examenes);
+            setExamenes(examenes);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const cargarCursos = async () => {
+        try {
+            const { data } = await axios.get('http://localhost:3001/api/examen/cursos', {
+                params: { CodigoGrado: session.CodigoGrado }
+            });
+            const { cursos } = data;
+            console.log('Hola', cursos);
+            setCursos(cursos);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const cargarTemas = async (CodigoCurso: number) => {
+        console.log('Codigo Curso temas', CodigoCurso);
+        try {
+            const { data } = await axios.get('http://localhost:3001/api/examen/temas', {
+                params: { CodigoCurso: CodigoCurso }
+            });
+            const { temas } = data;
+            console.log('Hola', temas);
             setTemas(temas);
         } catch (error) {
             console.error(error);
         }
     };
 
-    const funcionPrueba = () => {
-
-    }
-   
-    const openNew = () => {
-        setTema(temaVacio);
-        setSubmitted(false);
-        setTemaDialog(true);
-    };
-
-    const hideDialog = () => {
-        setSubmitted(false);
-        setTemaDialog(false);
-    };
-
-    const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const val = (e.target && e.target.value) || '';
-
-        let _tema = { ...tema };
-
-        _tema['Descripcion'] = val;
-
-        setTema(_tema);
-    };
-
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h4 className="m-0">Lista de examenes</h4>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <div className="field col">
-                    {/* <Dropdown
-                        value={nivel.Codigo}
-                        options={niveles}
-                        optionLabel="Nombre"
-                        optionValue="Codigo"
-                        name="Prerequisito"
-                        onChange={(e) => {
-                            onDropdownChange(e);
-                        }}
-                        placeholder="Seleccione un nivel"
-                        id="Prerequisito"
-                        required
-                    /> */}
-                </div>{' '}
-            </span>
+            <h4 className="m-0">Examenes pendientes</h4>
+            <span className="block mt-2 md:mt-0 p-input-icon-left"></span>
         </div>
     );
 
-    const leftToolbarTemplate = () => {
-        return (
-            <React.Fragment>
-                <div className="my-2">
-                    <Button label="New" icon="pi pi-plus" severity="success" className=" mr-2" onClick={openNew} />
-                </div>
-            </React.Fragment>
-        );
+    const temaBodyTemplate = (rowData: any) => {
+        return rowData?.Tema?.Descripcion;
     };
 
-    const rightToolbarTemplate = () => {
-        return (
-            <React.Fragment>
-                <Button label="Export" icon="pi pi-upload" severity="help" onClick={funcionPrueba} />
-            </React.Fragment>
-        );
+    const cursoBodyTemplate = (rowData: any) => {
+        return rowData?.Tema?.Curso?.Nombre;
     };
 
-    const temaDialogFooter = (
-        <>
-            <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
-            <Button label="Guardar" icon="pi pi-check" text onClick={funcionPrueba} />
-        </>
-    );
-
-    const nombreCursoBodyTemplate = (rowData: typeof temaVacio) => {
-        return rowData.Descripcion;
+    const fechaBodyTemplate = (rowData: any) => {
+        return formatDate(new Date(rowData?.Fecha));
     };
 
+    const horaBodyTemplate = (rowData: any) => {
+        return rowData?.HoraInicio.substring(0, 5) + ' - ' + rowData?.HoraFin.substring(0, 5);
+    };
 
-    const actionBodyTemplate = (rowData: typeof temaVacio) => {
+    const duracionBodyTemplate = (rowData: any) => {
+        return rowData?.Duracion + ' min';
+    };
+
+    const formatDate = (value: Date) => {
+        return value.toLocaleString('es-PE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+
+    const actionBodyTemplate = (rowData: any) => {
         return (
-            <>
-                <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => funcionPrueba()} />
-                <Button icon="pi pi-list" rounded severity="info" outlined tooltip="Ver preguntas" className="mr-2" onClick={() => funcionPrueba()} />
-            </>
+            <Link
+                href={{
+                    pathname: '/estudiante/examenes/examen',
+                    query: {
+                        Z: rowData.Codigo
+                    }
+                }}
+            >
+                <Button
+                    icon="pi pi-external-link"
+                    rounded
+                    severity="success"
+                    outlined
+                    tooltip="Abrir"
+                    className="mr-2"
+                />
+            </Link>
         );
     };
 
@@ -177,50 +199,33 @@ export default function BancoPreguntas() {
             <div className="col-12">
                 <div className="card">
                     <Toast ref={toast} />
-                    <h1>Curso: {curso?.Nombre}</h1>
-                    <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-
                     <DataTable
                         ref={dt}
-                        value={temas}
-                        dataKey="id"
+                        value={examenes}
+                        dataKey="Codigo"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} examenes"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} cursos"
                         globalFilter={globalFilter}
-                        emptyMessage="Este curso aún no tiene temas registrados."
+                        emptyMessage="No hay examenes programados."
                         header={header}
                         responsiveLayout="scroll"
                     >
                         {/* <Column header="Codigo" sortable body={codeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column> */}
-                        <Column field="Descripcion" header="Tema" sortable body={nombreCursoBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
+                        <Column field="Tema.Curso.Nombre" header="Curso" sortable body={cursoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
+                        <Column field="Tema.Descripcion" header="Tema" sortable body={temaBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                        <Column header="Fecha" sortable body={fechaBodyTemplate} headerStyle={{ minWidth: '2rem' }}></Column>
+                        <Column header="Hora" sortable body={horaBodyTemplate} headerStyle={{ minWidth: '2rem' }}></Column>
+                        <Column header="Duracion" sortable body={duracionBodyTemplate} headerStyle={{ minWidth: '2rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
-
-                    <Dialog visible={temaDialog} style={{ width: '600px' }} header="Información del tema" modal className="p-fluid" footer={temaDialogFooter} onHide={hideDialog}>
-                        <div className="field">
-                            <label htmlFor="Descripcion" className="font-bold">
-                                Descripción:
-                            </label>
-                            <InputTextarea
-                                id="Descripcion"
-                                value={tema.Descripcion}
-                                onChange={(e) => {
-                                    onInputChange(e);
-                                }}
-                                required
-                                autoFocus
-                                maxLength={100}
-                                className={classNames({ 'p-invalid': submitted && !tema.Descripcion })}
-                            />
-                            {submitted && !tema.Descripcion && <small className="p-error">Ingrese una descripción del tema.</small>}
-                        </div>
-                    </Dialog>
                 </div>
             </div>
         </div>
     );
-}
+};
+
+export default GestionCursos;

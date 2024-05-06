@@ -6,7 +6,6 @@ import { Toolbar } from 'primereact/toolbar';
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { DataTable } from 'primereact/datatable';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { Card } from 'primereact/card';
 import { RadioButton } from 'primereact/radiobutton';
@@ -25,7 +24,18 @@ const Page = () => {
     const router = useRouter();
 
     const searchParams = useSearchParams();
-    const codigoCurso = searchParams.get('codigoCurso');
+    const CodigoExamen = searchParams.get('Z');
+
+    const user = {
+        Codigo: 1,
+        FechaNacimiento: new Date(),
+        CodigoPersona: 1,
+        CodigoGrado: 4,
+        CodigoApoderado: 0,
+        TipoUsuario: 3
+    };
+
+    const [session, setSession] = useState(user);
 
     const cursoVacio = {
         Codigo: 0,
@@ -44,7 +54,15 @@ const Page = () => {
         Codigo: 0,
         Descripcion: '',
         RutaImagen: '',
-        CodigoTema: 0
+        CodigoTema: 0,
+        Respuestas: [
+            {
+                Codigo: 0,
+                CodigoPregunta: 0,
+                Tipo: false,
+                Valor: ''
+            }
+        ]
     };
 
     const respuestaVacia = {
@@ -54,45 +72,56 @@ const Page = () => {
         CodigoPregunta: 0
     };
 
+    const examenVacio = {
+        Codigo: 0,
+        Fecha: new Date(),
+        HoraInicio: '08:00',
+        HoraFin: '09:00',
+        Duracion: 0,
+        CodigoTema: 0
+    };
+
+    const [examen, setExamen] = useState(examenVacio);
+
     const [temas, setTemas] = useState<(typeof temaVacio)[]>([]);
-    const [preguntas, setPreguntas] = useState<(typeof preguntaVacia)[]>([]);
-    const [respuestasEstudiante, setRespuestasEstudiante] = useState<boolean[]>([]);
+    const [preguntas, setPreguntas] = useState<any[]>([]);
+    const [valorRespuestas, setRespuestasEstudiante] = useState<boolean[]>([]);
 
     const [curso, setCurso] = useState(cursoVacio);
     const [tema, setTema] = useState(temaVacio);
     const [pregunta, setPregunta] = useState(preguntaVacia);
     const [respuesta, setRespuesta] = useState(respuestaVacia);
 
+    const tiempoPregunta = 10;
+
     const toast = useRef<Toast>(null);
-    const [visible, setVisible] = useState(false);
+    const [iniciado, setIniciado] = useState(false);
+    const [visible, setVisible] = useState(true);
     const toastBC = useRef<Toast>(null);
-    const [timeLeft, setTimeLeft] = useState(60);
-    const [timerRunning, setTimerRunning] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(tiempoPregunta);
     const timerRef = useRef<number | undefined>(undefined);
+
     const [selectedRepuesta, setSelectedRepuesta] = useState(-1);
     const [correcto, setCorrecto] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
+
+    const [respuestas, setRespuestas] = useState<(number | null)[]>([]);
+
     const openBtnRef = useRef(null);
-    const closeBtnRef = useRef(null);
 
     useEffect(() => {
-        // Limpiar el temporizador cuando el componente se desmonte o cambie de pregunta
-        return () => {
-            clearInterval(timerRef.current);
-        };
-    }, [activeIndex]);
+        cargarExamen();
+    }, []);
 
-
-    const cargarPreguntas = async (CodigoCurso: any) => {
-        console.log('Hola');
+    const cargarExamen = async () => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/pregunta', {
-                params: { CodigoCurso }
+            const { data } = await axios.get('http://localhost:3001/api/examen/datos', {
+                params: { CodigoExamen }
             });
-            const { curso, temas } = data;
-            console.log('Hola', data);
-            setCurso(curso);
-            setTemas(temas);
+            const { examen, preguntas } = data;
+            setExamen(examen);
+            setPreguntas(preguntas);
+            console.log('Examen: ', data);
         } catch (error) {
             console.error(error);
         }
@@ -100,221 +129,145 @@ const Page = () => {
 
     const funcionPrueba = () => {};
 
+    useEffect(() => {
+        if (activeIndex < preguntas.length - 1) {
+            if (timeLeft === 0) {
+                nextQuestion();
+            }
+        }
+    }, [timeLeft]);
+
     const startTimer = () => {
-        setTimerRunning(true);
+        setTimeLeft(tiempoPregunta);
+        clearInterval(timerRef.current);
         timerRef.current = window.setInterval(() => {
             setTimeLeft((prevTime) => {
                 if (prevTime === 0) {
                     clearInterval(timerRef.current);
-                    setTimerRunning(false);
-                    nextQuestion()
-                    return 60;
+                    return tiempoPregunta;
                 }
                 return prevTime - 1;
             });
         }, 1000); // Actualizar el tiempo cada segundo
     };
 
-    // Función para detener el temporizador
-    const stopTimer = () => {
-        clearInterval(timerRef.current);
-        setTimerRunning(false);
+    const nextQuestion = () => {
+        setSelectedRepuesta(-1);
+        if (activeIndex < preguntas.length - 1) {
+            setTimeLeft(tiempoPregunta);
+            setActiveIndex(activeIndex + 1);
+        } else {
+            confirm();
+        }
     };
 
-    // Función para pasar a la siguiente pregunta
-    const nextQuestion = () => {
-        if (activeIndex < tabs.length - 3) {
-            setActiveIndex((prevIndex) => prevIndex + 1);
-            setTimeLeft(60);
-            startTimer();
+    const siguientePregunta = () => {
+        if (selectedRepuesta >= 0 && selectedRepuesta <= 4) {
+            valorRespuestas.push(correcto);
+            respuestas.push(selectedRepuesta);
+        } else respuestas.push(null);
+        setTimeLeft(tiempoPregunta);
+        startTimer();
+        setSelectedRepuesta(-1);
+
+        // console.log(valorRespuestas);
+        if (activeIndex < preguntas.length - 1) {
+            setActiveIndex(activeIndex + 1);
         }
     };
 
     // Función para manejar el clic en el botón "Iniciar"
     const handleStartClick = () => {
+        setIniciado(true);
         startTimer();
     };
 
-
-
-    const [tabs, setTabs] = useState([
-        {
-            index: 1,
-            pregunta: '¿Cuál es el océano más grande del mundo?',
-            respuestas: [
-                { texto: 'Océano Atlántico', correcta: false },
-                { texto: 'Océano Pacífico', correcta: true },
-                { texto: 'Océano Índico', correcta: false },
-                { texto: 'Océano Ártico', correcta: false }
-            ],
-            title: 'Pregunta 1',
-            content: 'Pregunta 1 Content...',
-            disabled: false
-        },
-        {
-            index: 2,
-            pregunta: '¿Quién escribió "Don Quijote de la Mancha"?',
-            respuestas: [
-                { texto: 'Miguel de Cervantes', correcta: true },
-                { texto: 'Gabriel García Márquez', correcta: false },
-                { texto: 'William Shakespeare', correcta: false },
-                { texto: 'Jorge Luis Borges', correcta: false }
-            ],
-            title: 'Pregunta 2',
-            content: 'Pregunta 2 Content...',
-            disabled: false
-        },
-        {
-            index: 3,
-            pregunta: '¿Cuál es el río más largo del mundo?',
-            respuestas: [
-                { texto: 'Río Amazonas', correcta: true },
-                { texto: 'Río Nilo', correcta: false },
-                { texto: 'Río Yangtsé', correcta: false },
-                { texto: 'Río Misisipi', correcta: false }
-            ],
-            title: 'Pregunta 3',
-            content: 'Pregunta 3 Content...',
-            disabled: false
-        },
-        {
-            index: 4,
-            pregunta: '¿Cuál es el elemento más abundante en la corteza terrestre?',
-            respuestas: [
-                { texto: 'Oxígeno', correcta: false },
-                { texto: 'Hierro', correcta: false },
-                { texto: 'Silicio', correcta: true },
-                { texto: 'Calcio', correcta: false }
-            ],
-            title: 'Pregunta 4',
-            content: 'Pregunta 4 Content...',
-            disabled: false
-        },
-        {
-            index: 5,
-            pregunta: '¿En qué año llegó el hombre a la Luna por primera vez?',
-            respuestas: [
-                { texto: '1969', correcta: true },
-                { texto: '1971', correcta: false },
-                { texto: '1965', correcta: false },
-                { texto: '1975', correcta: false }
-            ],
-            title: 'Pregunta 5',
-            content: 'Pregunta 5 Content...',
-            disabled: false
-        },
-        {
-            index: 6,
-            pregunta: '¿Cuál es el país más grande del mundo?',
-            respuestas: [
-                { texto: 'Estados Unidos', correcta: false },
-                { texto: 'Rusia', correcta: true },
-                { texto: 'China', correcta: false },
-                { texto: 'Canadá', correcta: false }
-            ],
-            title: 'Pregunta 6',
-            content: 'Pregunta 6 Content...',
-            disabled: false
-        },
-        {
-            index: 7,
-            pregunta: '¿Quién pintó la Mona Lisa?',
-            respuestas: [
-                { texto: 'Leonardo da Vinci', correcta: true },
-                { texto: 'Pablo Picasso', correcta: false },
-                { texto: 'Vincent van Gogh', correcta: false },
-                { texto: 'Claude Monet', correcta: false }
-            ],
-            title: 'Pregunta 7',
-            content: 'Pregunta 7 Content...',
-            disabled: false
-        },
-        {
-            index: 8,
-            pregunta: '¿Cuál es el metal más caro del mundo?',
-            respuestas: [
-                { texto: 'Oro', correcta: false },
-                { texto: 'Platino', correcta: false },
-                { texto: 'Rodio', correcta: true },
-                { texto: 'Paladio', correcta: false }
-            ],
-            title: 'Pregunta 8',
-            content: 'Pregunta 8 Content...',
-            disabled: false
-        },
-        {
-            index: 9,
-            pregunta: '¿Cuál es el animal más grande del mundo?',
-            respuestas: [
-                { texto: 'Elefante africano', correcta: false },
-                { texto: 'Ballena azul', correcta: true },
-                { texto: 'Tiburón ballena', correcta: false },
-                { texto: 'Jirafa', correcta: false }
-            ],
-            title: 'Pregunta 9',
-            content: 'Pregunta 9 Content...',
-            disabled: false
-        },
-        {
-            index: 10,
-            pregunta: '¿Cuál es el desierto más grande del mundo?',
-            respuestas: [
-                { texto: 'Desierto del Sahara', correcta: true },
-                { texto: 'Desierto de Atacama', correcta: false },
-                { texto: 'Desierto de Kalahari', correcta: false },
-                { texto: 'Desierto de Gobi', correcta: false }
-            ],
-            title: 'Pregunta 10',
-            content: 'Pregunta 10 Content...',
-            disabled: false
-        }
-    ]);
-
     const clear = () => {
         toastBC.current?.clear();
-        setVisible(false);
         router.push('/estudiante/examenes');
     };
 
     const confirm = () => {
+        setVisible(false);
         setTimeout(() => {
             toast.current?.show({
                 severity: 'success',
-                summary: 'Examen enviado',
-                detail: 'Felicitaciones, su examen ha sido enviado',
+                summary: 'Mensaje',
+                detail: 'Su examen ha sido enviado correctamente',
                 life: 5000
             });
         }, 2500);
+        guardarExamen();
+    };
 
-        if (!visible) {
-            setVisible(true);
-            toastBC.current?.clear();
-            toastBC.current?.show({
-                severity: 'info',
-                summary: 'Can you send me the report?',
-                sticky: true,
-                content: (
-                    <div className="flex flex-column align-items-left" style={{ flex: '1' }}>
-                        <div className="flex align-items-center gap-2">
-                            <span className="font-bold text-900">Resultado del examen</span>
+    const guardarExamen = async () => {
+        const estudianteExamenDiario = {
+            CodigoEstudiante: session.Codigo,
+            CodigoExamenDiario: CodigoExamen,
+            Nota: valorRespuestas.filter((respuesta: boolean) => respuesta === true).length * 2,
+            Correctas: valorRespuestas.filter((respuesta: boolean) => respuesta === true).length,
+            Incorrectas: valorRespuestas.length - valorRespuestas.filter((respuesta: boolean) => respuesta === true).length,
+            EnBlanco: preguntas.length - valorRespuestas.length,
+            Estado: true
+        };
+
+        const preguntaEstudianteExamenDiario = preguntas.map((pregunta, index) => ({
+            CodigoPregunta: pregunta.Codigo,
+            CodigoRespuesta: respuestas[index],
+            CodigoEstudiante: session.Codigo,
+            CodigoExamenDiario: CodigoExamen
+        }));
+
+        await axios
+            .post('http://localhost:3001/api/examen/guardar', {
+                estudianteExamenDiario,
+                preguntaEstudianteExamenDiario
+            })
+            .then((response) => {
+                toastBC.current?.show({
+                    severity: 'info',
+                    summary: 'Can you send me the report?',
+                    sticky: true,
+                    content: (
+                        <div className="flex flex-column align-items-left" style={{ flex: '1' }}>
+                            <div className="flex align-items-center gap-2">
+                                <span className="font-bold text-900">Resultado del examen</span>
+                            </div>
+                            <div className="font-medium text-lg my-3 text-900">
+                                Correctas: {valorRespuestas.filter((respuesta: boolean) => respuesta === true).length} <br />
+                                Incorrectas: {valorRespuestas.length - valorRespuestas.filter((respuesta: boolean) => respuesta === true).length} <br />
+                                En blanco: {preguntas.length - valorRespuestas.length}
+                            </div>
+                            <Button className="p-button-sm flex" label="OK" severity="info" onClick={clear}></Button>
                         </div>
-                        <div className="font-medium text-lg my-3 text-900">
-                            Correctas: {respuestasEstudiante.filter((respuesta: boolean) => respuesta === true).length} / {respuestasEstudiante.length}
-                            En blanco: 2
-                        </div>
-                        <Button className="p-button-sm flex" label="OK" severity="info" onClick={clear}></Button>
-                    </div>
-                )
+                    )
+                });
             });
-        }
     };
 
     const footer =
-        activeIndex === tabs.length - 1 ? (
+        activeIndex === preguntas.length - 1 ? (
             <>
                 <Button
                     onClick={() => {
+                        if (selectedRepuesta >= 0 && selectedRepuesta <= 4) {
+                            valorRespuestas.push(correcto);
+                            respuestas.push(selectedRepuesta);
+                        }
+
                         confirm();
+                    }}
+                    label="Enviar Examen"
+                    icon="pi pi-check"
+                    severity="success"
+                />
+            </>
+        ) : (
+            <>
+                <Button
+                    onClick={() => {
+                        console.log('Hola');
+                        console.log(correcto);
                         // if (correcto) {
                         //     toast.current?.show({
                         //         severity: 'success',
@@ -330,16 +283,6 @@ const Page = () => {
                         //         life: 2000
                         //     });
                         // }
-                    }}
-                    label="Enviar Examen"
-                    icon="pi pi-check"
-                    severity="success"
-                />
-            </>
-        ) : (
-            <>
-                <Button
-                    onClick={() => {
                         siguientePregunta();
                     }}
                     label="Siguiente Pregunta"
@@ -363,38 +306,12 @@ const Page = () => {
         );
     };
 
-    const siguientePregunta = () => {
-        setTimeLeft(60);
-        startTimer();
-        // if (correcto) {
-        //     toast.current?.show({
-        //         severity: 'success',
-        //         summary: '¡Correcto!',
-        //         detail: 'Has seleccionado la respuesta correcta.',
-        //         life: 2000
-        //     });
-        // } else {
-        //     toast.current?.show({
-        //         severity: 'error',
-        //         summary: '¡Incorrecto!',
-        //         detail: 'La respuesta que seleccionaste es incorrecta.',
-        //         life: 2000
-        //     });
-        // }
-        setSelectedRepuesta(-1);
-        respuestasEstudiante.push(correcto);
-        console.log(respuestasEstudiante);
-        if (activeIndex < tabs.length - 1) {
-            setActiveIndex(activeIndex + 1);
-        }
-    };
-
     const leftToolbarTemplate = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
                     <StyleClass nodeRef={openBtnRef} selector=".box" enterClassName="hidden" enterActiveClassName="fadein">
-                        <Button label="Iniciar" icon="pi pi-play" severity="success" className=" mr-2" ref={openBtnRef} onClick={handleStartClick}/>
+                        <Button label="Iniciar" icon="pi pi-play" severity="success" className=" mr-2" ref={openBtnRef} onClick={handleStartClick} disabled={iniciado}/>
                     </StyleClass>
                 </div>
             </React.Fragment>
@@ -419,45 +336,48 @@ const Page = () => {
                 {/* <h1>Tema: Cultura General{curso?.Nombre}</h1> */}
                 <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
 
-                <TabView
-                    scrollable
-                    activeIndex={activeIndex}
-                    onTabChange={(e) => {
-                        setActiveIndex(e.index);
-                    }}
-                    className="hidden animation-duration-500 box"
-                >
-                    {tabs.map((tab, index) => {
-                        return (
-                            <TabPanel key={tab.title} header={tab.title} disabled={index !== activeIndex}>
-                                <Card title={pregunta1(index + 1, tab.pregunta)} footer={footer}>
-                                    <div className="ml-4 flex">
-                                        <div className="flex flex-column gap-3">
-                                            {tab.respuestas.map((respuesta, index: number) => {
-                                                return (
-                                                    <div key={index} className="flex align-items-center ml-5">
-                                                        <RadioButton
-                                                            name="respuesta"
-                                                            value={respuesta.correcta}
-                                                            onChange={(e) => {
-                                                                setSelectedRepuesta(index);
-                                                                setCorrecto(e.value);
-                                                            }}
-                                                            checked={selectedRepuesta === index}
-                                                        />
-                                                        <label className="ml-2">{respuesta.texto}</label>
-                                                    </div>
-                                                );
-                                            })}
+                {visible && (
+                    <TabView
+                        scrollable
+                        activeIndex={activeIndex}
+                        onTabChange={(e) => {
+                            setActiveIndex(e.index);
+                        }}
+                        className="hidden animation-duration-500 box"
+                    >
+                        {preguntas.map((pregunta, index) => {
+                            return (
+                                <TabPanel key={index} header={'Pregunta ' + (index + 1)} disabled={index !== activeIndex}>
+                                    <Card title={pregunta1(index + 1, pregunta.Descripcion)} footer={footer}>
+                                        <div className="ml-4 flex">
+                                            <div className="flex flex-column gap-3">
+                                                {pregunta.Respuesta.map((respuesta: any, index: number) => {
+                                                    return (
+                                                        <div key={index} className="flex align-items-center ml-5">
+                                                            <RadioButton
+                                                                name="respuesta"
+                                                                value={respuesta.Tipo}
+                                                                onChange={(e) => {
+                                                                    setSelectedRepuesta(index);
+                                                                    setCorrecto(!!e.value);
+                                                                    console.log(!!e.value);
+                                                                }}
+                                                                checked={selectedRepuesta === index}
+                                                            />
+                                                            <label className="ml-2">{respuesta.Valor}</label>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
-                                <img src="" alt="" />
-                            </TabPanel>
-                        );
-                    })}
-                    <TabPanel disabled></TabPanel>
-                </TabView>
+                                    </Card>
+                                    <img src="" alt="" />
+                                </TabPanel>
+                            );
+                        })}
+                        <TabPanel disabled></TabPanel>
+                    </TabView>
+                )}
             </div>
         </div>
     );

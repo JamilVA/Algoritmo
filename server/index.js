@@ -3,23 +3,19 @@ const express = require('express'); //de esta forma se importa en node
 require('dotenv').config();
 const { dbConnection } = require('./config/database');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 //Creando el servidor express
-const app = express({origin: true, credentials: true});
+const app = express();
 
 //Configuracion de CORS
 app.use(cors()); 
 
-app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.header('Access-Control-Allow-Headers', 'Origin, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Response-Time, X-PINGOTHER, X-CSRF-Token,Authorization');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT ,DELETE');
-    res.header('Access-Control-Allow-Credentials', true);
-    next();
-})
-
 //Lectura y parseo del body
 app.use(express.json());
+
+//Lectuta de cookies
+app.use(cookieParser());
 
 //Conexion a la BD
 dbConnection();
@@ -31,6 +27,7 @@ app.use('/api/docente', require('./routes/docente.route'));
 app.use('/api/curso', require('./routes/curso.route'));
 app.use('/api/pregunta', require('./routes/pregunta.route'));
 app.use('/api/examen', require('./routes/examenDiario.route'));
+app.use('/api', require('./routes/auth.route'));
 
 
 // app.use('/api/docente', require('./routes/docante.route'));

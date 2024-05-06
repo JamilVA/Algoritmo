@@ -7,7 +7,8 @@ const preguntaExamenDiarioEstudiante = sequelize.define('preguntaExamenDiarioEst
         autoIncrement:true,
         primaryKey:true,
     },
-    RespuestaCorrecta: DataTypes.TINYINT(),
+    CodigoPregunta: DataTypes.INTEGER(),
+    CodigoRespuesta: DataTypes.INTEGER(),
 })
 
 module.exports = preguntaExamenDiarioEstudiante
