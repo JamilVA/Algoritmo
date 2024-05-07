@@ -20,6 +20,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Calendar } from 'primereact/calendar';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 const GestionCursos = () => {
     const router = useRouter();
@@ -43,10 +44,6 @@ const GestionCursos = () => {
         }
     };
 
-    const nivelVacio = {
-        Codigo: 0,
-        Nombre: ''
-    };
 
     const gradoVacio = {
         Codigo: 0,
@@ -68,12 +65,6 @@ const GestionCursos = () => {
         Duracion: 0,
         CodigoTema: 0
     };
-
-    const [grado, setGrado] = useState(gradoVacio);
-    const [curso, setCurso] = useState(cursoVacio);
-
-    const [cursos, setCursos] = useState<(typeof cursoVacio)[]>([]);
-    const [temas, setTemas] = useState<(typeof temaVacio)[]>([]);
     const [examenes, setExamenes] = useState<(typeof examenDiarioVacio)[]>([]);
 
     const [examen, setExamen] = useState(examenDiarioVacio);
@@ -82,56 +73,22 @@ const GestionCursos = () => {
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
-    const user = {
-        Codigo: 1,
-        FechaNacimiento: new Date(),
-        CodigoPersona: 1,
-        CodigoGrado: 4,
-        CodigoApoderado: 0,
-        TipoUsuario: 3
-    };
-
-    const [session, setSession] = useState(user);
+    const { data: session, status } = useSession();
 
     useEffect(() => {
-        cargarExamenes();
-    }, []);
+        if (status === 'authenticated') {
+            cargarExamenes();
+        }
+    }, [status]);
 
     const cargarExamenes = async () => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/examen', {
-                params: { CodigoGrado: session.CodigoGrado }
+            const { data } = await axios.get('http://localhost:3001/api/examen/examenesEstudiante', {
+                params: { CodigoEstudiante: session?.user.codigoEstudiante }
             });
             const { examenes } = data;
             console.log('Hola', examenes);
             setExamenes(examenes);
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const cargarCursos = async () => {
-        try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/cursos', {
-                params: { CodigoGrado: session.CodigoGrado }
-            });
-            const { cursos } = data;
-            console.log('Hola', cursos);
-            setCursos(cursos);
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const cargarTemas = async (CodigoCurso: number) => {
-        console.log('Codigo Curso temas', CodigoCurso);
-        try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/temas', {
-                params: { CodigoCurso: CodigoCurso }
-            });
-            const { temas } = data;
-            console.log('Hola', temas);
-            setTemas(temas);
         } catch (error) {
             console.error(error);
         }
@@ -173,24 +130,27 @@ const GestionCursos = () => {
     };
 
     const actionBodyTemplate = (rowData: any) => {
+        const estadoExamen = rowData?.estudianteExamenDiarios[0]?.Estado ?? false
         return (
-            <Link
-                href={{
-                    pathname: '/estudiante/examenes/examen',
-                    query: {
-                        Z: rowData.Codigo
-                    }
-                }}
-            >
-                <Button
-                    icon="pi pi-external-link"
-                    rounded
-                    severity="success"
-                    outlined
-                    tooltip="Abrir"
-                    className="mr-2"
-                />
-            </Link>
+            <>
+                {estadoExamen && (
+
+                        <Button icon="pi pi-external-link" rounded severity={'secondary'} outlined tooltip="Examen culminado" className="mr-2"/>
+
+                )}
+                {!estadoExamen && (
+                    <Link
+                        href={{
+                            pathname: '/estudiante/examenes/examen',
+                            query: {
+                                Z: rowData.Codigo
+                            }
+                        }}
+                    >
+                        <Button icon="pi pi-external-link" rounded severity={'help'} outlined tooltip="Abrir" className="mr-2" />
+                    </Link>
+                )}
+            </>
         );
     };
 

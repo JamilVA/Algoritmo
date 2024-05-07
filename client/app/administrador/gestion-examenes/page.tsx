@@ -421,7 +421,7 @@ const GestionCursos = () => {
                         <Column field="Tema.Descripcion" header="Tema" sortable body={temaBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                         <Column header="Fecha" sortable body={fechaBodyTemplate} headerStyle={{ minWidth: '4rem' }}></Column>
                         <Column header="Hora" sortable body={horaBodyTemplate} headerStyle={{ minWidth: '4rem' }}></Column>
-                        <Column header="Duracion" sortable body={duracionBodyTemplate} headerStyle={{ minWidth: '4rem' }}></Column>
+                        <Column header="Tiempo/Pregunta" sortable body={duracionBodyTemplate} headerStyle={{ minWidth: '4rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
 
@@ -494,7 +494,7 @@ const GestionCursos = () => {
                                 />
                             </div>
                             <div className="field col">
-                                <label className="font-bold">Duracion</label>
+                                <label className="font-bold">Tiempo por Pregunta</label>
                                 <InputNumber value={examen.Duracion} onValueChange={(e) => setExamen({ ...examen, Duracion: e.value ?? 0 })} min={0} max={240} suffix=" min" />
                             </div>
                         </div>

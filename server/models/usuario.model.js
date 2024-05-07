@@ -8,7 +8,10 @@ const Usuario = sequelize.define('Usuario',{
         primaryKey:true
     },
     Estado: DataTypes.TINYINT,
-    Email: DataTypes.STRING(45),
+    Email: {
+        type: DataTypes.STRING(45),
+        unique: true,
+    },
     Password: DataTypes.STRING(20),
 })
 

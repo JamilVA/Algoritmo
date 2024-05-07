@@ -19,6 +19,7 @@ import { renderToString } from 'react-dom/server';
 import { useRouter } from 'next/navigation';
 
 import { useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 const Page = () => {
     const router = useRouter();
@@ -26,16 +27,7 @@ const Page = () => {
     const searchParams = useSearchParams();
     const CodigoExamen = searchParams.get('Z');
 
-    const user = {
-        Codigo: 1,
-        FechaNacimiento: new Date(),
-        CodigoPersona: 1,
-        CodigoGrado: 4,
-        CodigoApoderado: 0,
-        TipoUsuario: 3
-    };
-
-    const [session, setSession] = useState(user);
+    const { data: session, status } = useSession();
 
     const cursoVacio = {
         Codigo: 0,
@@ -92,7 +84,7 @@ const Page = () => {
     const [pregunta, setPregunta] = useState(preguntaVacia);
     const [respuesta, setRespuesta] = useState(respuestaVacia);
 
-    const tiempoPregunta = 10;
+    const [tiempoPregunta, setTiempoPregunta] = useState(60);
 
     const toast = useRef<Toast>(null);
     const [iniciado, setIniciado] = useState(false);
@@ -110,8 +102,10 @@ const Page = () => {
     const openBtnRef = useRef(null);
 
     useEffect(() => {
-        cargarExamen();
-    }, []);
+        if (status === 'authenticated') {
+            cargarExamen();
+        }
+    }, [status]);
 
     const cargarExamen = async () => {
         try {
@@ -119,6 +113,7 @@ const Page = () => {
                 params: { CodigoExamen }
             });
             const { examen, preguntas } = data;
+            setTiempoPregunta(examen.Duracion*60)
             setExamen(examen);
             setPreguntas(preguntas);
             console.log('Examen: ', data);
@@ -202,7 +197,7 @@ const Page = () => {
 
     const guardarExamen = async () => {
         const estudianteExamenDiario = {
-            CodigoEstudiante: session.Codigo,
+            CodigoEstudiante: session?.user.codigoEstudiante,
             CodigoExamenDiario: CodigoExamen,
             Nota: valorRespuestas.filter((respuesta: boolean) => respuesta === true).length * 2,
             Correctas: valorRespuestas.filter((respuesta: boolean) => respuesta === true).length,
@@ -214,7 +209,7 @@ const Page = () => {
         const preguntaEstudianteExamenDiario = preguntas.map((pregunta, index) => ({
             CodigoPregunta: pregunta.Codigo,
             CodigoRespuesta: respuestas[index],
-            CodigoEstudiante: session.Codigo,
+            CodigoEstudiante: session?.user.codigoEstudiante,
             CodigoExamenDiario: CodigoExamen
         }));
 
@@ -322,7 +317,7 @@ const Page = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <p className="m-0 text-900 font-bold text-5xl text-primary">{timeLeft}</p>
+                    <p className="m-0 text-900 font-bold text-5xl text-primary">{(Math.floor(timeLeft / 60)) + 'min ' + (timeLeft%60) +'s'}</p>
                 </div>
             </React.Fragment>
         );

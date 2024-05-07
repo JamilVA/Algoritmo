@@ -7,6 +7,8 @@ const {
   Pregunta,
   Respuesta,
   PreguntaExamenDiarioEstudiante,
+  Estudiante,
+  Nivel,
 } = require("../config/relations");
 
 const { sequelize } = require("../config/database");
@@ -27,6 +29,39 @@ const getExamenes = async (req, res) => {
         },
       ],
       where: { "$Tema.Curso.CodigoGrado$": CodigoGrado },
+    });
+    res.json({ message: "Examenes cargados correctamente", examenes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar los examenes" });
+  }
+};
+
+const getExamenesEstudiante = async (req, res) => {
+  try {
+    const { CodigoEstudiante } = req.query;
+
+    const estudiante = await Estudiante.findOne({
+      where: { Codigo: CodigoEstudiante },
+    });
+
+    const examenes = await ExamenDiario.findAll({
+      include: [
+        {
+          model: Tema,
+          include: [
+            {
+              model: Curso,
+            },
+          ],
+        },
+        {
+          model: EstudianteExamenDiario,
+          required: false,
+          where: { CodigoEstudiante },
+        },
+      ],
+      where: { "$Tema.Curso.CodigoGrado$": estudiante.CodigoGrado },
     });
     res.json({ message: "Examenes cargados correctamente", examenes });
   } catch (error) {
@@ -56,10 +91,6 @@ const getExamen = async (req, res) => {
     const examen = await ExamenDiario.findOne({
       where: { Codigo: CodigoExamen },
     });
-
-    // const preguntas = await Pregunta.findAll({
-    //   where: { CodigoTema: examenDiario.CodigoTema },
-    // });
 
     const preguntas = await Pregunta.findAll({
       include: [
@@ -136,7 +167,6 @@ const guardarExamen = async (req, res) => {
       );
     });
 
-
     res.json({ message: "Examen guardado correctamente" });
   } catch (error) {
     console.error(error);
@@ -144,8 +174,94 @@ const guardarExamen = async (req, res) => {
   }
 };
 
+const getDetalleExamen = async (req, res) => {
+  try {
+    const { CodigoEstudiante } = req.query;
+
+    const estudiante = await Estudiante.findOne({
+      where: { Codigo: CodigoEstudiante },
+    });
+
+    const examenes = await ExamenDiario.findAll({
+      include: [
+        {
+          model: Tema,
+        },
+      ],
+      where: { "$Tema.Curso.CodigoGrado$": estudiante.CodigoGrado },
+    });
+    res.json({ message: "Examenes cargados correctamente", examenes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar los examenes" });
+  }
+};
+
+const getInfoReporte = async (req, res) => {
+  const niveles = await Nivel.findAll({});
+  const grados = await Grado.findAll({});
+  const examenes = await ExamenDiario.count({});
+  const estudiantes = await Estudiante.count({})
+
+  res.json({
+    ok: true,
+    niveles,
+    grados,
+    examenes,
+    estudiantes
+  });
+};
+
+const getReporteGrado = async (req, res) => {
+  try {
+    const { CodigoGrado } = req.query;
+
+    const examenes = await ExamenDiario.findAll({
+      include: [
+        {
+          model: Tema,
+          include: [
+            {
+              model: Curso,
+            },
+          ],
+        },
+        {
+          model: EstudianteExamenDiario,
+        },
+      ],
+      where: { "$Tema.Curso.CodigoGrado$": CodigoGrado },
+    });
+
+    const datos = examenes.map(examen => ({Codigo: examen.Codigo, Curso: examen.Tema.Curso.Nombre, Tema: examen.Tema.Descripcion, Resueltos: examen?.estudianteExamenDiarios.length ?? 0}));
+
+    res.json({ message: "Examenes cargados correctamente", datos });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar los examenes" });
+  }
+};
+
+const getReporteCurso = async (req, res) => {
+  try {
+    const { CodigoEstudiante } = req.query;
+
+    const datos = await ExamenDiario.findOne({});
+
+    res.json({ message: "Examenes cargados correctamente", datos });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar los examenes" });
+  }
+};
+
 module.exports = {
   getExamenes,
+  getExamenesEstudiante,
+  getInfoReporte,
+  getReporteGrado,
+  getReporteCurso,
+  getDetalleExamen,
   getExamen,
   getCursos,
   getTemas,

@@ -17,7 +17,7 @@ const Respuesta = require("../models/respuesta.model");
 
 const Asistencia = require('../models/asistencia.model');
 const CursoEstudiante = require('../models/cursoEstudiante.model');
-const EstudianteExamenDiario = require('../models/estudianteexamendiario.model');
+const EstudianteExamenDiario = require('../models/estudianteExamenDiario.model');
 const PreguntaExamenDiarioEstudiante = require('../models/preguntaExamenDiarioEstudiante.model');
 const Sesion = require('../models/sesion.model');
 const ExamenDiario = require("../models/examenDiario.model");

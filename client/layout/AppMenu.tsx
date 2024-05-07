@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
-import React, { useContext, useState } from 'react';
+import React, { use, useContext, useState } from 'react';
 import AppMenuitem from './AppMenuitem';
 import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
@@ -31,7 +31,8 @@ const AppMenu = () => {
                 { label: 'Gestion Estudiantes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-estudiantes' },
                 { label: 'Gestion Docentes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-docentes' },
                 { label: 'Gestion Cursos', icon: 'pi pi-fw pi-fw pi-book', to: '/administrador/gestion-cursos' },
-                { label: 'Gestion Examenes', icon: 'pi pi-fw pi-file-edit', to: '/administrador/gestion-examenes' }
+                { label: 'Gestion Examenes', icon: 'pi pi-fw pi-file-edit', to: '/administrador/gestion-examenes' },
+                { label: 'Reportes', icon: 'pi pi-fw pi-chart-line', to: '/administrador/reportes' },
             ]
         }
     ];
@@ -97,7 +98,8 @@ const AppMenu = () => {
                         { label: 'Gestion Estudiantes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-estudiantes' },
                         { label: 'Gestion Docentes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-docentes' },
                         { label: 'Gestion Cursos', icon: 'pi pi-fw pi-fw pi-book', to: '/administrador/gestion-cursos' },
-                        { label: 'Gestion Examenes', icon: 'pi pi-fw pi-file-edit', to: '/administrador/gestion-examenes' }
+                        { label: 'Gestion Examenes', icon: 'pi pi-fw pi-file-edit', to: '/administrador/gestion-examenes' },
+                        { label: 'Reportes', icon: 'pi pi-fw pi-chart-line', to: '/administrador/reportes' },
                         // { label: 'Gestion Pagos', icon: 'pi pi-fw pi-money-bill', to: '/administrador/gestion-pagos' },
                         // { label: 'Gestion Matricula', icon: 'pi pi-fw pi-list', to: '/administrador/matricula' },
                     ]
@@ -142,8 +144,8 @@ const AppMenu = () => {
         }
     ];
 
-    if (i == 0) {
-        console.log('Hola', session?.user)
+    if (status === 'authenticated' && i == 0) {
+        console.log('Holax', session?.user)
         switch (session?.user?.tipoUsuario) {
             case 1:
                 setUser(modelAdministrador);
@@ -164,7 +166,7 @@ const AppMenu = () => {
     return (
         <MenuProvider>
             <ul className="layout-menu">
-                {model.map((item, i) => {
+                {user.map((item, i) => {
                     return !item?.seperator ? <AppMenuitem item={item} root={true} index={i} key={item.label} /> : <li className="menu-separator"></li>;
                 })}
             </ul>
