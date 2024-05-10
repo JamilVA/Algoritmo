@@ -315,7 +315,7 @@ export default function GestionApoderado() {
                                     id="Persona.ApellidoMaterno"
                                     value={apoderado.Persona.ApellidoMaterno}
                                     onChange={(e) => {
-                                        onInputChange(e, 'Email');
+                                        onInputChange(e, 'Materno');
                                     }}
                                     required
                                     maxLength={45}
