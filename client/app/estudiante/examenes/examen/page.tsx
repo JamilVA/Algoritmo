@@ -317,7 +317,7 @@ const Page = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <p className="m-0 text-900 font-bold text-5xl text-primary">{(Math.floor(timeLeft / 60)) + 'min ' + (timeLeft%60) +'s'}</p>
+                    {/* <p className="m-0 text-900 font-bold text-5xl text-primary">{(Math.floor(timeLeft / 60)) + 'min ' + (timeLeft%60) +'s'}</p> */}
                 </div>
             </React.Fragment>
         );

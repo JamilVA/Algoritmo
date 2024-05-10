@@ -26,7 +26,7 @@ const AppMenu = () => {
         {
             label: 'PANEL DE ADMINISTRACIÓN',
             items: [
-                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/administrador' },
+                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/inicio' },
                 { label: 'Gestion Apoderados', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-apoderados' },
                 { label: 'Gestion Estudiantes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-estudiantes' },
                 { label: 'Gestion Docentes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-docentes' },
@@ -50,7 +50,7 @@ const AppMenu = () => {
         {
             label: 'PANEL DOCENTE',
             items: [
-                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/docente' },
+                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/inicio' },
                 { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/docente/cursos' }
             ]
         }
@@ -60,7 +60,7 @@ const AppMenu = () => {
         {
             label: 'PANEL ESTUDIANTE',
             items: [
-                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/estudiante' },
+                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/inicio' },
                 // { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/estudiante/cursos' },
                 { label: 'Examenes', icon: 'pi pi-fw pi-file', to: '/estudiante/examenes' },
                 { label: 'Reportes', icon: 'pi pi-fw pi-chart-line', to: '/estudiante/reportes' },
