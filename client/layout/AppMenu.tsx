@@ -26,7 +26,7 @@ const AppMenu = () => {
         {
             label: 'PANEL DE ADMINISTRACIÓN',
             items: [
-                { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/administrador' },
+                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/administrador' },
                 { label: 'Gestion Apoderados', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-apoderados' },
                 { label: 'Gestion Estudiantes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-estudiantes' },
                 { label: 'Gestion Docentes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-docentes' },
@@ -41,8 +41,7 @@ const AppMenu = () => {
         {
             label: 'PANEL APODERADO',
             items: [
-                { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/apoderado' },
-                { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/apoderado/cursos' }
+                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/apoderado' },
             ]
         }
     ];
@@ -51,7 +50,7 @@ const AppMenu = () => {
         {
             label: 'PANEL DOCENTE',
             items: [
-                { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/docente' },
+                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/docente' },
                 { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/docente/cursos' }
             ]
         }
@@ -61,9 +60,11 @@ const AppMenu = () => {
         {
             label: 'PANEL ESTUDIANTE',
             items: [
-                { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/estudiante' },
-                { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/estudiante/cursos' },
-                { label: 'Examenes', icon: 'pi pi-fw pi-file', to: '/estudiante/examenes' }
+                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/estudiante' },
+                // { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/estudiante/cursos' },
+                { label: 'Examenes', icon: 'pi pi-fw pi-file', to: '/estudiante/examenes' },
+                { label: 'Reportes', icon: 'pi pi-fw pi-chart-line', to: '/estudiante/reportes' },
+
             ]
         }
     ];
@@ -93,7 +94,7 @@ const AppMenu = () => {
                 {
                     label: 'Administrador',
                     items: [
-                        { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/administrador' },
+                        { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/administrador' },
                         { label: 'Gestion Apoderados', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-apoderados' },
                         { label: 'Gestion Estudiantes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-estudiantes' },
                         { label: 'Gestion Docentes', icon: 'pi pi-fw pi-users', to: '/administrador/gestion-docentes' },
@@ -107,7 +108,7 @@ const AppMenu = () => {
                 {
                     label: 'Apoderado',
                     items: [
-                        { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/apoderado' },
+                        { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/apoderado' },
                         { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/apoderado/cursos' }
                         // { label: 'Asistencia', icon: 'pi pi-fw pi-check-circle', to: '/apoderado/asistencias' },
                         // { label: 'Horarios', icon: 'pi pi-fw pi-calendar-plus', to: '/apoderado/horarios' },
@@ -117,14 +118,14 @@ const AppMenu = () => {
                 {
                     label: 'Docente',
                     items: [
-                        { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/docente' },
+                        { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/docente' },
                         { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/docente/cursos' }
                     ]
                 },
                 {
                     label: 'Estudiante',
                     items: [
-                        { label: 'Perfil', icon: 'pi pi-fw pi-id-card', to: '/estudiante' },
+                        { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/estudiante' },
                         { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/estudiante/cursos' },
                         { label: 'Examenes', icon: 'pi pi-fw pi-file', to: '/estudiante/examenes' }
                         // { label: 'Horarios', icon: 'pi pi-fw pi-calendar-plus', to: '/estudiante/horarios' },
@@ -145,7 +146,6 @@ const AppMenu = () => {
     ];
 
     if (status === 'authenticated' && i == 0) {
-        console.log('Holax', session?.user)
         switch (session?.user?.tipoUsuario) {
             case 1:
                 setUser(modelAdministrador);
@@ -172,17 +172,6 @@ const AppMenu = () => {
             </ul>
         </MenuProvider>
     );
-
-    // return (
-    //     <MenuProvider>
-    //         <ul className="layout-menu">
-    //             {model.map((item, i) => {
-    //                 return !item?.seperator ? <AppMenuitem item={item} root={true} index={i} key={item.label} /> : <li className="menu-separator"></li>;
-    //             })}
-    //         </ul>
-    //     </MenuProvider>
-    // );
-
     
 };
 

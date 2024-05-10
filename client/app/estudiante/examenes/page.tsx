@@ -44,7 +44,6 @@ const GestionCursos = () => {
         }
     };
 
-
     const gradoVacio = {
         Codigo: 0,
         Nombre: '',
@@ -129,16 +128,25 @@ const GestionCursos = () => {
         });
     };
 
+    const comprobarAperturaExamen = (examen: any) => {
+        if(examen?.estudianteExamenDiarios[0]?.Estado) return false
+
+        const fechaExamen = new Date(examen.Fecha)
+
+        if(fechaExamen.setHours(0,0,0,0) < new Date().setHours(0,0,0,0)) return false
+        const horaActual = new Date()
+        const horaInicio = new Date(examen.HoraInicio)
+        const horaFin = new Date(examen.HoraFin)
+        console.log(horaActual.getHours())
+        return true
+    };
+
     const actionBodyTemplate = (rowData: any) => {
-        const estadoExamen = rowData?.estudianteExamenDiarios[0]?.Estado ?? false
+        const estadoExamen = comprobarAperturaExamen(rowData)
         return (
             <>
+                {!estadoExamen && <Button icon="pi pi-external-link" rounded severity={'secondary'} outlined tooltip="Examen culminado" className="mr-2" />}
                 {estadoExamen && (
-
-                        <Button icon="pi pi-external-link" rounded severity={'secondary'} outlined tooltip="Examen culminado" className="mr-2"/>
-
-                )}
-                {!estadoExamen && (
                     <Link
                         href={{
                             pathname: '/estudiante/examenes/examen',

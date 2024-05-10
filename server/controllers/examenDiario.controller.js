@@ -12,6 +12,8 @@ const {
 } = require("../config/relations");
 
 const { sequelize } = require("../config/database");
+const estudianteExamenDiario = require("../models/estudianteExamenDiario.model");
+const examenDiario = require("../models/examenDiario.model");
 
 const getExamenes = async (req, res) => {
   try {
@@ -63,6 +65,49 @@ const getExamenesEstudiante = async (req, res) => {
       ],
       where: { "$Tema.Curso.CodigoGrado$": estudiante.CodigoGrado },
     });
+    res.json({ message: "Examenes cargados correctamente", examenes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar los examenes" });
+  }
+};
+
+const getReporteExamenesEstudiante = async (req, res) => {
+  try {
+    const { CodigoEstudiante } = req.query;
+
+    const listaExamenes = await EstudianteExamenDiario.findAll({
+      include: [
+        {
+          model: ExamenDiario,
+          attributes: ["Fecha"],
+          include: [
+            {
+              model: Tema,
+              attributes: ["Descripcion"],
+              include: [
+                {
+                  model: Curso,
+                  attributes: ["Nombre"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      where: { CodigoEstudiante: CodigoEstudiante },
+    });
+
+    const examenes = listaExamenes.map((examen) => ({
+      Nota: examen.Nota,
+      Correctas: examen.Correctas,
+      Incorrectas: examen.Incorrectas,
+      EnBlanco: examen.EnBlanco,
+      Fecha: examen.examenDiario.Fecha,
+      Tema: examen.examenDiario.Tema.Descripcion,
+      Curso: examen.examenDiario.Tema.Curso.Nombre,
+    }));
+
     res.json({ message: "Examenes cargados correctamente", examenes });
   } catch (error) {
     console.error(error);
@@ -201,14 +246,14 @@ const getInfoReporte = async (req, res) => {
   const niveles = await Nivel.findAll({});
   const grados = await Grado.findAll({});
   const examenes = await ExamenDiario.count({});
-  const estudiantes = await Estudiante.count({})
+  const estudiantes = await Estudiante.count({});
 
   res.json({
     ok: true,
     niveles,
     grados,
     examenes,
-    estudiantes
+    estudiantes,
   });
 };
 
@@ -233,7 +278,12 @@ const getReporteGrado = async (req, res) => {
       where: { "$Tema.Curso.CodigoGrado$": CodigoGrado },
     });
 
-    const datos = examenes.map(examen => ({Codigo: examen.Codigo, Curso: examen.Tema.Curso.Nombre, Tema: examen.Tema.Descripcion, Resueltos: examen?.estudianteExamenDiarios.length ?? 0}));
+    const datos = examenes.map((examen) => ({
+      Codigo: examen.Codigo,
+      Curso: examen.Tema.Curso.Nombre,
+      Tema: examen.Tema.Descripcion,
+      Resueltos: examen?.estudianteExamenDiarios.length ?? 0,
+    }));
 
     res.json({ message: "Examenes cargados correctamente", datos });
   } catch (error) {
@@ -255,12 +305,232 @@ const getReporteCurso = async (req, res) => {
   }
 };
 
+const obtenerChartData = async () => {};
+
+const getDataChart = async (req, res) => {
+  try {
+    const { CodigoNivel } = req.query;
+
+    const grados = await Grado.findAll({
+      where: { CodigoNivel },
+    });
+
+    const datos = await EstudianteExamenDiario.findAll({
+      include: [
+        {
+          model: Estudiante,
+          include: [
+            {
+              model: Grado,
+              attributes: ["Codigo", "Nombre", "CodigoNivel"],
+            },
+          ],
+          attributes: ["Codigo"],
+        },
+        {
+          model: ExamenDiario,
+          attributes: ["Fecha"],
+        },
+      ],
+      attributes: ["Nota"],
+      where: { "$Estudiante.Grado.CodigoNivel$": CodigoNivel },
+    });
+
+    const labels = [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ];
+
+    const colors = [
+      "#f97316",
+      "#06b6d4",
+      "#ec4899",
+      "#22c55e",
+      "#a855f7",
+      "#eab308",
+    ];
+
+    const colorsText = ["orange", "cyan", "pink", "green", "purple", "yellow"];
+
+    let datosGrado = [];
+    let datosFinales = [];
+    let datosPromedios = [];
+
+    grados.forEach((f, index) => {
+      const grado = datos
+        .filter((examen) => examen.Estudiante.Grado.Codigo == f.Codigo)
+        .map((dato) => ({ Nota: dato.Nota, Fecha: dato.examenDiario.Fecha }));
+      datosGrado.push([]);
+
+      for (let j = 0; j < 12; j++) {
+        const gradomes = grado
+          .filter((examen) => new Date(examen.Fecha).getMonth() == j)
+          .map((dato) => dato.Nota);
+        if (gradomes.length > 0) {
+          const suma = gradomes.reduce((total, numero) => total + numero, 0);
+          const promedio = suma / gradomes?.length;
+          datosGrado[index].push(promedio);
+        } else datosGrado[index].push(0);
+      }
+    });
+
+    const promedios = [];
+
+    datosGrado.forEach((grado) => {
+      const gradoLimpio = grado.filter((nota) => nota != 0);
+      if (gradoLimpio.length > 0) {
+        const suma = gradoLimpio.reduce((total, numero) => total + numero, 0);
+        const promedio = suma / gradoLimpio?.length;
+        promedios.push(promedio);
+      } else promedios.push(0);
+    });
+
+    grados.forEach((grado, index) => {
+      const y = {
+        grado: grado.Nombre,
+        promedio: promedios[index],
+        porcentaje: (promedios[index] / 20) * 100,
+        color: colorsText[index],
+      };
+      datosPromedios.push(y);
+
+      const x = {
+        label: grado.Nombre,
+        data: datosGrado[index],
+        fill: false,
+        backgroundColor: colors[index],
+        borderColor: colors[index],
+        tension: 0.4,
+      };
+      datosFinales.push(x);
+    });
+
+    res.json({
+      message: "Datos cargados correctamente",
+      labels,
+      datosPromedios,
+      datosFinales,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar los datos" });
+  }
+};
+
+const getDataChartEstudiante = async (req, res) => {
+  try {
+    const { CodigoEstudiante } = req.query;
+
+    const datos = await EstudianteExamenDiario.findAll({
+      include: [
+        {
+          model: ExamenDiario,
+          attributes: ["Fecha"],
+        },
+      ],
+      attributes: ["Nota"],
+      where: { CodigoEstudiante },
+    });
+
+    const labels = [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ];
+
+    const colors = [
+      "#f97316",
+      "#06b6d4",
+      "#ec4899",
+      "#22c55e",
+      "#a855f7",
+      "#eab308",
+    ];
+
+    const colorsText = ["orange", "cyan", "pink", "green", "purple", "yellow"];
+
+    const datosLimpios = datos.map((dato) => ({
+      Nota: dato.Nota,
+      Fecha: dato.examenDiario.Fecha,
+    }));
+
+    let datosEstudiante = [];
+    let datosFinales = [];
+
+    for (let j = 0; j < 12; j++) {
+      const mes = datosLimpios
+        .filter((examen) => new Date(examen.Fecha).getMonth() == j)
+        .map((dato) => dato.Nota);
+      if (mes.length > 0) {
+        const suma = mes.reduce((total, numero) => total + numero, 0);
+        const promedio = suma / mes?.length;
+        datosEstudiante.push(promedio);
+      } else datosEstudiante.push(0);
+    }
+
+    const x = {
+      label: 'Notas del Estudiante',
+      data: datosEstudiante,
+      fill: false,
+      backgroundColor: colors[0],
+      borderColor: colors[0],
+      tension: 0.4,
+    };
+    datosFinales.push(x);
+
+    res.json({
+      message: "Datos cargados correctamente",
+      labels,
+      datosFinales,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar los datos" });
+  }
+};
+
+const getDataPromedioGrado = async (req, res) => {
+  try {
+    const { CodigoNivel } = req.query;
+
+    const datos = await ExamenDiario.findOne({});
+
+    res.json({ message: "Examenes cargados correctamente", datos });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar los examenes" });
+  }
+};
+
 module.exports = {
   getExamenes,
   getExamenesEstudiante,
+  getReporteExamenesEstudiante,
   getInfoReporte,
   getReporteGrado,
   getReporteCurso,
+  getDataChart,
+  getDataChartEstudiante,
+  getDataPromedioGrado,
   getDetalleExamen,
   getExamen,
   getCursos,

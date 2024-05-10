@@ -14,28 +14,6 @@ import { ChartData, ChartOptions } from 'chart.js';
 import { Dropdown } from 'primereact/dropdown';
 import axios from 'axios';
 
-const lineData: ChartData = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-    datasets: [
-        {
-            label: 'Primer Grado',
-            data: [0, 0, 0, 0, 0, 15, 0],
-            fill: false,
-            backgroundColor: '#2f4860',
-            borderColor: '#2f4860',
-            tension: 0.4
-        },
-        {
-            label: 'Segundo Grado',
-            data: [0, 0, 0, 0, 0, 0, 0],
-            fill: false,
-            backgroundColor: '#00bb7e',
-            borderColor: '#00bb7e',
-            tension: 0.4
-        }
-    ]
-};
-
 const nivelVacio = {
     Codigo: 0,
     Nombre: ''
@@ -58,12 +36,18 @@ const Dashboard = () => {
     const [grados, setGrados] = useState<(typeof gradoVacio)[]>([]);
     const [gradosx, setGradosx] = useState<(typeof gradoVacio)[]>([]);
 
+    const [lineData, setLineData] = useState({
+        labels: [],
+        datasets: []
+    });
+
+    const [promediosGrado, setPromediosGrado] = useState([]);
+
     const [nivel, setNivel] = useState(nivelVacio);
     const [grado, setGrado] = useState(gradoVacio);
 
     const [estudiantes, setEstudiantes] = useState(0);
     const [examenes, setExamenes] = useState(0);
-
 
     const applyLightTheme = () => {
         const lineOptions: ChartOptions = {
@@ -131,7 +115,6 @@ const Dashboard = () => {
 
     useEffect(() => {
         cargarDatos();
-
     }, []);
 
     useEffect(() => {
@@ -150,7 +133,7 @@ const Dashboard = () => {
             setNiveles(niveles);
             setGrados(grados);
             setExamenes(examenes);
-            setEstudiantes(estudiantes)
+            setEstudiantes(estudiantes);
         } catch (error) {
             console.error(error);
         }
@@ -163,8 +146,23 @@ const Dashboard = () => {
                 params: { CodigoGrado: CodigoGrado }
             });
             const { examenes, datos } = data;
-            setProducts(datos)
-            console.log('Datos', datos)
+            setProducts(datos);
+            console.log('Datos', datos);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const cargarDataGraficos = async (CodigoNivel: number) => {
+        try {
+            const { data } = await axios.get('http://localhost:3001/api/examen/dataChart', {
+                params: { CodigoNivel }
+            });
+            const { labels, datosFinales, datosPromedios, datosGrado } = data;
+            setLineData({ ...lineData, labels: labels, datasets: datosFinales });
+            setPromediosGrado(datosPromedios);
+            console.log('promediosGrado', datosPromedios);
+            console.log('datasets', datosFinales);
         } catch (error) {
             console.error(error);
         }
@@ -176,6 +174,8 @@ const Dashboard = () => {
 
     const onNivelSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
+
+        cargarDataGraficos(val);
 
         setGradosx(grados.filter((g) => g.CodigoNivel == val));
         let nivelx = niveles.find((nivel) => nivel.Codigo === val);
@@ -299,7 +299,7 @@ const Dashboard = () => {
                 <div className="card">
                     <h5>Ultimos Examenes</h5>
                     <DataTable value={products} rows={5} paginator responsiveLayout="scroll">
-                        <Column field='Curso' header="Curso"  headerStyle={{ minWidth: '6rem' }}/>
+                        <Column field="Curso" header="Curso" headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Tema" header="Tema" sortable headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Resueltos" header="Resueltos" sortable headerStyle={{ minWidth: '3rem' }} />
                         <Column
@@ -406,94 +406,26 @@ const Dashboard = () => {
                 <div className="card">
                     <div className="flex justify-content-between align-items-center mb-5">
                         <h5>Promedio de los examenes diarios</h5>
-                        <div>
-                            <Button type="button" icon="pi pi-ellipsis-v" rounded text className="p-button-plain" onClick={(event) => menu1.current?.toggle(event)} />
-                            <Menu
-                                ref={menu1}
-                                popup
-                                model={[
-                                    { label: 'Add New', icon: 'pi pi-fw pi-plus' },
-                                    { label: 'Remove', icon: 'pi pi-fw pi-minus' }
-                                ]}
-                            />
-                        </div>
                     </div>
                     <ul className="list-none p-0 m-0">
-                        <li className="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
-                            <div>
-                                <span className="text-900 font-medium mr-2 mb-1 md:mb-0">1° Grado</span>
-                                <div className="mt-1 text-600"></div>
-                            </div>
-                            <div className="mt-2 md:mt-0 flex align-items-center">
-                                <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
-                                    <div className="bg-orange-500 h-full" style={{ width: '75%' }} />
-                                </div>
-                                <span className="text-orange-500 ml-3 font-medium">15/20</span>
-                            </div>
-                        </li>
-                        <li className="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
-                            <div>
-                                <span className="text-900 font-medium mr-2 mb-1 md:mb-0">2° Grado</span>
-                                <div className="mt-1 text-600"></div>
-                            </div>
-                            <div className="mt-2 md:mt-0 ml-0 md:ml-8 flex align-items-center">
-                                <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
-                                    <div className="bg-cyan-500 h-full" style={{ width: '0%' }} />
-                                </div>
-                                <span className="text-cyan-500 ml-3 font-medium">00/20</span>
-                            </div>
-                        </li>
-                        <li className="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
-                            <div>
-                                <span className="text-900 font-medium mr-2 mb-1 md:mb-0">3° Grado</span>
-                                <div className="mt-1 text-600"></div>
-                            </div>
-                            <div className="mt-2 md:mt-0 ml-0 md:ml-8 flex align-items-center">
-                                <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
-                                    <div className="bg-pink-500 h-full" style={{ width: '0%' }} />
-                                </div>
-                                <span className="text-pink-500 ml-3 font-medium">00/20</span>
-                            </div>
-                        </li>
-                        <li className="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
-                            <div>
-                                <span className="text-900 font-medium mr-2 mb-1 md:mb-0">4° Grado</span>
-                                <div className="mt-1 text-600"></div>
-                            </div>
-                            <div className="mt-2 md:mt-0 ml-0 md:ml-8 flex align-items-center">
-                                <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
-                                    <div className="bg-green-500 h-full" style={{ width: '0%' }} />
-                                </div>
-                                <span className="text-green-500 ml-3 font-medium">00/20</span>
-                            </div>
-                        </li>
-                        <li className="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
-                            <div>
-                                <span className="text-900 font-medium mr-2 mb-1 md:mb-0">5° Grado</span>
-                                <div className="mt-1 text-600"></div>
-                            </div>
-                            <div className="mt-2 md:mt-0 ml-0 md:ml-8 flex align-items-center">
-                                <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
-                                    <div className="bg-purple-500 h-full" style={{ width: '0%' }} />
-                                </div>
-                                <span className="text-purple-500 ml-3 font-medium">00/20</span>
-                            </div>
-                        </li>
-                        <li className="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
-                            <div>
-                                <span className="text-900 font-medium mr-2 mb-1 md:mb-0">6° Grado</span>
-                                <div className="mt-1 text-600"></div>
-                            </div>
-                            <div className="mt-2 md:mt-0 ml-0 md:ml-8 flex align-items-center">
-                                <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
-                                    <div className="bg-teal-500 h-full" style={{ width: '0%' }} />
-                                </div>
-                                <span className="text-teal-500 ml-3 font-medium">00/20</span>
-                            </div>
-                        </li>
+                        {promediosGrado.map((grado: any, index) => {
+                            return (
+                                <li key={index} className="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
+                                    <div>
+                                        <span className="text-900 font-medium mr-2 mb-1 md:mb-0">{grado.grado}</span>
+                                        <div className="mt-1 text-600"></div>
+                                    </div>
+                                    <div className="mt-2 md:mt-0 ml-0 md:ml-8 flex align-items-center">
+                                        <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
+                                            <div className={"bg-"+grado.color+"-500 h-full"} style={{ width: (grado.porcentaje+'%') }} />
+                                        </div>
+                                        <span className={"text-"+grado.color+"-500 ml-3 font-medium"}>{grado.promedio>9 ? grado.promedio : '0'+grado.promedio}/20</span>
+                                    </div>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
-
             </div>
         </div>
     );

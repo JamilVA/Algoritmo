@@ -22,8 +22,6 @@ const handler = NextAuth({
 
                 const user = await res.json();
 
-                console.log('Usuario:', user, 'fin')
-
                 if (user.error) throw new Error(user.error);
 
                 return user;
@@ -41,8 +39,6 @@ const handler = NextAuth({
         
         async session({ session, token }) {
             session.user = token as any;
-            console.log(session)
-
             return session;
         },
     },
