@@ -1,48 +1,52 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 import { useRouter } from 'next/navigation';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Checkbox } from 'primereact/checkbox';
 import { Button } from 'primereact/button';
 import { Password } from 'primereact/password';
 import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { LayoutContext } from '../../layout/context/layoutcontext';
 import { Divider } from 'primereact/divider';
 import Link from 'next/link';
+import axios from 'axios';
 
-const LoginPage = () => {
+const HomePage = () => {
     const [errors, setErrors] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
 
+    const usuarioVacio = {
+        Nombres: '',
+        TipoUsuario: '',
+    }
+
+    const [usuario, setUsuario] = useState(usuarioVacio);
+
+    const { data: session, status } = useSession();
+
     const router = useRouter();
     const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setLoading(true);
-        setErrors('');
-
-        const responseNextAuth = await signIn('credentials', {
-            email,
-            password,
-            redirect: false
+    const cargarDatos = async () => {
+        const { data } = await axios.get('http://localhost:3001/api/info', {
+            params: { CodigoPersona: session?.user.codigoPersona }
         });
-
-        setLoading(false);
-
-        if (responseNextAuth?.error) {
-            setErrors(responseNextAuth.error);
-        } else {
-            router.push('/inicio');
-            router.refresh();
-        }
+        const { usuario } = data;
+        console.log('Hola', usuario);
+        setUsuario(usuario);
     };
+
+    useEffect(() => {
+        if (status === 'authenticated') {
+            cargarDatos();
+        }
+    }, [status]);
 
     return (
         <div className="surface-0 flex justify-content-center">
@@ -76,12 +80,12 @@ const LoginPage = () => {
                             }}
                         >
                             <div className="flex flex-column justify-content-center align-items-center text-center px-3 py-3 md:py-0">
-                                <h3 className="text-gray-900 mb-2">Nombres y Apellidos</h3>
-                                <span className="text-gray-600 text-2xl">Estudiante/Docente/Apoderado</span>
+                                <h3 className="text-gray-900 mb-2">{usuario.Nombres}</h3>
+                                <span className="text-gray-600 text-2xl">{usuario?.TipoUsuario}</span>
                                 <p className="text-gray-900 sm:line-height-2 md:line-height-4 text-2xl mt-4" style={{ maxWidth: '800px' }}>
                                     Colegios Algoritmo te da la bienvenida a su Sistema Académico
                                 </p>
-                                <img src="/layout/images/logo.png" className="mt-4" alt="Company logo" />
+                                <img src="/layout/images/logo.png" className="mt-4" alt="Colegios Algoritmo Logo" />
                             </div>
                         </div>
                     </div>
@@ -91,4 +95,4 @@ const LoginPage = () => {
     );
 };
 
-export default LoginPage;
+export default HomePage;

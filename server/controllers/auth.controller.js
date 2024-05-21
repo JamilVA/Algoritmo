@@ -3,6 +3,8 @@ const {
   Docente,
   Estudiante,
   Apoderado,
+  Persona,
+  TipoUsuario,
 } = require("../config/relations");
 // const bcrypt = require('bcryptjs');
 const {
@@ -39,7 +41,7 @@ const login = async (req, res) => {
         .json({ error: "Usuario y/o contraseña incorrectos" });
 
     const respuestaPassword = comparePassword(user.Password, password);
-    
+
     if (!respuestaPassword)
       return res
         .status(403)
@@ -92,6 +94,46 @@ const login = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Error de servidor" });
+  }
+};
+
+const getInfo = async (req, res) => {
+  try {
+    const { CodigoPersona } = req.query;
+
+    const persona = await Persona.findOne({
+      include: [
+        {
+          model: Usuario,
+          attributes: ["Codigo"],
+          include: [
+            {
+              model: TipoUsuario,
+              attributes: ["Nombre"],
+            },
+          ],
+        },
+      ],
+      attributes: ["Nombres", "ApellidoPaterno", "ApellidoMaterno"],
+    });
+
+    const usuario = {
+      Nombres:
+        persona.Nombres +
+        " " +
+        persona.ApellidoPaterno +
+        " " +
+        persona.ApellidoMaterno,
+      TipoUsuario: persona.Usuario.TipoUsuario.Nombre,
+    };
+
+    res.json({
+      message: "Datos cargados correctamente",
+      usuario,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar los datos" });
   }
 };
 
@@ -163,4 +205,10 @@ const changePasswordAdmin = async (req, res) => {
   }
 };
 
-module.exports = { login, logout, changePassword, changePasswordAdmin };
+module.exports = {
+  login,
+  logout,
+  getInfo,
+  changePassword,
+  changePasswordAdmin,
+};

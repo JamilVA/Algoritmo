@@ -32,11 +32,10 @@ export default function GestionDocente() {
             ApellidoPaterno: '',
             ApellidoMaterno: '',
             DNI: '',
-        
+
             Usuario: {
                 Email: '',
                 Password: ''
-
             }
         },
         Grado: {
@@ -133,9 +132,24 @@ export default function GestionDocente() {
                     })
                     .then((response) => {
                         console.log(response.data);
-                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Docente creado correctamente', life: 3000 });
+                        toast.current?.show({
+                            severity: 'success',
+                            summary: 'Mensaje',
+                            detail: response.data.message,
+                            life: 3000
+                        });
                         cargarDatos();
+                    })
+                    .catch((error) => {
+                        toast.current?.show({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: !error.response ? error.message : error.response.data.error,
+                            life: 3000
+                        });
                     });
+                cargarDatos();
+
                 setDocente(docenteVacio);
                 hideDialog();
             } catch (error) {
@@ -157,8 +171,21 @@ export default function GestionDocente() {
                     })
                     .then((response) => {
                         console.log(response.data);
-                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Docente modificado correctamente', life: 3000 });
+                        toast.current?.show({
+                            severity: 'info',
+                            summary: 'Mensaje',
+                            detail: response.data.message,
+                            life: 3000
+                        });
                         cargarDatos();
+                    })
+                    .catch((error) => {
+                        toast.current?.show({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: !error.response ? error.message : error.response.data.error,
+                            life: 3000
+                        });
                     });
                 setDocente(docenteVacio);
                 hideDialog();
@@ -199,8 +226,6 @@ export default function GestionDocente() {
     const editDocente = (docente: typeof docenteVacio) => {
         setDocente({ ...docente });
         setDocenteDialog(true);
-
-        console.log('Docente recibido para editar:', docente);
     };
 
     const exportCSV = () => {
@@ -220,8 +245,7 @@ export default function GestionDocente() {
     const rightToolbarTemplate = () => {
         return (
             <React.Fragment>
-                <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} chooseLabel="Import" className="mr-2 inline-block" />
-                <Button label="Export" icon="pi pi-upload" severity="help" onClick={exportCSV} />
+                <Button label="Exportar" icon="pi pi-upload" severity="help" onClick={exportCSV} />
             </React.Fragment>
         );
     };

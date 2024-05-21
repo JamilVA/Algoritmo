@@ -309,31 +309,37 @@ const obtenerChartData = async () => {};
 
 const getDataChart = async (req, res) => {
   try {
-    const { CodigoNivel } = req.query;
+    const { CodigoGrado } = req.query;
 
-    const grados = await Grado.findAll({
-      where: { CodigoNivel },
+    const cursos = await Curso.findAll({
+      where: { CodigoGrado },
     });
 
     const datos = await EstudianteExamenDiario.findAll({
       include: [
         {
           model: Estudiante,
-          include: [
-            {
-              model: Grado,
-              attributes: ["Codigo", "Nombre", "CodigoNivel"],
-            },
-          ],
-          attributes: ["Codigo"],
+          attributes: ["Codigo", 'CodigoGrado'],
         },
         {
           model: ExamenDiario,
           attributes: ["Fecha"],
+          include:[
+            {
+              model: Tema,
+              attributes: ['Codigo'],
+              include:[
+                {
+                  model: Curso,
+                  attributes: ['Codigo']
+                }
+              ]
+            }
+          ]
         },
       ],
       attributes: ["Nota"],
-      where: { "$Estudiante.Grado.CodigoNivel$": CodigoNivel },
+      where: { "$Estudiante.CodigoGrado$": CodigoGrado },
     });
 
     const labels = [
@@ -358,46 +364,53 @@ const getDataChart = async (req, res) => {
       "#22c55e",
       "#a855f7",
       "#eab308",
+      '#3b82f6',
+      '#ff3d32',
+      '#64748b',
+      '#6366f1',
+      '#14b8a6',
+      '#6366f1',
+      '#6b7280'
     ];
 
-    const colorsText = ["orange", "cyan", "pink", "green", "purple", "yellow"];
+    const colorsText = ["orange", "cyan", "pink", "green", "purple", "yellow", 'blue', 'red', 'bluegray', 'indigo', 'teal', 'primary', 'gray'];
 
-    let datosGrado = [];
+    let datosCurso = [];
     let datosFinales = [];
     let datosPromedios = [];
 
-    grados.forEach((f, index) => {
-      const grado = datos
-        .filter((examen) => examen.Estudiante.Grado.Codigo == f.Codigo)
+    cursos.forEach((f, index) => {
+      const curso = datos
+        .filter((examen) => examen.examenDiario.Tema.Curso.Codigo == f.Codigo)
         .map((dato) => ({ Nota: dato.Nota, Fecha: dato.examenDiario.Fecha }));
-      datosGrado.push([]);
+      datosCurso.push([]);
 
       for (let j = 0; j < 12; j++) {
-        const gradomes = grado
+        const cursomes = curso
           .filter((examen) => new Date(examen.Fecha).getMonth() == j)
           .map((dato) => dato.Nota);
-        if (gradomes.length > 0) {
-          const suma = gradomes.reduce((total, numero) => total + numero, 0);
-          const promedio = suma / gradomes?.length;
-          datosGrado[index].push(promedio);
-        } else datosGrado[index].push(0);
+        if (cursomes.length > 0) {
+          const suma = cursomes.reduce((total, numero) => total + numero, 0);
+          const promedio = suma / cursomes?.length;
+          datosCurso[index].push(promedio);
+        } else datosCurso[index].push(0);
       }
     });
 
     const promedios = [];
 
-    datosGrado.forEach((grado) => {
-      const gradoLimpio = grado.filter((nota) => nota != 0);
-      if (gradoLimpio.length > 0) {
-        const suma = gradoLimpio.reduce((total, numero) => total + numero, 0);
-        const promedio = suma / gradoLimpio?.length;
+    datosCurso.forEach((curso) => {
+      const cursoLimpio = curso.filter((nota) => nota != 0);
+      if (cursoLimpio.length > 0) {
+        const suma = cursoLimpio.reduce((total, numero) => total + numero, 0);
+        const promedio = suma / cursoLimpio?.length;
         promedios.push(promedio);
       } else promedios.push(0);
     });
 
-    grados.forEach((grado, index) => {
+    cursos.forEach((curso, index) => {
       const y = {
-        grado: grado.Nombre,
+        curso: curso.Nombre,
         promedio: promedios[index],
         porcentaje: (promedios[index] / 20) * 100,
         color: colorsText[index],
@@ -405,8 +418,8 @@ const getDataChart = async (req, res) => {
       datosPromedios.push(y);
 
       const x = {
-        label: grado.Nombre,
-        data: datosGrado[index],
+        label: curso.Nombre,
+        data: datosCurso[index],
         fill: false,
         backgroundColor: colors[index],
         borderColor: colors[index],
@@ -464,9 +477,17 @@ const getDataChartEstudiante = async (req, res) => {
       "#22c55e",
       "#a855f7",
       "#eab308",
+      '#3b82f6',
+      '#ff3d32',
+      '#64748b',
+      '#6366f1',
+      '#14b8a6',
+      '#6366f1',
+      '#6b7280'
     ];
 
-    const colorsText = ["orange", "cyan", "pink", "green", "purple", "yellow"];
+    const colorsText = ["orange", "cyan", "pink", "green", "purple", "yellow", 'blue', 'red', 'bluegray', 'indigo', 'teal', 'primary', 'gray'];
+
 
     const datosLimpios = datos.map((dato) => ({
       Nota: dato.Nota,

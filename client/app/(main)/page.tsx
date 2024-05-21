@@ -11,7 +11,6 @@ import { classNames } from 'primereact/utils';
 import { signIn } from 'next-auth/react';
 import { LayoutContext } from '../../layout/context/layoutcontext';
 
-
 const LoginPage = () => {
     const [errors, setErrors] = useState<string>('');
     const [email, setEmail] = useState<string>('');
@@ -82,7 +81,6 @@ const LoginPage = () => {
                             <Button loading={loading} label="Login" severity="info" className="w-full btn_login" type="submit"></Button>
                             <br /> <br />
                             {errors.length > 0 && (
-                                
                                 <Message
                                     style={{
                                         border: 'solid',

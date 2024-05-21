@@ -74,6 +74,9 @@ export default function GestionEstudiante() {
     const [estudiantes, setEstudiantes] = useState<(typeof estudianteVacio)[]>([]);
     const [estudiante, setEstudiante] = useState(estudianteVacio);
 
+    const [fechaMinima, setFechaMinima] = useState(new Date());
+    const [i, setI] = useState(0);
+
     const [apoderados, setApoderados] = useState<(typeof apoderadoVacio)[]>([]);
 
     const [grados, setGrados] = useState<(typeof gradoVacio)[]>([]);
@@ -96,6 +99,13 @@ export default function GestionEstudiante() {
         cargarDatos();
         cargarApoderados();
         cargarGrados();
+        if (i == 0) {
+            var fechaActual = new Date();
+            fechaActual.setFullYear(fechaActual.getFullYear() - 3);
+            setFechaMinima(fechaActual);
+            console.log('Fecha minima', fechaActual);
+            setI(1);
+        }
     }, []);
 
     const cargarDatos = async () => {
@@ -134,7 +144,7 @@ export default function GestionEstudiante() {
     };
 
     const openNew = () => {
-        setEstudiante(estudianteVacio);
+        setEstudiante({ ...estudianteVacio, FechaNacimiento: fechaMinima });
         setSubmitted(false);
         setEstudianteDialog(true);
     };
@@ -163,8 +173,21 @@ export default function GestionEstudiante() {
                 })
                 .then((response) => {
                     console.log(response.data);
-                    toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Estudiante creado correctamente', life: 3000 });
+                    toast.current?.show({
+                        severity: 'success',
+                        summary: 'Mensaje',
+                        detail: response.data.message,
+                        life: 3000
+                    });
                     cargarDatos();
+                })
+                .catch((error) => {
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: !error.response ? error.message : error.response.data.error,
+                        life: 3000
+                    });
                 });
             setEstudiante(estudianteVacio);
             hideDialog();
@@ -179,12 +202,26 @@ export default function GestionEstudiante() {
                         DNI: _estudiante.Persona.DNI,
                         Email: _estudiante.Persona.Usuario.Email,
                         Password: _estudiante.Persona.Usuario.Password,
-                        FechaNacimiento: _estudiante.FechaNacimiento
+                        FechaNacimiento: _estudiante.FechaNacimiento,
+                        CodigoPersona: estudiante.Persona.Codigo,
                     })
                     .then((response) => {
                         console.log(response.data);
-                        toast.current!.show({ severity: 'success', summary: 'Successful', detail: 'Estudiante modificado correctamente', life: 3000 });
+                        toast.current?.show({
+                            severity: 'success',
+                            summary: 'Mensaje',
+                            detail: response.data.message,
+                            life: 3000
+                        });
                         cargarDatos();
+                    })
+                    .catch((error) => {
+                        toast.current?.show({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: !error.response ? error.message : error.response.data.error,
+                            life: 3000
+                        });
                     });
                 setEstudiante(estudianteVacio);
                 hideDialog();
@@ -317,8 +354,7 @@ export default function GestionEstudiante() {
     const rightToolbarTemplate = () => {
         return (
             <React.Fragment>
-                <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} chooseLabel="Import" className="mr-2 inline-block" />
-                <Button label="Export" icon="pi pi-upload" severity="help" onClick={exportCSV} />
+                <Button label="Exportar" icon="pi pi-upload" severity="help" onClick={exportCSV} />
             </React.Fragment>
         );
     };
@@ -597,7 +633,7 @@ export default function GestionEstudiante() {
                                     }}
                                     showIcon
                                     required
-                                    className={classNames({ 'p-invalid': submitted && !estudiante.FechaNacimiento })}
+                                    maxDate={fechaMinima}
                                 />
                                 {submitted && !estudiante.Persona.ApellidoMaterno && <small className="p-error">Seleccione la fecha de nacimiento del estudiante.</small>}
                             </div>

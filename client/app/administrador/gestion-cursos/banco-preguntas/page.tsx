@@ -70,6 +70,7 @@ export default function BancoPreguntas() {
     const [respuesta2, setRespuesta2] = useState(respuestaVacia);
     const [respuesta3, setRespuesta3] = useState(respuestaVacia);
     const [respuesta4, setRespuesta4] = useState(respuestaVacia);
+    const [respuesta5, setRespuesta5] = useState(respuestaVacia);
 
     const [curso, setCurso] = useState(cursoVacio);
     const [tema, setTema] = useState(temaVacio);
@@ -144,13 +145,13 @@ export default function BancoPreguntas() {
         let _pregunta = { ...pregunta };
 
         console.log('Crear pregunta', pregunta);
-        console.log('Add Respuestas', respuesta1, respuesta2, respuesta3, respuesta4);
+        console.log('Add Respuestas', respuesta1, respuesta2, respuesta3, respuesta4, respuesta5);
 
         await axios
             .post('http://localhost:3001/api/pregunta/crearPregunta', {
                 CodigoTema: tema.Codigo,
                 pregunta: _pregunta,
-                respuestas: [respuesta1, respuesta2, respuesta3, respuesta4]
+                respuestas: [respuesta1, respuesta2, respuesta3, respuesta4, respuesta5]
             })
             .then((response) => {
                 console.log(response.data);
@@ -167,6 +168,7 @@ export default function BancoPreguntas() {
                 setRespuesta2(respuestaVacia)
                 setRespuesta3(respuestaVacia)
                 setRespuesta4(respuestaVacia)
+                setRespuesta5(respuestaVacia)
             })
             .catch((error) => {
                 console.error(error.response);
@@ -284,6 +286,9 @@ export default function BancoPreguntas() {
             case 4:
                 setRespuesta4({ ...respuesta4, Valor: val, Tipo: false });
                 break;
+            case 5:
+                setRespuesta5({ ...respuesta5, Valor: val, Tipo: false });
+                break;
             default:
                 break;
         }
@@ -325,7 +330,7 @@ export default function BancoPreguntas() {
     const rightToolbarTemplate = () => {
         return (
             <React.Fragment>
-                <Button label="Export" icon="pi pi-upload" severity="help" onClick={exportarCursos} />
+                <Button label="Exportar" icon="pi pi-upload" severity="help" onClick={exportarCursos} />
             </React.Fragment>
         );
     };
@@ -347,6 +352,7 @@ export default function BancoPreguntas() {
                     setRespuesta2(respuestaVacia);
                     setRespuesta3(respuestaVacia);
                     setRespuesta4(respuestaVacia);
+                    setRespuesta5(respuestaVacia);
                 }}
             />
             <Button label="Guardar" icon="pi pi-check" text onClick={guardarPregunta} />
@@ -536,6 +542,19 @@ export default function BancoPreguntas() {
                                 autoFocus
                                 maxLength={100}
                                 className={classNames({ 'p-invalid': submitted && !respuesta4.Valor })}
+                            />
+                            <br />
+                            <br />
+                            <InputText
+                                id="respuesta5.Valor"
+                                value={respuesta5.Valor ?? ''}
+                                onChange={(e) => {
+                                    onRespuestaChange(e, 5);
+                                }}
+                                required
+                                autoFocus
+                                maxLength={100}
+                                className={classNames({ 'p-invalid': submitted && !respuesta5.Valor })}
                             />
                         </div>
                     </Dialog>

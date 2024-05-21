@@ -45,37 +45,65 @@ const getEstudiantes = async (req, res) => {
 
 const crearEstudiante = async (req, res) => {
   try {
-    const persona = await Persona.create({
-      Codigo: null,
-      Nombres: req.body.Nombres,
-      ApellidoPaterno: req.body.ApellidoPaterno,
-      ApellidoMaterno: req.body.ApellidoMaterno,
-      DNI: req.body.DNI,
+    let _persona = await Persona.findOne({
+      where: { DNI: req.body.DNI },
     });
+    if (_persona)
+      return res.status(403).json({ error: "Ese DNI ya está registrado" });
 
-    const estudiante = await Estudiante.create({
-      Codigo: null,
-      FechaNacimiento: req.body.FechaNacimiento,
-      CodigoPersona: persona.Codigo,
-    });
-    const usuario = await Usuario.create({
-      Password: req.body.Password,
-      Email: req.body.Email,
-      Estado: true,
-      CodigoPersona: persona.Codigo,
-      CodigoTipoUsuario: 3,
-    });
+    let _usuario = await Usuario.findOne({ where: { Email: req.body.Email } });
+    if (_usuario) {
+      return res.status(403).json({ error: "Ese email ya está registrado" });
+    }
 
-    res.json({
-      ok: true,
-      persona,
-      estudiante,
-      usuario,
+    let persona = null;
+    let estudiante = null;
+    let usuario = null;
+
+    await sequelize.transaction(async (t) => {
+      persona = await Persona.create(
+        {
+          Codigo: null,
+          Nombres: req.body.Nombres,
+          ApellidoPaterno: req.body.ApellidoPaterno,
+          ApellidoMaterno: req.body.ApellidoMaterno,
+          DNI: req.body.DNI,
+        },
+        {
+          transaction: t,
+        }
+      );
+
+      estudiante = await Estudiante.create(
+        {
+          Codigo: null,
+          FechaNacimiento: req.body.FechaNacimiento,
+          CodigoPersona: persona.Codigo,
+        },
+        {
+          transaction: t,
+        }
+      );
+      usuario = await Usuario.create(
+        {
+          Password: req.body.Password,
+          Email: req.body.Email,
+          Estado: true,
+          CodigoPersona: persona.Codigo,
+          CodigoTipoUsuario: 3,
+        },
+        {
+          transaction: t,
+        }
+      );
     });
+    res.json({ message: "Estudiante guardado correctamente" });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ error: "Error al guardar el Estudiante" });
   }
 };
+
 const cargarGrados = async (req, res) => {
   try {
     const grados = await Grado.findAll({});
@@ -89,52 +117,68 @@ const cargarGrados = async (req, res) => {
   }
 };
 const actualizarEstudiante = async (req, res) => {
+  console.log('REQ: ', req.body)
   try {
-    const persona = await Persona.update(
-      {
-        Nombres: req.body.Nombres,
-        ApellidoPaterno: req.body.ApellidoPaterno,
-        ApellidoMaterno: req.body.ApellidoMaterno,
-        DNI: req.body.DNI,
-      },
-      {
-        where: {
-          Codigo: req.body.CodigoPersona,
-        },
-      }
-    );
+    let _persona = await Persona.findOne({ where: { DNI: req.body.DNI } });
+    if (_persona && _persona.Codigo != req.body.CodigoPersona) {
+      return res.status(403).json({ error: "Ese DNI ya está registrado" });
+    }
 
-    const estudiante = await Estudiante.update(
-      {
-        FechaNacimiento: req.body.FechaNacimiento,
-        CodigoPersona: persona.Codigo,
-      },
-      {
-        where: {
-          Codigo: req.body.Codigo,
-        },
-      }
-    );
-    const usuario = await Usuario.update(
-      {
-        Password: req.body.Password,
-        Email: req.body.Email,
-      },
-      {
-        where: {
-          CodigoPersona: req.body.CodigoPersona,
-        },
-      }
-    );
+    let _usuario = await Usuario.findOne({ where: { Email: req.body.Email } });
+    if (_usuario && _usuario.CodigoPersona != req.body.CodigoPersona) {
+      return res.status(403).json({ error: "Ese email ya está registrado" });
+    }
 
-    res.json({
-      ok: true,
-      persona,
-      estudiante,
-      usuario,
+    let persona = null;
+    let estudiante = null;
+    let usuario = null;
+
+    await sequelize.transaction(async (t) => {
+      persona = await Persona.update(
+        {
+          Nombres: req.body.Nombres,
+          ApellidoPaterno: req.body.ApellidoPaterno,
+          ApellidoMaterno: req.body.ApellidoMaterno,
+          DNI: req.body.DNI,
+        },
+        {
+          where: {
+            Codigo: req.body.CodigoPersona,
+          },
+          transaction: t,
+        }
+      );
+
+      estudiante = await Estudiante.update(
+        {
+          FechaNacimiento: req.body.FechaNacimiento,
+          CodigoPersona: persona.Codigo,
+        },
+        {
+          where: {
+            CodigoPersona: req.body.CodigoPersona,
+          },
+          transaction: t,
+        }
+      );
+      usuario = await Usuario.update(
+        {
+          Password: req.body.Password,
+          Email: req.body.Email,
+          Estado: true,
+        },
+        {
+          where: {
+            CodigoPersona: req.body.CodigoPersona,
+          },
+          transaction: t,
+        }
+      );
     });
+    res.json({ message: "Estudiante actualizado correctamente" });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ error: "Error al actualizar el Estudiante" });
   }
 };
 

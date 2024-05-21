@@ -153,10 +153,10 @@ const Dashboard = () => {
         }
     };
 
-    const cargarDataGraficos = async (CodigoNivel: number) => {
+    const cargarDataGraficos = async (CodigoGrado: number) => {
         try {
             const { data } = await axios.get('http://localhost:3001/api/examen/dataChart', {
-                params: { CodigoNivel }
+                params: { CodigoGrado }
             });
             const { labels, datosFinales, datosPromedios, datosGrado } = data;
             setLineData({ ...lineData, labels: labels, datasets: datosFinales });
@@ -174,9 +174,6 @@ const Dashboard = () => {
 
     const onNivelSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-
-        cargarDataGraficos(val);
-
         setGradosx(grados.filter((g) => g.CodigoNivel == val));
         let nivelx = niveles.find((nivel) => nivel.Codigo === val);
 
@@ -192,6 +189,8 @@ const Dashboard = () => {
         let gradox = grados.find((grado) => grado.Codigo === val);
 
         let _grado = { ...grado, Nombre: gradox?.Nombre ?? '', Codigo: gradox?.Codigo ?? 0, CodigoNivel: gradox?.CodigoNivel ?? 0 };
+
+        cargarDataGraficos(val);
 
         setGrado(_grado);
         cargarReporte(val);
@@ -313,7 +312,7 @@ const Dashboard = () => {
                         />
                     </DataTable>
                 </div>
-                <div
+                {/* <div
                     className="px-4 py-5 shadow-2 flex flex-column md:flex-row md:align-items-center justify-content-between mb-3"
                     style={{
                         borderRadius: '1rem',
@@ -329,7 +328,7 @@ const Dashboard = () => {
                             Descargar
                         </Link>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             <div className="col-12 xl:col-6">
@@ -408,18 +407,18 @@ const Dashboard = () => {
                         <h5>Promedio de los examenes diarios</h5>
                     </div>
                     <ul className="list-none p-0 m-0">
-                        {promediosGrado.map((grado: any, index) => {
+                        {promediosGrado.map((curso: any, index) => {
                             return (
                                 <li key={index} className="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
                                     <div>
-                                        <span className="text-900 font-medium mr-2 mb-1 md:mb-0">{grado.grado}</span>
+                                        <span className="text-900 font-medium mr-2 mb-1 md:mb-0">{curso.curso}</span>
                                         <div className="mt-1 text-600"></div>
                                     </div>
                                     <div className="mt-2 md:mt-0 ml-0 md:ml-8 flex align-items-center">
                                         <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
-                                            <div className={"bg-"+grado.color+"-500 h-full"} style={{ width: (grado.porcentaje+'%') }} />
+                                            <div className={"bg-"+curso.color+"-500 h-full"} style={{ width: (curso.porcentaje+'%') }} />
                                         </div>
-                                        <span className={"text-"+grado.color+"-500 ml-3 font-medium"}>{grado.promedio>9 ? grado.promedio : '0'+grado.promedio}/20</span>
+                                        <span className={"text-"+curso.color+"-500 ml-3 font-medium"}>{curso.promedio>9 ? curso.promedio : '0'+curso.promedio}/20</span>
                                     </div>
                                 </li>
                             );

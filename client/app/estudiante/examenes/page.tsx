@@ -129,20 +129,20 @@ const GestionCursos = () => {
     };
 
     const comprobarAperturaExamen = (examen: any) => {
-        if(examen?.estudianteExamenDiarios[0]?.Estado) return false
+        if (examen?.estudianteExamenDiarios[0]?.Estado) return false;
 
-        const fechaExamen = new Date(examen.Fecha)
+        const fechaExamen = new Date(examen.Fecha);
 
-        if(fechaExamen.setHours(0,0,0,0) < new Date().setHours(0,0,0,0)) return false
-        const horaActual = new Date()
-        const horaInicio = new Date(examen.HoraInicio)
-        const horaFin = new Date(examen.HoraFin)
-        console.log(horaActual.getHours())
-        return true
+        if (fechaExamen.setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) return false;
+        const horaActual = new Date();
+        const horaInicio = new Date(examen.HoraInicio);
+        const horaFin = new Date(examen.HoraFin);
+        console.log(horaActual.getHours());
+        return true;
     };
 
     const actionBodyTemplate = (rowData: any) => {
-        const estadoExamen = comprobarAperturaExamen(rowData)
+        const estadoExamen = comprobarAperturaExamen(rowData);
         return (
             <>
                 {!estadoExamen && <Button icon="pi pi-external-link" rounded severity={'secondary'} outlined tooltip="Examen culminado" className="mr-2" />}
@@ -162,6 +162,13 @@ const GestionCursos = () => {
         );
     };
 
+    const rowClass = (data: any) => {
+        return {
+            'bg-gray-200': data.estudianteExamenDiarios.length > 0,
+            'bg-green-50 font-bold': data.estudianteExamenDiarios.length == 0
+        };
+    };
+
     return (
         <div className="grid crud-demo">
             <div className="col-12">
@@ -171,6 +178,7 @@ const GestionCursos = () => {
                         ref={dt}
                         value={examenes}
                         dataKey="Codigo"
+                        rowClassName={rowClass}
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}

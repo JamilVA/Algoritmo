@@ -339,7 +339,7 @@ const GestionCursos = () => {
     const rightToolbarTemplate = () => {
         return (
             <React.Fragment>
-                <Button label="Export" icon="pi pi-upload" severity="help" onClick={exportarCursos} />
+                <Button label="Exportar" icon="pi pi-upload" severity="help" onClick={exportarCursos} />
             </React.Fragment>
         );
     };
