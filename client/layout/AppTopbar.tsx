@@ -2,9 +2,14 @@
 
 import Link from 'next/link';
 import { classNames } from 'primereact/utils';
-import React, { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
 import { AppTopbarRef } from '@/types';
 import { LayoutContext } from './context/layoutcontext';
+import { signIn, signOut, useSession } from "next-auth/react";
+import { Dialog } from 'primereact/dialog';
+import { OverlayPanel } from 'primereact/overlaypanel';
+import FloatUserCard from '@/app/components/FloatUserCard';
+import { Button } from 'primereact/button';
 
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } = useContext(LayoutContext);
@@ -12,11 +17,29 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const topbarmenuRef = useRef(null);
     const topbarmenubuttonRef = useRef(null);
 
+    const [closeSessionDialog, setCloseSessionDialog] = useState(false);
+    const op = useRef<OverlayPanel>(null);
+
     useImperativeHandle(ref, () => ({
         menubutton: menubuttonRef.current,
         topbarmenu: topbarmenuRef.current,
         topbarmenubutton: topbarmenubuttonRef.current
     }));
+
+    const openCloseSessionDialog = () => {
+        setCloseSessionDialog(true);
+    };
+
+    const hideCloseSessionDialog = () => {
+        setCloseSessionDialog(false);
+    };
+
+    const closeSessionDialogFooter = (
+        <>
+            <Button label="No" outlined icon="pi pi-times" onClick={hideCloseSessionDialog} />
+            <Button label="Si" icon="pi pi-check" onClick={() => signOut()} />
+        </>
+    );
 
     return (
         <div className="layout-topbar">
@@ -34,21 +57,25 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
             </button>
 
             <div ref={topbarmenuRef} className={classNames('layout-topbar-menu', { 'layout-topbar-menu-mobile-active': layoutState.profileSidebarVisible })}>
-                <button type="button" className="p-link layout-topbar-button">
-                    <i className="pi pi-calendar"></i>
-                    <span>Calendar</span>
-                </button>
-                <button type="button" className="p-link layout-topbar-button">
+                {/* <button type="button" className="p-link layout-topbar-button" onClick={(e) => op.current?.toggle(e)}>
                     <i className="pi pi-user"></i>
-                    <span>Profile</span>
+                    <span style={{ color: '#002479' }}>Perfil</span>
+                </button> */}
+                <button onClick={openCloseSessionDialog} className="p-link layout-topbar-button">
+                    <i className="pi pi-power-off"></i>
+                    <span style={{ color: '#002479' }}>Cerrar sesión</span>
                 </button>
-                <Link href="/documentation">
-                    <button type="button" className="p-link layout-topbar-button">
-                        <i className="pi pi-cog"></i>
-                        <span>Settings</span>
-                    </button>
-                </Link>
             </div>
+            <Dialog visible={closeSessionDialog} style={{ width: '400px' }} header="Confirmar" modal footer={closeSessionDialogFooter} onHide={hideCloseSessionDialog}>
+                <div className="flex align-items-center justify-content-center">
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                    {<span>¿Estás seguro de cerrar la sesión?</span>}
+                </div>
+            </Dialog>
+
+            <OverlayPanel id="card" style={{ width: '300px' }} ref={op} showCloseIcon>
+                <FloatUserCard></FloatUserCard>
+            </OverlayPanel>
         </div>
     );
 });

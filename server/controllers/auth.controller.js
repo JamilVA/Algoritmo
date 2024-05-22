@@ -115,6 +115,7 @@ const getInfo = async (req, res) => {
         },
       ],
       attributes: ["Nombres", "ApellidoPaterno", "ApellidoMaterno"],
+      where: {Codigo: CodigoPersona}
     });
 
     const usuario = {

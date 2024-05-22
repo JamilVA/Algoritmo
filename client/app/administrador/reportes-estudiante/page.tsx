@@ -14,6 +14,11 @@ import { ChartData, ChartOptions } from 'chart.js';
 import { Dropdown } from 'primereact/dropdown';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
+import { InputText } from 'primereact/inputtext';
+import { InputNumber } from 'primereact/inputnumber';
+import { Toast } from 'primereact/toast';
+import PDF from '../../components/PDF'
+import { PDFDownloadLink } from '@react-pdf/renderer';
 
 const estudianteVacio = {
     Codigo: 0,
@@ -32,10 +37,13 @@ const Dashboard = () => {
         datasets: []
     });
 
+    const toast = useRef<Toast>(null);
+
     const [promedios, setPromedios] = useState([]);
     const [examenes, setExamenes] = useState([]);
 
     const [estudiante, setEstudiante] = useState(estudianteVacio);
+    const [DNI, setDNI] = useState('');
 
     const applyLightTheme = () => {
         const lineOptions: ChartOptions = {
@@ -71,42 +79,104 @@ const Dashboard = () => {
 
     useEffect(() => {
         applyLightTheme();
-        cargarDatos();
-        cargarDataGraficos();
     }, []);
 
     const cargarDatos = async () => {
-        try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/reporteExamenesEstudiante', {
-                params: { CodigoEstudiante: CodigoEstudiante }
+        await axios
+            .get('http://localhost:3001/api/examen/reporteExamenesEstudiante', {
+                params: { DNI }
+            })
+            .then((response) => {
+                console.log(response.data);
+
+                const _estudiante = response.data.estudiante;
+                const _examenes = response.data.examenes;
+                setExamenes(_examenes);
+                setEstudiante(_estudiante);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Mensaje',
+                    detail: response.data.message,
+                    life: 3000
+                });
+                cargarDataGraficos();
+            })
+            .catch((error) => {
+                console.log(error);
+                toast.current?.show({
+                    severity: 'warn',
+                    summary: 'Advertencia',
+                    detail: !error.response ? error.message : error.response.data.error,
+                    life: 3000
+                });
             });
-            const { estudiante, examenes } = data;
-            console.log('Datos', examenes);
-            setExamenes(examenes);
-            setEstudiante(estudiante);
-        } catch (error) {
-            console.error(error);
-        }
     };
 
     const cargarDataGraficos = async () => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/dataChartEstudiante', {
-                params: { CodigoEstudiante }
-            });
-            const { labels, datosFinales } = data;
-            setLineData({ ...lineData, labels: labels, datasets: datosFinales });
-            console.log('datasets', datosFinales);
+            await axios
+                .get('http://localhost:3001/api/examen/dataChartEstudiante', {
+                    params: { DNI }
+                })
+                .then((response) => {
+                    console.log(response.data);
+                    const { data } = response;
+                    const { labels, datosFinales } = data;
+                    setLineData({ ...lineData, labels: labels, datasets: datosFinales });
+                    console.log('datasets', datosFinales);
+                })
+                .catch((error) => {
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: !error.response ? error.message : error.response.data.error,
+                        life: 3000
+                    });
+                });
         } catch (error) {
             console.error(error);
         }
     };
+
+    const buscarEstudiante = () => {
+        if (DNI.length == 8) {
+            cargarDatos();
+        } else {
+        }
+    };
+
     return (
         <div className="grid">
+            <Toast ref={toast} />
+
+            <div className="col-12">
+                <h6 className="m-0">BUSCAR ESTUDIANTE</h6>
+                <InputText
+                    className="mt-3 mr-2"
+                    value={DNI}
+                    autoFocus
+                    maxLength={8}
+                    type="search"
+                    placeholder="Ingrese DNI"
+                    onChange={(e) => {
+                        setDNI(e.target.value);
+                    }}
+                />
+
+                <Button
+                    icon="pi pi-search"
+                    className="p-input-icon-right"
+                    // loading={loading}
+                    onClick={() => {
+                        buscarEstudiante();
+                    }}
+                    tooltip="Buscar estudiante"
+                />
+            </div>
             <div className="col-12">
                 <div className="card">
-                    <h3 className='font-bold'>
-                        {estudiante.Nombres} <span className='text-primary-500 text-xl'>{' ( ' + estudiante.Grado + ' )'}</span>
+                    <h3 className="font-bold">
+                        {estudiante.Nombres} <span className="text-primary-500 text-xl">{' ( ' + estudiante.Grado + ' )'}</span>
                     </h3>
                     <h5>Ultimos Examenes</h5>
                     <DataTable value={examenes} rows={5} paginator responsiveLayout="scroll">
@@ -119,9 +189,16 @@ const Dashboard = () => {
                         <Column
                             header="Ver"
                             headerStyle={{ minWidth: '1rem' }}
-                            body={() => (
+                            body={(examen:any) => (
                                 <>
-                                    <Button icon="pi pi-search" text />
+                                    {/* <Button icon="pi pi-search" text onClick={() => {
+                                        sdasa
+                                    }}/> */}
+                                    <PDFDownloadLink document={<PDF CodigoEstudiante={estudiante.Codigo} CodigoExamen={examen.Codigo} />} fileName='ExamenResuelto.pdf'>
+                                        {
+                                            ({loading, url, error}) => loading ? <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i> : <Button icon="pi pi-search" text/> 
+                                        }
+                                    </PDFDownloadLink>
                                 </>
                             )}
                         />

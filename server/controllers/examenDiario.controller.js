@@ -9,11 +9,13 @@ const {
   PreguntaExamenDiarioEstudiante,
   Estudiante,
   Nivel,
+  Persona,
 } = require("../config/relations");
 
 const { sequelize } = require("../config/database");
 const estudianteExamenDiario = require("../models/estudianteExamenDiario.model");
 const examenDiario = require("../models/examenDiario.model");
+const { TEXT } = require("sequelize");
 
 const getExamenes = async (req, res) => {
   try {
@@ -75,30 +77,122 @@ const getExamenesEstudiante = async (req, res) => {
 const getReporteExamenesEstudiante = async (req, res) => {
   try {
     const { CodigoEstudiante } = req.query;
+    const { DNI } = req.query;
 
-    const listaExamenes = await EstudianteExamenDiario.findAll({
-      include: [
-        {
-          model: ExamenDiario,
-          attributes: ["Fecha"],
-          include: [
-            {
-              model: Tema,
-              attributes: ["Descripcion"],
-              include: [
-                {
-                  model: Curso,
-                  attributes: ["Nombre"],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      where: { CodigoEstudiante: CodigoEstudiante },
-    });
+    let usuario;
+    let listaExamenes;
+
+    if (CodigoEstudiante) {
+      console.log("Si hay CODIGO ESTUDIANTE");
+      usuario = await Estudiante.findOne({
+        include: [
+          {
+            model: Grado,
+            attributes: ["Nombre"],
+          },
+          {
+            model: Persona,
+            attributes: ["Nombres", "ApellidoPaterno", "ApellidoMaterno"],
+          },
+        ],
+        where: { Codigo: CodigoEstudiante },
+      });
+
+      listaExamenes = await EstudianteExamenDiario.findAll({
+        include: [
+          {
+            model: ExamenDiario,
+            attributes: ["Fecha"],
+            include: [
+              {
+                model: Tema,
+                attributes: ["Descripcion"],
+                include: [
+                  {
+                    model: Curso,
+                    attributes: ["Nombre"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        where: { CodigoEstudiante: CodigoEstudiante },
+      });
+    }
+
+    if (DNI) {
+      usuario = await Estudiante.findOne({
+        include: [
+          {
+            model: Grado,
+            attributes: ["Nombre"],
+          },
+          {
+            model: Persona,
+            attributes: [
+              "Nombres",
+              "ApellidoPaterno",
+              "ApellidoMaterno",
+              "DNI",
+            ],
+          },
+        ],
+        where: { "$Persona.DNI$": DNI },
+      });
+
+      if (!usuario) {
+        return res.status(403).json({ error: "No se ha encontrado ningun estudiante con DNI: "+DNI });
+      }
+
+      console.log("Estudiante encontrado", usuario);
+
+      listaExamenes = await EstudianteExamenDiario.findAll({
+        include: [
+          {
+            model: ExamenDiario,
+            attributes: ["Fecha"],
+            include: [
+              {
+                model: Tema,
+                attributes: ["Descripcion"],
+                include: [
+                  {
+                    model: Curso,
+                    attributes: ["Nombre"],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            model: Estudiante,
+            attributes: ["Codigo"],
+            include: [
+              {
+                model: Persona,
+                attributes: ["DNI"],
+              },
+            ],
+          },
+        ],
+        where: { "$Estudiante.Persona.DNI$": DNI },
+      });
+    }
+
+    const estudiante = {
+      Codigo: usuario.Codigo,
+      Nombres:
+        usuario?.Persona.Nombres +
+        " " +
+        usuario?.Persona.ApellidoPaterno +
+        " " +
+        usuario?.Persona.ApellidoMaterno,
+      Grado: usuario?.Grado.Nombre,
+    };
 
     const examenes = listaExamenes.map((examen) => ({
+      Codigo: examen.CodigoExamenDiario,
       Nota: examen.Nota,
       Correctas: examen.Correctas,
       Incorrectas: examen.Incorrectas,
@@ -108,7 +202,11 @@ const getReporteExamenesEstudiante = async (req, res) => {
       Curso: examen.examenDiario.Tema.Curso.Nombre,
     }));
 
-    res.json({ message: "Examenes cargados correctamente", examenes });
+    res.json({
+      message: "Examenes cargados correctamente",
+      examenes,
+      estudiante,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al cargar los examenes" });
@@ -222,23 +320,57 @@ const guardarExamen = async (req, res) => {
 const getDetalleExamen = async (req, res) => {
   try {
     const { CodigoEstudiante } = req.query;
+    const { CodigoExamen } = req.query;
 
     const estudiante = await Estudiante.findOne({
-      where: { Codigo: CodigoEstudiante },
+      include: [
+        {
+          model: Persona,
+          attributes: ['Nombres', 'ApellidoPaterno', 'ApellidoMaterno']
+        }
+      ]
     });
 
-    const examenes = await ExamenDiario.findAll({
+    const temaexamen = await ExamenDiario.findOne({
       include: [
         {
           model: Tema,
-        },
+          attributes: ['Descripcion']
+        }
+      ]
+    })
+
+    const examen = await EstudianteExamenDiario.findOne({
+      include: [
+        {
+          model: PreguntaExamenDiarioEstudiante,
+          // include: [
+          //   {
+          //     model: Pregunta,
+          //     include: [
+          //       {
+          //         model: Respuesta
+          //       }
+          //     ]
+          //   }
+          // ]
+        }
       ],
-      where: { "$Tema.Curso.CodigoGrado$": estudiante.CodigoGrado },
+      where: { CodigoEstudiante: CodigoEstudiante, CodigoExamenDiario: CodigoExamen },
     });
-    res.json({ message: "Examenes cargados correctamente", examenes });
+
+    // const preguntas = examen.PreguntasExamenDiarioEstudiante;
+
+    // console.log('Preguntas',(preguntas).json)
+
+    const tema = {
+      Descripcion: temaexamen.Tema.Descripcion
+    }
+
+    res.json({ message: "Examen cargados correctamente", examen, estudiante, tema });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error al cargar los examenes" });
+    res.status(500).json({ error: "Error al cargar el examen" });
   }
 };
 
@@ -319,23 +451,23 @@ const getDataChart = async (req, res) => {
       include: [
         {
           model: Estudiante,
-          attributes: ["Codigo", 'CodigoGrado'],
+          attributes: ["Codigo", "CodigoGrado"],
         },
         {
           model: ExamenDiario,
           attributes: ["Fecha"],
-          include:[
+          include: [
             {
               model: Tema,
-              attributes: ['Codigo'],
-              include:[
+              attributes: ["Codigo"],
+              include: [
                 {
                   model: Curso,
-                  attributes: ['Codigo']
-                }
-              ]
-            }
-          ]
+                  attributes: ["Codigo"],
+                },
+              ],
+            },
+          ],
         },
       ],
       attributes: ["Nota"],
@@ -364,16 +496,30 @@ const getDataChart = async (req, res) => {
       "#22c55e",
       "#a855f7",
       "#eab308",
-      '#3b82f6',
-      '#ff3d32',
-      '#64748b',
-      '#6366f1',
-      '#14b8a6',
-      '#6366f1',
-      '#6b7280'
+      "#3b82f6",
+      "#ff3d32",
+      "#64748b",
+      "#6366f1",
+      "#14b8a6",
+      "#6366f1",
+      "#6b7280",
     ];
 
-    const colorsText = ["orange", "cyan", "pink", "green", "purple", "yellow", 'blue', 'red', 'bluegray', 'indigo', 'teal', 'primary', 'gray'];
+    const colorsText = [
+      "orange",
+      "cyan",
+      "pink",
+      "green",
+      "purple",
+      "yellow",
+      "blue",
+      "red",
+      "bluegray",
+      "indigo",
+      "teal",
+      "primary",
+      "gray",
+    ];
 
     let datosCurso = [];
     let datosFinales = [];
@@ -443,17 +589,44 @@ const getDataChart = async (req, res) => {
 const getDataChartEstudiante = async (req, res) => {
   try {
     const { CodigoEstudiante } = req.query;
+    const { DNI } = req.query;
 
-    const datos = await EstudianteExamenDiario.findAll({
-      include: [
-        {
-          model: ExamenDiario,
-          attributes: ["Fecha"],
-        },
-      ],
-      attributes: ["Nota"],
-      where: { CodigoEstudiante },
-    });
+    let datos;
+
+    if (CodigoEstudiante) {
+      datos = await EstudianteExamenDiario.findAll({
+        include: [
+          {
+            model: ExamenDiario,
+            attributes: ["Fecha"],
+          },
+        ],
+        attributes: ["Nota"],
+        where: { CodigoEstudiante },
+      });
+    }
+    if (DNI) {
+      datos = await EstudianteExamenDiario.findAll({
+        include: [
+          {
+            model: ExamenDiario,
+            attributes: ["Fecha"],
+          },
+          {
+            model: Estudiante,
+            attributes: ["Codigo"],
+            include: [
+              {
+                model: Persona,
+                attributes: ["DNI"],
+              },
+            ],
+          },
+        ],
+        attributes: ["Nota"],
+        where: { "$Estudiante.Persona.DNI$": DNI },
+      });
+    }
 
     const labels = [
       "Enero",
@@ -477,17 +650,30 @@ const getDataChartEstudiante = async (req, res) => {
       "#22c55e",
       "#a855f7",
       "#eab308",
-      '#3b82f6',
-      '#ff3d32',
-      '#64748b',
-      '#6366f1',
-      '#14b8a6',
-      '#6366f1',
-      '#6b7280'
+      "#3b82f6",
+      "#ff3d32",
+      "#64748b",
+      "#6366f1",
+      "#14b8a6",
+      "#6366f1",
+      "#6b7280",
     ];
 
-    const colorsText = ["orange", "cyan", "pink", "green", "purple", "yellow", 'blue', 'red', 'bluegray', 'indigo', 'teal', 'primary', 'gray'];
-
+    const colorsText = [
+      "orange",
+      "cyan",
+      "pink",
+      "green",
+      "purple",
+      "yellow",
+      "blue",
+      "red",
+      "bluegray",
+      "indigo",
+      "teal",
+      "primary",
+      "gray",
+    ];
 
     const datosLimpios = datos.map((dato) => ({
       Nota: dato.Nota,
@@ -509,7 +695,7 @@ const getDataChartEstudiante = async (req, res) => {
     }
 
     const x = {
-      label: 'Notas del Estudiante',
+      label: "Notas del Estudiante",
       data: datosEstudiante,
       fill: false,
       backgroundColor: colors[0],

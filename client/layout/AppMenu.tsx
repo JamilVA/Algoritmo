@@ -33,6 +33,7 @@ const AppMenu = () => {
                 { label: 'Gestion Cursos', icon: 'pi pi-fw pi-fw pi-book', to: '/administrador/gestion-cursos' },
                 { label: 'Gestion Examenes', icon: 'pi pi-fw pi-file-edit', to: '/administrador/gestion-examenes' },
                 { label: 'Reportes', icon: 'pi pi-fw pi-chart-line', to: '/administrador/reportes' },
+                { label: 'Reportes Estudiante', icon: 'pi pi-fw pi-chart-line', to: '/administrador/reportes-estudiante' },
             ]
         }
     ];
@@ -41,7 +42,8 @@ const AppMenu = () => {
         {
             label: 'PANEL APODERADO',
             items: [
-                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/apoderado' },
+                { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/inicio' },
+                { label: 'Reportes', icon: 'pi pi-fw pi-chart-line', to: '/apoderado' },
             ]
         }
     ];
