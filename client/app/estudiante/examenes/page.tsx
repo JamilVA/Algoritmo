@@ -129,7 +129,7 @@ const GestionCursos = () => {
     };
 
     const comprobarAperturaExamen = (examen: any) => {
-        if (examen?.estudianteExamenDiarios[0]?.Estado) return false;
+        if (examen?.EstudianteExamenDiarios[0]?.Estado) return false;
 
         const fechaExamen = new Date(examen.Fecha);
 
@@ -164,8 +164,8 @@ const GestionCursos = () => {
 
     const rowClass = (data: any) => {
         return {
-            'bg-gray-200': data.estudianteExamenDiarios.length > 0,
-            'bg-green-50 font-bold': data.estudianteExamenDiarios.length == 0
+            'bg-gray-200': data.EstudianteExamenDiarios?.length > 0,
+            'bg-green-50 font-bold': data.EstudianteExamenDiarios.length == 0
         };
     };
 

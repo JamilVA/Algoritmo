@@ -3,12 +3,9 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
-import { FileUpload } from 'primereact/fileupload';
-import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
+import { FileUpload, FileUploadFilesEvent } from 'primereact/fileupload';
 import { InputText } from 'primereact/inputtext';
-import { Dropdown } from 'primereact/dropdown';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
 import { Rating } from 'primereact/rating';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
@@ -79,6 +76,8 @@ export default function BancoPreguntas() {
     const [temaDialog, setTemaDialog] = useState(false);
     const [preguntasDialog, setPreguntasDialog] = useState(false);
     const [newPreguntaDialog, setNewPreguntaDialog] = useState(false);
+
+    const [actividad, setActividad] = useState(null);
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -164,11 +163,11 @@ export default function BancoPreguntas() {
                 });
                 setNewPreguntaDialog(false);
                 setPregunta(preguntaVacia);
-                setRespuesta1(respuestaVacia)
-                setRespuesta2(respuestaVacia)
-                setRespuesta3(respuestaVacia)
-                setRespuesta4(respuestaVacia)
-                setRespuesta5(respuestaVacia)
+                setRespuesta1(respuestaVacia);
+                setRespuesta2(respuestaVacia);
+                setRespuesta3(respuestaVacia);
+                setRespuesta4(respuestaVacia);
+                setRespuesta5(respuestaVacia);
             })
             .catch((error) => {
                 console.error(error.response);
@@ -395,11 +394,52 @@ export default function BancoPreguntas() {
         return Respuestas.filter((s) => s.CodigoPregunta == Codigo);
     };
 
+    const handleUpload = async (event: FileUploadFilesEvent, rowData: any) => {
+        const file = event.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        await axios
+            .post('http://localhost:3001/api/files/upload', formData)
+            .then((response) => {
+                // console.log(response.data.path)
+                let _actividad = { ...rowData, RutaRecursoGuia: response.data.filename };
+                toast.current?.show({ severity: 'success', summary: 'Success', detail: 'File Uploaded' });
+                // modificarActividad(_actividad);
+                // setActividad(emptyActividad);
+            })
+            .catch((error) => {
+                // console.error(error)
+                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Error de petición' });
+            });
+    };
+
     const respuestasBodyTemplate = (rowData: typeof preguntaVacia) => {
-        
         return (
             <React.Fragment>
-                <DataTable ref={dt} value={filtrarRespuestas(rowData.Respuesta, rowData.Codigo)} header={rowData?.Descripcion ?? ''} dataKey="Codigo" emptyMessage="Este pregunta no tiene respuestas registradas.">
+                <DataTable
+                    ref={dt}
+                    value={filtrarRespuestas(rowData.Respuesta, rowData.Codigo)}
+                    header={
+                        <>
+                            <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                                <h5 className="m-0">{rowData.Descripcion}</h5>
+                                <span className="block mt-2 md:mt-0">
+                                    <FileUpload
+                                        chooseOptions={{ icon: 'pi pi-upload', className: 'p-2' }}
+                                        chooseLabel="Subir imágen"
+                                        mode="basic"
+                                        accept="image/*"
+                                        maxFileSize={5000000}
+                                        customUpload
+                                        uploadHandler={(e) => handleUpload(e, actividad)}
+                                    />
+                                </span>
+                            </div>
+                        </>
+                    }
+                    dataKey="Codigo"
+                    emptyMessage="Este pregunta no tiene respuestas registradas."
+                >
                     <Column headerStyle={{ display: 'none' }} body={respuestaBodyTemplate} style={{ minWidth: '8rem' }}></Column>
                     <Column headerStyle={{ display: 'none' }} body={correctaBodyTemplate} style={{ minWidth: '2rem' }}></Column>
                 </DataTable>
@@ -566,7 +606,7 @@ export default function BancoPreguntas() {
                             ref={dt}
                             value={preguntas}
                             dataKey="Codigo"
-                            header={tema?.Descripcion}
+                            header={tema.Descripcion}
                             paginator
                             rows={10}
                             rowsPerPageOptions={[5, 10, 25]}

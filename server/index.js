@@ -28,6 +28,7 @@ app.use('/api/curso', require('./routes/curso.route'));
 app.use('/api/pregunta', require('./routes/pregunta.route'));
 app.use('/api/examen', require('./routes/examenDiario.route'));
 app.use('/api', require('./routes/auth.route'));
+app.use('/api/files', require('./routes/files.route'))
 
 
 // app.use('/api/docente', require('./routes/docante.route'));
