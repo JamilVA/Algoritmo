@@ -2,15 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
 import axios from 'axios';
 
-// Registrar la fuente Oswald
+// Registrar la fuente Roboto
 Font.register({
-    family: 'Oswald',
-    src: 'https://fonts.gstatic.com/s/oswald/v13/Y_TKV6o8WovbUd3m_X9aAA.ttf'
+    family: 'Roboto',
+    fonts: [
+        {
+            src: '/fonts/Roboto-Regular.ttf',
+            fontWeight: 400
+        },
+        {
+            src: '/fonts/Roboto-Bold.ttf',
+            fontWeight: 700
+        }
+    ]
 });
 
 const styles = StyleSheet.create({
     page: {
-        padding: 30
+        padding: 30,
+        fontFamily: 'Roboto'
     },
     header: {
         display: 'flex',
@@ -21,8 +31,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 24,
-        fontWeight: 'bold',
-        fontFamily: 'Oswald'
+        fontWeight: 'bold'
     },
     scoreContainer: {
         textAlign: 'right'
@@ -30,8 +39,7 @@ const styles = StyleSheet.create({
     score: {
         fontSize: 40,
         color: 'red',
-        fontWeight: 'bold',
-        fontFamily: 'Oswald'
+        fontWeight: 'bold'
     },
     date: {
         fontSize: 9,
@@ -53,15 +61,15 @@ const styles = StyleSheet.create({
     },
     options: {
         marginLeft: 20,
-        fontSize: 13
+        fontSize: 14
     },
-    markedBien: {
+    markedOptionCorrect: {
         color: 'green',
-        fontWeight: 900
+        fontWeight: 'bold'
     },
-    markedMal: {
+    markedOptionIncorrect: {
         color: 'red',
-        fontWeight: 900
+        fontWeight: 'bold'
     },
     section: {
         margin: 10,
@@ -90,9 +98,10 @@ const PDF: React.FC<PDFProps> = ({ CodigoEstudiante, CodigoExamen }) => {
         Descripcion: ''
     };
 
-    const [examen, setExamen] = useState<any>(null);
     const [estudiante, setEstudiante] = useState(estudianteVacio);
+    const [examen, setExamen] = useState<any>(null);
     const [tema, setTema] = useState(temaVacio);
+    const [preguntas, setPreguntas] = useState([]);
 
     useEffect(() => {
         fetchData();
@@ -104,45 +113,71 @@ const PDF: React.FC<PDFProps> = ({ CodigoEstudiante, CodigoExamen }) => {
             .then((response) => {
                 console.log(response.data);
 
-                const _estudiante = response.data.estudiante;
-                const _tema = response.data.tema;
-                const _examen = response.data.examen;
-                setExamen(_examen);
-                setEstudiante(_estudiante);
-                setTema(_tema);
+                const { estudiante, tema, preguntas, examen } = response.data;
+                setExamen(examen);
+                setPreguntas(preguntas);
+                setEstudiante(estudiante);
+                setTema(tema);
             })
             .catch((error) => {
                 console.log(error);
             });
     };
 
+    const formatDate = (dateString: string) => {
+        const options: Intl.DateTimeFormatOptions = {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true,
+            timeZone: 'America/Lima'
+        };
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('es-PE', options).format(date);
+    };
+
+    const renderPreguntas = (preguntas: any[]) => {
+        return preguntas.map((pregunta, index) => (
+            <View key={pregunta.Codigo} style={styles.questionSection}>
+                <Text style={styles.question}>
+                    {index + 1}. {pregunta.Descripcion}
+                </Text>
+                <View style={styles.options}>
+                    {pregunta.Respuestas.map((respuesta: any, idx: number) => {
+                        const isMarked = pregunta.RespuestaSeleccionada === idx + 1;
+                        const optionStyle = isMarked
+                            ? respuesta.Tipo
+                                ? styles.markedOptionCorrect
+                                : styles.markedOptionIncorrect
+                            : undefined;
+                        return (
+                            <Text key={idx} style={optionStyle}>
+                                {String.fromCharCode(97 + idx)}) {respuesta.Valor} {respuesta.Tipo ? '(Correcta)' : ''}
+                            </Text>
+                        );
+                    })}
+                </View>
+            </View>
+        ));
+    };
+
     return (
         <Document>
             <Page size="A4" style={styles.page}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Error al generar el PDF</Text>
-                </View>
-                {/* <View style={styles.header}>
                     <Text style={styles.title}>Tema: {tema.Descripcion}</Text>
                     <View style={styles.scoreContainer}>
                         <Text style={styles.date}>Nota:</Text>
-                        <Text style={styles.score}>20</Text>
-                        <Text style={styles.date}>21 de mayo de 2024</Text>
+                        <Text style={styles.score}>{examen?.Nota}</Text>
+                        <Text style={styles.date}>{examen ? formatDate(examen.Fecha) : ''}</Text>
                     </View>
                 </View>
                 <View style={styles.studentInfo}>
                     <Text style={styles.studentName}>{`Estudiante: ${estudiante.Persona.Nombres} ${estudiante.Persona.ApellidoPaterno} ${estudiante.Persona.ApellidoMaterno}`}</Text>
                 </View>
-                <View style={styles.questionSection}>
-                    <Text style={styles.question}>1. ¿De qué color es el cielo?</Text>
-                    <View style={styles.options}>
-                        <Text>a) azul</Text>
-                        <Text style={styles.markedBien}>b) azul</Text>
-                        <Text>c) azul</Text>
-                        <Text style={styles.markedMal}>d) azul</Text>
-                        <Text>e) azul</Text>
-                    </View>
-                </View> */}
+                {preguntas && renderPreguntas(preguntas)}
             </Page>
         </Document>
     );

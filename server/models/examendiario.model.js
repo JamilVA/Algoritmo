@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require('../config/database')
 
-const examenDiario = sequelize.define('examenDiario', {
+const ExamenDiario = sequelize.define('ExamenDiario', {
     Codigo:{
         type: DataTypes.INTEGER,
         autoIncrement:true,
@@ -13,4 +13,4 @@ const examenDiario = sequelize.define('examenDiario', {
     Duracion: DataTypes.INTEGER(),
 })
 
-module.exports = examenDiario
+module.exports = ExamenDiario

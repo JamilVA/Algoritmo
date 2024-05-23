@@ -17,7 +17,7 @@ import { useSearchParams } from 'next/navigation';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
-import PDF from '../../components/PDF'
+import PDF from '../../components/PDF';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
 const estudianteVacio = {
@@ -142,6 +142,12 @@ const Dashboard = () => {
         if (DNI.length == 8) {
             cargarDatos();
         } else {
+            toast.current?.show({
+                severity: 'warn',
+                summary: 'Advertencia',
+                detail: 'El DNI debe tener 8 dígitos',
+                life: 3000
+            });
         }
     };
 
@@ -189,15 +195,13 @@ const Dashboard = () => {
                         <Column
                             header="Ver"
                             headerStyle={{ minWidth: '1rem' }}
-                            body={(examen:any) => (
+                            body={(examen: any) => (
                                 <>
                                     {/* <Button icon="pi pi-search" text onClick={() => {
                                         sdasa
                                     }}/> */}
-                                    <PDFDownloadLink document={<PDF CodigoEstudiante={estudiante.Codigo} CodigoExamen={examen.Codigo} />} fileName='ExamenResuelto.pdf'>
-                                        {
-                                            ({loading, url, error}) => loading ? <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i> : <Button icon="pi pi-search" text/> 
-                                        }
+                                    <PDFDownloadLink document={<PDF CodigoEstudiante={estudiante.Codigo} CodigoExamen={examen.Codigo} />} fileName="ExamenResuelto.pdf">
+                                        {({ loading, url, error }) => (loading ? <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i> : <Button icon="pi pi-search" text />)}
                                     </PDFDownloadLink>
                                 </>
                             )}

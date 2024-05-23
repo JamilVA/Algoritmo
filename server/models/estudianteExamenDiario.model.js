@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/database");
 
-const estudianteExamenDiario = sequelize.define("estudianteExamenDiario", {
+const EstudianteExamenDiario = sequelize.define("EstudianteExamenDiario", {
   CodigoEstudiante: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -16,7 +16,8 @@ const estudianteExamenDiario = sequelize.define("estudianteExamenDiario", {
   Correctas: DataTypes.INTEGER,
   Incorrectas: DataTypes.INTEGER,
   EnBlanco: DataTypes.INTEGER,
-  Estado: DataTypes.BOOLEAN
+  Estado: DataTypes.BOOLEAN,
+  Fecha: DataTypes.DATE,
 });
 
-module.exports = estudianteExamenDiario;
+module.exports = EstudianteExamenDiario;

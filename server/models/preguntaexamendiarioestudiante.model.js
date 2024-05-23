@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require('../config/database')
 
-const preguntaExamenDiarioEstudiante = sequelize.define('preguntaExamenDiarioEstudiante', {
+const PreguntaExamenDiarioEstudiante = sequelize.define('PreguntaExamenDiarioEstudiante', {
     Codigo:{
         type: DataTypes.INTEGER,
         autoIncrement:true,
@@ -11,4 +11,4 @@ const preguntaExamenDiarioEstudiante = sequelize.define('preguntaExamenDiarioEst
     CodigoRespuesta: DataTypes.INTEGER(),
 })
 
-module.exports = preguntaExamenDiarioEstudiante
+module.exports = PreguntaExamenDiarioEstudiante

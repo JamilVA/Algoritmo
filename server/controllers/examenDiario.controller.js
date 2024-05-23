@@ -13,9 +13,6 @@ const {
 } = require("../config/relations");
 
 const { sequelize } = require("../config/database");
-const estudianteExamenDiario = require("../models/estudianteExamenDiario.model");
-const examenDiario = require("../models/examenDiario.model");
-const { TEXT } = require("sequelize");
 
 const getExamenes = async (req, res) => {
   try {
@@ -142,10 +139,10 @@ const getReporteExamenesEstudiante = async (req, res) => {
       });
 
       if (!usuario) {
-        return res.status(403).json({ error: "No se ha encontrado ningun estudiante con DNI: "+DNI });
+        return res.status(403).json({
+          error: "No se ha encontrado ningun estudiante con DNI: " + DNI,
+        });
       }
-
-      console.log("Estudiante encontrado", usuario);
 
       listaExamenes = await EstudianteExamenDiario.findAll({
         include: [
@@ -197,9 +194,9 @@ const getReporteExamenesEstudiante = async (req, res) => {
       Correctas: examen.Correctas,
       Incorrectas: examen.Incorrectas,
       EnBlanco: examen.EnBlanco,
-      Fecha: examen.examenDiario.Fecha,
-      Tema: examen.examenDiario.Tema.Descripcion,
-      Curso: examen.examenDiario.Tema.Curso.Nombre,
+      Fecha: examen.ExamenDiario.Fecha,
+      Tema: examen.ExamenDiario.Tema.Descripcion,
+      Curso: examen.ExamenDiario.Tema.Curso.Nombre,
     }));
 
     res.json({
@@ -319,55 +316,89 @@ const guardarExamen = async (req, res) => {
 
 const getDetalleExamen = async (req, res) => {
   try {
-    const { CodigoEstudiante } = req.query;
-    const { CodigoExamen } = req.query;
+    const { CodigoEstudiante, CodigoExamen } = req.query;
+    if (!CodigoEstudiante || !CodigoExamen) {
+      return res
+        .status(400)
+        .json({ error: "CodigoEstudiante y CodigoExamen son requeridos" });
+    }
 
     const estudiante = await Estudiante.findOne({
       include: [
         {
           model: Persona,
-          attributes: ['Nombres', 'ApellidoPaterno', 'ApellidoMaterno']
-        }
-      ]
+          attributes: ["Nombres", "ApellidoPaterno", "ApellidoMaterno"],
+        },
+      ],
+      where: {
+        Codigo: CodigoEstudiante,
+      },
     });
 
     const temaexamen = await ExamenDiario.findOne({
       include: [
         {
           model: Tema,
-          attributes: ['Descripcion']
-        }
-      ]
-    })
-
-    const examen = await EstudianteExamenDiario.findOne({
-      include: [
-        {
-          model: PreguntaExamenDiarioEstudiante,
-          // include: [
-          //   {
-          //     model: Pregunta,
-          //     include: [
-          //       {
-          //         model: Respuesta
-          //       }
-          //     ]
-          //   }
-          // ]
-        }
+          attributes: ["Descripcion"],
+        },
       ],
-      where: { CodigoEstudiante: CodigoEstudiante, CodigoExamenDiario: CodigoExamen },
+      where: {
+        Codigo: CodigoExamen,
+      },
     });
 
-    // const preguntas = examen.PreguntasExamenDiarioEstudiante;
+    const examen = await EstudianteExamenDiario.findOne({
+      attributes: ["Nota", "Fecha"],
+      where: {
+        CodigoEstudiante: CodigoEstudiante,
+        CodigoExamenDiario: CodigoExamen,
+      },
+    });
 
-    // console.log('Preguntas',(preguntas).json)
+    const preguntasBuscar = await PreguntaExamenDiarioEstudiante.findAll({
+      attributes: ["CodigoPregunta", "CodigoRespuesta"],
+      where: {
+        CodigoEstudiante: CodigoEstudiante,
+        CodigoExamenDiario: CodigoExamen,
+      },
+    });
+
+    // Utilizar Promise.all para esperar a que todas las promesas se resuelvan
+    const preguntas = await Promise.all(
+      preguntasBuscar.map(async (buscar) => {
+        const pregunta = await Pregunta.findOne({
+          include: [
+            {
+              model: Respuesta,
+              order: sequelize.literal("RAND()"),
+              limit: 5,
+            },
+          ],
+          where: { Codigo: buscar.CodigoPregunta },
+        });
+
+        return {
+          Codigo: pregunta.Codigo,
+          Descripcion: pregunta.Descripcion,
+          RutaImagen: pregunta.RutaImagen ?? "",
+          Respuestas: pregunta.Respuesta,
+          RespuestaSeleccionada: buscar.CodigoRespuesta ?? null,
+        };
+      })
+    );
+    console.log("RSP:", preguntas);
 
     const tema = {
-      Descripcion: temaexamen.Tema.Descripcion
-    }
+      Descripcion: temaexamen.Tema.Descripcion,
+    };
 
-    res.json({ message: "Examen cargados correctamente", examen, estudiante, tema });
+    res.json({
+      message: "Examen cargados correctamente",
+      examen,
+      preguntas,
+      estudiante,
+      tema,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al cargar el examen" });
@@ -527,8 +558,8 @@ const getDataChart = async (req, res) => {
 
     cursos.forEach((f, index) => {
       const curso = datos
-        .filter((examen) => examen.examenDiario.Tema.Curso.Codigo == f.Codigo)
-        .map((dato) => ({ Nota: dato.Nota, Fecha: dato.examenDiario.Fecha }));
+        .filter((examen) => examen.ExamenDiario.Tema.Curso.Codigo == f.Codigo)
+        .map((dato) => ({ Nota: dato.Nota, Fecha: dato.ExamenDiario.Fecha }));
       datosCurso.push([]);
 
       for (let j = 0; j < 12; j++) {
@@ -677,7 +708,7 @@ const getDataChartEstudiante = async (req, res) => {
 
     const datosLimpios = datos.map((dato) => ({
       Nota: dato.Nota,
-      Fecha: dato.examenDiario.Fecha,
+      Fecha: dato.ExamenDiario.Fecha,
     }));
 
     let datosEstudiante = [];
