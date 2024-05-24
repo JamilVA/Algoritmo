@@ -491,7 +491,7 @@ export default function BancoPreguntas() {
                                                     op.current!.toggle(e);
                                                 }}
                                             />
-                                            <OverlayPanel ref={op}>{imagenURL && <Image src={imagenURL} zoomSrc={imagenURL} alt="Foto Docente" width="80" height="80" preview />}</OverlayPanel>
+                                            <OverlayPanel ref={op}>{imagenURL && <Image src={imagenURL} zoomSrc={imagenURL} alt="Imagen referencial de la pregunta" width="80" height="80" preview />}</OverlayPanel>
                                         </>
                                     )}
                                 </span>

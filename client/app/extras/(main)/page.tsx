@@ -204,7 +204,7 @@ const Dashboard = () => {
                 </div>
                 <div className="card">
                     <div className="flex justify-content-between align-items-center mb-5">
-                        <h5>Promedio de los examenes diarios</h5>
+                        <h5>Promedio de los examenes diarios en el año</h5>
                         <div>
                             <Button type="button" icon="pi pi-ellipsis-v" rounded text className="p-button-plain" onClick={(event) => menu1.current?.toggle(event)} />
                             <Menu

@@ -438,7 +438,7 @@ const getReporteGrado = async (req, res) => {
       Codigo: examen.Codigo,
       Curso: examen.Tema.Curso.Nombre,
       Tema: examen.Tema.Descripcion,
-      Resueltos: examen?.estudianteExamenDiarios.length ?? 0,
+      Resueltos: examen?.EstudianteExamenDiarios.length ?? 0,
     }));
 
     res.json({ message: "Examenes cargados correctamente", datos });
@@ -558,7 +558,7 @@ const getDataChart = async (req, res) => {
       for (let j = 0; j < 12; j++) {
         const cursomes = curso
           .filter((examen) => new Date(examen.Fecha).getMonth() == j)
-          .map((dato) => dato.Nota);
+          .map((dato) => Number(dato.Nota));
         if (cursomes.length > 0) {
           const suma = cursomes.reduce((total, numero) => total + numero, 0);
           const promedio = suma / cursomes?.length;
@@ -710,10 +710,11 @@ const getDataChartEstudiante = async (req, res) => {
     for (let j = 0; j < 12; j++) {
       const mes = datosLimpios
         .filter((examen) => new Date(examen.Fecha).getMonth() == j)
-        .map((dato) => dato.Nota);
+        .map((dato) => Number(dato.Nota));
       if (mes.length > 0) {
+        console.log("MESSI: ", mes);
         const suma = mes.reduce((total, numero) => total + numero, 0);
-        const promedio = suma / mes?.length;
+        const promedio = suma / mes.length;
         datosEstudiante.push(promedio);
       } else datosEstudiante.push(0);
     }

@@ -404,7 +404,7 @@ const Dashboard = () => {
                 </div> */}
                 <div className="card">
                     <div className="flex justify-content-between align-items-center mb-5">
-                        <h5>Promedio de los examenes diarios</h5>
+                        <h5>Promedio de los examenes diarios en el año</h5>
                     </div>
                     <ul className="list-none p-0 m-0">
                         {promediosGrado.map((curso: any, index) => {

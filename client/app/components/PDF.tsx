@@ -146,7 +146,7 @@ const PDF: React.FC<PDFProps> = ({ CodigoEstudiante, CodigoExamen }) => {
                 </Text>
                 <View style={styles.options}>
                     {pregunta.Respuestas.map((respuesta: any, idx: number) => {
-                        const isMarked = pregunta.RespuestaSeleccionada === idx + 1;
+                        const isMarked = pregunta.RespuestaSeleccionada === respuesta.Codigo;
                         const optionStyle = isMarked
                             ? respuesta.Tipo
                                 ? styles.markedOptionCorrect

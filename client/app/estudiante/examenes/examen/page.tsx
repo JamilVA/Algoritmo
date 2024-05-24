@@ -14,7 +14,7 @@ import { StyleClass } from 'primereact/styleclass';
 
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { renderToString } from 'react-dom/server';
+import { Image } from 'primereact/image';
 
 import { useRouter } from 'next/navigation';
 
@@ -74,6 +74,7 @@ const Page = () => {
     };
 
     const [examen, setExamen] = useState(examenVacio);
+    const [mensaje, setMensaje] = useState('');
 
     const [temas, setTemas] = useState<(typeof temaVacio)[]>([]);
     const [preguntas, setPreguntas] = useState<any[]>([]);
@@ -92,8 +93,10 @@ const Page = () => {
     const toastBC = useRef<Toast>(null);
     const [timeLeft, setTimeLeft] = useState(tiempoPregunta);
     const timerRef = useRef<number | undefined>(undefined);
+    const [imagenURL, setImagenURL] = useState<string | null>(null);
 
     const [selectedRepuesta, setSelectedRepuesta] = useState(-1);
+    const [selectedOption, setSelectedOption] = useState(-1);
     const [correcto, setCorrecto] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -113,7 +116,7 @@ const Page = () => {
                 params: { CodigoExamen }
             });
             const { examen, preguntas } = data;
-            setTiempoPregunta(examen.Duracion*60)
+            setTiempoPregunta(examen.Duracion * 60);
             setExamen(examen);
             setPreguntas(preguntas);
             console.log('Examen: ', data);
@@ -146,9 +149,15 @@ const Page = () => {
         }, 1000); // Actualizar el tiempo cada segundo
     };
 
-    const nextQuestion = () => {
+    const nextQuestion = async () => {
         setSelectedRepuesta(-1);
+        setSelectedOption(-1);
         if (activeIndex < preguntas.length - 1) {
+            console.log('Pregunta' + (activeIndex + 2) + ': ', preguntas[activeIndex + 1]);
+            if (preguntas[activeIndex + 1].RutaImagen) {
+                console.log('Hay Imagen');
+                await obtenerArchivo(preguntas[activeIndex + 1].RutaImagen);
+            }
             setTimeLeft(tiempoPregunta);
             setActiveIndex(activeIndex + 1);
         } else {
@@ -156,17 +165,25 @@ const Page = () => {
         }
     };
 
-    const siguientePregunta = () => {
-        if (selectedRepuesta >= 0 && selectedRepuesta <= 4) {
+    const siguientePregunta = async () => {
+        if (selectedRepuesta >= 0) {
             valorRespuestas.push(correcto);
             respuestas.push(selectedRepuesta);
         } else respuestas.push(null);
         setTimeLeft(tiempoPregunta);
         startTimer();
         setSelectedRepuesta(-1);
+        setSelectedOption(-1);
 
         // console.log(valorRespuestas);
         if (activeIndex < preguntas.length - 1) {
+            console.log('Pregunta' + (activeIndex + 2) + ': ', preguntas[activeIndex + 1]);
+
+            if (preguntas[activeIndex + 1].RutaImagen) {
+                console.log('Hay Imagen');
+                await obtenerArchivo(preguntas[activeIndex + 1].RutaImagen);
+            }
+
             setActiveIndex(activeIndex + 1);
         }
     };
@@ -175,6 +192,7 @@ const Page = () => {
     const handleStartClick = () => {
         setIniciado(true);
         startTimer();
+        if (preguntas[0]?.RutaImagen) obtenerArchivo(preguntas[0].RutaImagen);
     };
 
     const clear = () => {
@@ -240,12 +258,40 @@ const Page = () => {
             });
     };
 
+    const obtenerArchivo = async (ruta: string) => {
+        if (ruta === '') {
+            setMensaje('No llegó ruta');
+            return;
+        }
+        try {
+            setMensaje('Hay Imagen');
+
+            const response = await axios.get('http://localhost:3001/api/files/download', {
+                params: { fileName: ruta },
+                responseType: 'arraybuffer' // Especificar el tipo de respuesta como 'arraybuffer'
+            });
+
+            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const url = window.URL.createObjectURL(blob);
+
+            setImagenURL(url);
+        } catch (error) {
+            // console.error('Error al obtener el archivo:', error);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error de carga de archivo',
+                life: 3000
+            });
+        }
+    };
+
     const footer =
         activeIndex === preguntas.length - 1 ? (
             <>
                 <Button
                     onClick={() => {
-                        if (selectedRepuesta >= 0 && selectedRepuesta <= 4) {
+                        if (selectedRepuesta >= 0) {
                             valorRespuestas.push(correcto);
                             respuestas.push(selectedRepuesta);
                         }
@@ -306,7 +352,7 @@ const Page = () => {
             <React.Fragment>
                 <div className="my-2">
                     <StyleClass nodeRef={openBtnRef} selector=".box" enterClassName="hidden" enterActiveClassName="fadein">
-                        <Button label="Iniciar" icon="pi pi-play" severity="success" className=" mr-2" ref={openBtnRef} onClick={handleStartClick} disabled={iniciado}/>
+                        <Button label="Iniciar" icon="pi pi-play" severity="success" className=" mr-2" ref={openBtnRef} onClick={handleStartClick} disabled={iniciado} />
                     </StyleClass>
                 </div>
             </React.Fragment>
@@ -317,7 +363,7 @@ const Page = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    {/* <p className="m-0 text-900 font-bold text-5xl text-primary">{(Math.floor(timeLeft / 60)) + 'min ' + (timeLeft%60) +'s'}</p> */}
+                    <p className="m-0 text-900 font-bold text-5xl text-primary">{Math.floor(timeLeft / 60) + 'min ' + (timeLeft % 60) + 's'}</p>
                 </div>
             </React.Fragment>
         );
@@ -344,6 +390,8 @@ const Page = () => {
                             return (
                                 <TabPanel key={index} header={'Pregunta ' + (index + 1)} disabled={index !== activeIndex}>
                                     <Card title={pregunta1(index + 1, pregunta.Descripcion)} footer={footer}>
+                                        <div className="mt-0 m-5">{imagenURL && <Image src={imagenURL} width="150" height="150" zoomSrc={imagenURL} alt="Imagen de apoyo" preview />}</div>
+
                                         <div className="ml-4 flex">
                                             <div className="flex flex-column gap-3">
                                                 {pregunta.Respuesta.map((respuesta: any, index: number) => {
@@ -353,11 +401,12 @@ const Page = () => {
                                                                 name="respuesta"
                                                                 value={respuesta.Tipo}
                                                                 onChange={(e) => {
-                                                                    setSelectedRepuesta(index);
+                                                                    setSelectedRepuesta(respuesta.Codigo);
+                                                                    setSelectedOption(index);
                                                                     setCorrecto(!!e.value);
                                                                     console.log(!!e.value);
                                                                 }}
-                                                                checked={selectedRepuesta === index}
+                                                                checked={selectedOption === index}
                                                             />
                                                             <label className="ml-2">{respuesta.Valor}</label>
                                                         </div>
