@@ -80,7 +80,6 @@ const getReporteExamenesEstudiante = async (req, res) => {
     let listaExamenes;
 
     if (CodigoEstudiante) {
-      console.log("Si hay CODIGO ESTUDIANTE");
       usuario = await Estudiante.findOne({
         include: [
           {
@@ -288,12 +287,6 @@ const guardarExamen = async (req, res) => {
   try {
     const { estudianteExamenDiario, preguntaEstudianteExamenDiario } = req.body;
 
-    console.log(
-      "Examen GGG",
-      estudianteExamenDiario,
-      preguntaEstudianteExamenDiario
-    );
-
     await sequelize.transaction(async (t) => {
       await EstudianteExamenDiario.create(estudianteExamenDiario, {
         transaction: t,
@@ -386,7 +379,7 @@ const getDetalleExamen = async (req, res) => {
         };
       })
     );
-    console.log("RSP:", preguntas);
+    // console.log("RSP:", preguntas);
 
     const tema = {
       Descripcion: temaexamen.Tema.Descripcion,

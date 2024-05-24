@@ -40,8 +40,6 @@ const cargarPreguntas = async (req, res) => {
       ok: true,
       preguntas,
     });
-
-    console.log(preguntas);
   } catch (error) {
     console.log(error);
   }
@@ -64,6 +62,20 @@ const crearTema = async (req, res) => {
   }
 };
 
+const modificarImagen = async (req, res) => {
+  try {
+    const { pregunta } = req.body;
+    console.log('Pregunta para imagen' ,pregunta)
+    await Pregunta.update({RutaImagen: pregunta.RutaImagen},{where: {Codigo: pregunta.Codigo}})
+    res.json({
+      message: "Pregunta modificada Correctamente",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "No se pudo modificar la ruta de la Imagen" });
+  }
+}
+
 const crearPregunta = async (req, res) => {
   try {
     const { pregunta } = req.body;
@@ -74,7 +86,7 @@ const crearPregunta = async (req, res) => {
       preguntaNew = await Pregunta.update(
         {
           Descripcion: pregunta.Descripcion,
-          CodigoTema: pregunta.CodigoTema,
+          RutaImagen: pregunta.RutaImagen,
         },
         {
           where: {
@@ -82,32 +94,53 @@ const crearPregunta = async (req, res) => {
           },
         }
       );
+
+      const respuestas = await Promise.all(
+        respuestas.map(async (respuesta) => {
+          await Respuesta.update({
+            respuesta,
+          },{
+            where: {Codigo: respuesta.Codigo}
+          });
+
+          // return {
+          //   Codigo: pregunta.Codigo,
+          //   Descripcion: pregunta.Descripcion,
+          //   RutaImagen: pregunta.RutaImagen ?? "",
+          //   Respuestas: pregunta.Respuesta,
+          //   RespuestaSeleccionada: buscar.CodigoRespuesta ?? null,
+          // };
+        })
+      );
+      res.json({
+        message: "Pregunta modificada Correctamente",
+      });
     } else {
       preguntaNew = await Pregunta.create({
         Codigo: null,
         Descripcion: pregunta.Descripcion,
         CodigoTema: req.body.CodigoTema,
+        RutaImagen: pregunta.RutaImagen,
+      });
+
+      const listaRespuestas = respuestas.map((respuesta) => ({
+        ...respuesta,
+        CodigoPregunta: preguntaNew.Codigo,
+      }));
+
+      await sequelize.transaction(async (t) => {
+        await Respuesta.bulkCreate(listaRespuestas, {
+          transaction: t,
+        });
+      });
+
+      res.json({
+        message: "Pregunta Creada Correctamente",
       });
     }
-    const listaRespuestas = respuestas.map((respuesta) => ({
-      ...respuesta,
-      CodigoPregunta: preguntaNew.Codigo,
-    }));
-
-    await sequelize.transaction(async (t) => {
-      await Respuesta.bulkCreate(listaRespuestas, {
-        transaction: t,
-      });
-    });
-    console.log("Resp: ", listaRespuestas);
-    res.json({
-      preguntaNew,
-      listaRespuestas,
-      message: "Pregunta Creada Correctamente",
-    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error al crear la pregunta" });
+    res.status(500).json({ error: "Error al procesar la petición" });
   }
 };
 
@@ -139,4 +172,5 @@ module.exports = {
   editarTema,
   cargarPreguntas,
   crearPregunta,
+  modificarImagen
 };

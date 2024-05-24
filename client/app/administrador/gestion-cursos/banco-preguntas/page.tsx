@@ -6,7 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { FileUpload, FileUploadFilesEvent } from 'primereact/fileupload';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { Rating } from 'primereact/rating';
+import { Image } from 'primereact/image';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
@@ -15,6 +15,7 @@ import { Demo } from '@/types';
 import axios from 'axios';
 
 import { useSearchParams } from 'next/navigation';
+import { OverlayPanel } from 'primereact/overlaypanel';
 
 export default function BancoPreguntas() {
     const searchParams = useSearchParams();
@@ -77,27 +78,24 @@ export default function BancoPreguntas() {
     const [preguntasDialog, setPreguntasDialog] = useState(false);
     const [newPreguntaDialog, setNewPreguntaDialog] = useState(false);
 
-    const [actividad, setActividad] = useState(null);
-
     const [submitted, setSubmitted] = useState(false);
 
     const [globalFilter, setGlobalFilter] = useState('');
+    const [imagenURL, setImagenURL] = useState<string | null>(null);
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
+    const op = useRef<OverlayPanel>(null);
 
     useEffect(() => {
-        console.log('x');
         cargarTemas(codigoCurso);
     }, []);
 
     const cargarTemas = async (CodigoCurso: any) => {
-        console.log('Hola');
         try {
             const { data } = await axios.get('http://localhost:3001/api/pregunta/cargarTemas', {
                 params: { CodigoCurso }
             });
             const { curso, temas } = data;
-            console.log('Hola', data);
             setCurso(curso);
             setTemas(temas);
         } catch (error) {
@@ -115,6 +113,31 @@ export default function BancoPreguntas() {
             setPreguntas(preguntas);
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const obtenerArchivo = async (ruta: string) => {
+        if (ruta === '') {
+            return;
+        }
+        try {
+            const response = await axios.get('http://localhost:3001/api/files/download', {
+                params: { fileName: ruta },
+                responseType: 'arraybuffer' // Especificar el tipo de respuesta como 'arraybuffer'
+            });
+
+            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const url = window.URL.createObjectURL(blob);
+
+            setImagenURL(url);
+        } catch (error) {
+            // console.error('Error al obtener el archivo:', error);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error de carga de archivo',
+                life: 3000
+            });
         }
     };
 
@@ -177,6 +200,50 @@ export default function BancoPreguntas() {
                     detail: 'Ha ocurrido un error al procesar la solicitud',
                     life: 3000
                 });
+            });
+    };
+
+    const modificarRuta = async (pregunta: any) => {
+        await axios
+            .put('http://localhost:3001/api/pregunta/imagenPregunta', {
+                pregunta
+            })
+            .then((response) => {
+                cargarPreguntas(pregunta.CodigoTema);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: response.data.message,
+                    life: 3000
+                });
+            })
+            .catch((error) => {
+                // console.error(error)
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: error.message,
+                    life: 3000
+                });
+            });
+    };
+
+    const handleUpload = async (event: FileUploadFilesEvent, rowData: any) => {
+        const file = event.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        await axios
+            .post('http://localhost:3001/api/files/upload', formData)
+            .then((response) => {
+                // console.log(response.data.path)
+                let _pregunta = { ...rowData, RutaImagen: response.data.filename };
+                toast.current?.show({ severity: 'success', summary: 'Success', detail: 'File Uploaded' });
+                modificarRuta(_pregunta);
+                // setActividad(emptyActividad);
+            })
+            .catch((error) => {
+                console.error(error);
+                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Error de petición' });
             });
     };
 
@@ -389,28 +456,7 @@ export default function BancoPreguntas() {
     };
 
     const filtrarRespuestas = (Respuestas: (typeof respuestaVacia)[], Codigo: number) => {
-        console.log(Respuestas);
-        console.log(Respuestas.filter((s) => s.CodigoPregunta == Codigo));
         return Respuestas.filter((s) => s.CodigoPregunta == Codigo);
-    };
-
-    const handleUpload = async (event: FileUploadFilesEvent, rowData: any) => {
-        const file = event.files[0];
-        const formData = new FormData();
-        formData.append('file', file);
-        await axios
-            .post('http://localhost:3001/api/files/upload', formData)
-            .then((response) => {
-                // console.log(response.data.path)
-                let _actividad = { ...rowData, RutaRecursoGuia: response.data.filename };
-                toast.current?.show({ severity: 'success', summary: 'Success', detail: 'File Uploaded' });
-                // modificarActividad(_actividad);
-                // setActividad(emptyActividad);
-            })
-            .catch((error) => {
-                // console.error(error)
-                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Error de petición' });
-            });
     };
 
     const respuestasBodyTemplate = (rowData: typeof preguntaVacia) => {
@@ -424,15 +470,30 @@ export default function BancoPreguntas() {
                             <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
                                 <h5 className="m-0">{rowData.Descripcion}</h5>
                                 <span className="block mt-2 md:mt-0">
-                                    <FileUpload
-                                        chooseOptions={{ icon: 'pi pi-upload', className: 'p-2' }}
-                                        chooseLabel="Subir imágen"
-                                        mode="basic"
-                                        accept="image/*"
-                                        maxFileSize={5000000}
-                                        customUpload
-                                        uploadHandler={(e) => handleUpload(e, actividad)}
-                                    />
+                                    {!rowData.RutaImagen ? (
+                                        <FileUpload
+                                            chooseOptions={{ icon: 'pi pi-upload', className: 'p-2' }}
+                                            chooseLabel="Subir imágen"
+                                            mode="basic"
+                                            accept="image/*"
+                                            maxFileSize={5000000}
+                                            customUpload
+                                            uploadHandler={(e) => handleUpload(e, rowData)}
+                                        />
+                                    ) : (
+                                        <>
+                                            <Button
+                                                type="button"
+                                                icon="pi pi-image"
+                                                label="Ver imagen"
+                                                onClick={(e) => {
+                                                    obtenerArchivo(rowData.RutaImagen);
+                                                    op.current!.toggle(e);
+                                                }}
+                                            />
+                                            <OverlayPanel ref={op}>{imagenURL && <Image src={imagenURL} zoomSrc={imagenURL} alt="Foto Docente" width="80" height="80" preview />}</OverlayPanel>
+                                        </>
+                                    )}
                                 </span>
                             </div>
                         </>
