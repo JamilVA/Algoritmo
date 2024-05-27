@@ -95,7 +95,7 @@ const GestionCursos = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h4 className="m-0">Examenes pendientes</h4>
+            <h4 className="m-0">Examenes </h4>
             <span className="block mt-2 md:mt-0 p-input-icon-left"></span>
         </div>
     );
@@ -131,21 +131,31 @@ const GestionCursos = () => {
     const comprobarAperturaExamen = (examen: any) => {
         if (examen?.EstudianteExamenDiarios[0]?.Estado) return false;
 
+        // Obtener solo la parte de la fecha
         const fechaExamen = new Date(examen.Fecha);
+        const hoy = new Date();
 
-        if (fechaExamen.setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) return false;
+        if (fechaExamen.setHours(0, 0, 0, 0) < hoy.setHours(0, 0, 0, 0)) return false;
+
         const horaActual = new Date();
-        const horaInicio = new Date(examen.HoraInicio);
-        const horaFin = new Date(examen.HoraFin);
-        console.log(horaActual.getHours());
-        return true;
+        
+        // Crear objetos Date para las horas de inicio y fin usando la fecha del examen
+        const horaInicio = new Date(`${fechaExamen.toISOString().split('T')[0]}T${examen.HoraInicio}`);
+        const horaFin = new Date(`${fechaExamen.toISOString().split('T')[0]}T${examen.HoraFin}`);
+
+        // Comprobar que la hora actual está entre la hora de inicio y la hora de fin
+        if (horaActual >= horaInicio && horaActual <= horaFin) {
+            return true;
+        }
+
+        return false;
     };
 
     const actionBodyTemplate = (rowData: any) => {
         const estadoExamen = comprobarAperturaExamen(rowData);
         return (
             <>
-                {!estadoExamen && <Button icon="pi pi-external-link" rounded severity={'secondary'} outlined tooltip="Examen culminado" className="mr-2" />}
+                {!estadoExamen && <Button icon="pi pi-external-link" rounded severity={'secondary'} outlined tooltip="No disponible" className="mr-5" />}
                 {estadoExamen && (
                     <Link
                         href={{
@@ -164,8 +174,8 @@ const GestionCursos = () => {
 
     const rowClass = (data: any) => {
         return {
-            'bg-gray-200': data.EstudianteExamenDiarios?.length > 0,
-            'bg-green-50 font-bold': data.EstudianteExamenDiarios.length == 0
+            'bg-gray-200': comprobarAperturaExamen(data) == false,
+            'bg-green-50 font-bold': comprobarAperturaExamen(data) == true
         };
     };
 

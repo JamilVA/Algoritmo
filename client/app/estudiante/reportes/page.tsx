@@ -1,53 +1,48 @@
-/* eslint-disable @next/next/no-img-element */
-'use client';
+'use client'
+import React, { useContext, useEffect, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { Menu } from 'primereact/menu';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { ProductService } from '../../../demo/service/ProductService';
-import { LayoutContext } from '../../../layout/context/layoutcontext';
-import Link from 'next/link';
-import { Demo } from '@/types';
-import { ChartData, ChartOptions } from 'chart.js';
-import { Dropdown } from 'primereact/dropdown';
+import { useSession } from 'next-auth/react';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import PDF from '../../components/PDF';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 
-const nivelVacio = {
-    Codigo: 0,
-    Nombre: ''
-};
+interface Examen {
+    Codigo: number;
+    Curso: string;
+    Tema: string;
+    Nota: number;
+    Correctas: number;
+    Incorrectas: number;
+    EnBlanco: number;
+    Fecha: string;
+    HoraFin: string;
+}
 
-const gradoVacio = {
-    Codigo: 0,
-    Nombre: '',
-    CodigoNivel: 0
-};
-
-const Dashboard = () => {
-
+const Dashboard: React.FC = () => {
     const searchParams = useSearchParams();
     const CodigoEstudiante = searchParams.get('E');
-    
-    const [lineOptions, setLineOptions] = useState<ChartOptions>({});
 
-    const [lineData, setLineData] = useState({
-        labels: [],
-        datasets: []
-    });
-
-    const [promedios, setPromedios] = useState([]);
-
-    const [examenes, setExamenes] = useState([]);
-
+    const [lineOptions, setLineOptions] = useState({});
+    const [lineData, setLineData] = useState({ labels: [], datasets: [] });
+    const [examenes, setExamenes] = useState<Examen[]>([]);
+    const [selectedExamenCodigo, setSelectedExamenCodigo] = useState<number | null>(null);
+    const [pdfData, setPdfData] = useState<any>(null);
     const { data: session, status } = useSession();
 
+    useEffect(() => {
+        if (status === 'authenticated') {
+            applyLightTheme();
+            cargarDatos();
+            cargarDataGraficos();
+        }
+    }, [status]);
 
     const applyLightTheme = () => {
-        const lineOptions: ChartOptions = {
+        const lineOptions = {
             plugins: {
                 legend: {
                     labels: {
@@ -74,26 +69,15 @@ const Dashboard = () => {
                 }
             }
         };
-
         setLineOptions(lineOptions);
     };
-
-    useEffect(() => {
-        if (status === 'authenticated') {
-            applyLightTheme();
-            cargarDatos();
-            cargarDataGraficos()
-        }
-    }, [status]);
 
     const cargarDatos = async () => {
         try {
             const { data } = await axios.get('http://localhost:3001/api/examen/reporteExamenesEstudiante', {
                 params: { CodigoEstudiante: session?.user.codigoEstudiante }
             });
-            const { examenes } = data;
-            console.log('Datos', examenes);
-            setExamenes(examenes)
+            setExamenes(data.examenes);
         } catch (error) {
             console.error(error);
         }
@@ -104,13 +88,56 @@ const Dashboard = () => {
             const { data } = await axios.get('http://localhost:3001/api/examen/dataChartEstudiante', {
                 params: { CodigoEstudiante: session?.user.codigoEstudiante }
             });
-            const { labels, datosFinales } = data;
-            setLineData({ ...lineData, labels: labels, datasets: datosFinales });
-            console.log('datasets', datosFinales);
+            setLineData({ labels: data.labels, datasets: data.datosFinales });
         } catch (error) {
             console.error(error);
         }
     };
+
+    const fetchPdfData = async (CodigoEstudiante: number, CodigoExamen: number) => {
+        try {
+            const { data } = await axios.get('http://localhost:3001/api/examen/detalleExamen', {
+                params: { CodigoEstudiante, CodigoExamen }
+            });
+            return data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const comprobarAperturaExamen = (examen: Examen) => {
+        const fechaExamen = new Date(examen.Fecha);
+        const hoy = new Date();
+
+        if (fechaExamen.setHours(0, 0, 0, 0) > hoy.setHours(0, 0, 0, 0)) return false;
+        const horaActual = new Date();
+        const horaFin = new Date(`${fechaExamen.toISOString().split('T')[0]}T${examen.HoraFin}`);
+        horaFin.setMinutes(horaFin.getMinutes() + 20);
+        return horaActual > horaFin;
+    };
+
+    const renderPDFButton = (examen: Examen) => (
+        <>
+            {(examen.Codigo != selectedExamenCodigo) && (
+                <Button
+                    icon="pi pi-search"
+                    text
+                    onClick={async () => {
+                        const data = await fetchPdfData(session?.user.codigoEstudiante ?? 0, examen.Codigo);
+                        setPdfData({ ...data, CodigoEstudiante: session?.user.codigoEstudiante, CodigoExamen: examen.Codigo });
+                        setSelectedExamenCodigo(examen.Codigo);
+                    }}
+                    tooltip='Descargar PDF'
+                ></Button>
+            )}
+            {(pdfData && examen.Codigo == selectedExamenCodigo) && selectedExamenCodigo !== null && (
+                <PDFDownloadLink document={<PDF estudiante={pdfData.estudiante} examen={pdfData.examen} tema={pdfData.tema} preguntas={pdfData.preguntas} />} fileName={`Examen_${selectedExamenCodigo}.pdf`}>
+                    {({ loading }) => (loading ? 'Cargando documento...' : 'Descargar ahora')}
+                </PDFDownloadLink>
+            )}
+        </>
+    );
+
     return (
         <div className="grid">
             <div className="col-12">
@@ -118,70 +145,20 @@ const Dashboard = () => {
                     <h5>Ultimos Examenes</h5>
                     <DataTable value={examenes} rows={5} paginator responsiveLayout="scroll">
                         <Column field="Curso" header="Curso" sortable headerStyle={{ minWidth: '6rem' }} />
-                        <Column field="Tema" header="Tema"  headerStyle={{ minWidth: '6rem' }} />
+                        <Column field="Tema" header="Tema" headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Nota" header="Nota" sortable headerStyle={{ minWidth: '3rem' }} />
-                        <Column field="Correctas" header="C" headerStyle={{ minWidth: '2rem' }} />
-                        <Column field="Incorrectas" header="I" headerStyle={{ minWidth: '2rem' }} />
-                        <Column field="EnBlanco" header="B" headerStyle={{ minWidth: '2rem' }} />
-                        <Column
-                            header="Ver"
-                            headerStyle={{ minWidth: '1rem' }}
-                            body={() => (
-                                <>
-                                    <Button icon="pi pi-search" text />
-                                </>
-                            )}
-                        />
+                        <Column field="Correctas" header="Correctas" headerStyle={{ minWidth: '3rem' }} />
+                        <Column field="Incorrectas" header="Incorrectas" headerStyle={{ minWidth: '3rem' }} />
+                        <Column field="EnBlanco" header="En Blanco" headerStyle={{ minWidth: '3rem' }} />
+                        <Column header="Acciones" body={(data) => renderPDFButton(data)} headerStyle={{ minWidth: '8rem' }} />
                     </DataTable>
                 </div>
-                {/* <div
-                    className="px-4 py-5 shadow-2 flex flex-column md:flex-row md:align-items-center justify-content-between mb-3"
-                    style={{
-                        borderRadius: '1rem',
-                        background: 'linear-gradient(0deg, rgba(0, 123, 255, 0.5), rgba(0, 123, 255, 0.5)), linear-gradient(92.54deg, #1C80CF 47.88%, #FFFFFF 100.01%)'
-                    }}
-                >
-                    <div>
-                        <div className="text-blue-100 font-medium text-xl mt-2 mb-3">Resumen </div>
-                        <div className="text-white font-medium text-5xl">Resultados 2024</div>
-                    </div>
-                    <div className="mt-4 mr-auto md:mt-0 md:mr-0">
-                        <Link href="" className="p-button font-bold px-5 py-3 p-button-warning p-button-rounded p-button-raised">
-                            Descargar
-                        </Link>
-                    </div>
-                </div> */}
             </div>
-
             <div className="col-12">
                 <div className="card">
                     <h5>Tendencia Examenes</h5>
                     <Chart type="line" data={lineData} options={lineOptions} />
                 </div>
-
-                {/* <div className="card">
-                    <div className="flex justify-content-between align-items-center mb-5">
-                        <h5>Promedio de los examenes diarios en el año</h5>
-                    </div>
-                    <ul className="list-none p-0 m-0">
-                        {promedios.map((grado: any, index) => {
-                            return (
-                                <li key={index} className="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
-                                    <div>
-                                        <span className="text-900 font-medium mr-2 mb-1 md:mb-0">{grado.grado}</span>
-                                        <div className="mt-1 text-600"></div>
-                                    </div>
-                                    <div className="mt-2 md:mt-0 ml-0 md:ml-8 flex align-items-center">
-                                        <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
-                                            <div className={"bg-"+grado.color+"-500 h-full"} style={{ width: (grado.porcentaje+'%') }} />
-                                        </div>
-                                        <span className={"text-"+grado.color+"-500 ml-3 font-medium"}>{grado.promedio>9 ? grado.promedio : '0'+grado.promedio}/20</span>
-                                    </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </div> */}
             </div>
         </div>
     );

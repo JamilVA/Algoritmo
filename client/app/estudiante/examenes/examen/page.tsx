@@ -85,7 +85,7 @@ const Page = () => {
     const [pregunta, setPregunta] = useState(preguntaVacia);
     const [respuesta, setRespuesta] = useState(respuestaVacia);
 
-    const [tiempoPregunta, setTiempoPregunta] = useState(60);
+    const [tiempoPregunta, setTiempoPregunta] = useState(0);
 
     const toast = useRef<Toast>(null);
     const [iniciado, setIniciado] = useState(false);
@@ -110,6 +110,8 @@ const Page = () => {
         }
     }, [status]);
 
+    useEffect(() => {}, [examen]);
+
     const cargarExamen = async () => {
         try {
             const { data } = await axios.get('http://localhost:3001/api/examen/datos', {
@@ -117,6 +119,7 @@ const Page = () => {
             });
             const { examen, preguntas } = data;
             setTiempoPregunta(examen.Duracion * 60);
+            setTimeLeft(examen.Duracion * 60);
             setExamen(examen);
             setPreguntas(preguntas);
             console.log('Examen: ', data);
@@ -150,12 +153,11 @@ const Page = () => {
     };
 
     const nextQuestion = async () => {
+        setImagenURL(null)
         setSelectedRepuesta(-1);
         setSelectedOption(-1);
         if (activeIndex < preguntas.length - 1) {
-            console.log('Pregunta' + (activeIndex + 2) + ': ', preguntas[activeIndex + 1]);
             if (preguntas[activeIndex + 1].RutaImagen) {
-                console.log('Hay Imagen');
                 await obtenerArchivo(preguntas[activeIndex + 1].RutaImagen);
             }
             setTimeLeft(tiempoPregunta);
@@ -166,6 +168,7 @@ const Page = () => {
     };
 
     const siguientePregunta = async () => {
+        setImagenURL(null)
         if (selectedRepuesta >= 0) {
             valorRespuestas.push(correcto);
             respuestas.push(selectedRepuesta);
@@ -174,22 +177,26 @@ const Page = () => {
         startTimer();
         setSelectedRepuesta(-1);
         setSelectedOption(-1);
-
-        // console.log(valorRespuestas);
         if (activeIndex < preguntas.length - 1) {
-            console.log('Pregunta' + (activeIndex + 2) + ': ', preguntas[activeIndex + 1]);
-
             if (preguntas[activeIndex + 1].RutaImagen) {
-                console.log('Hay Imagen');
                 await obtenerArchivo(preguntas[activeIndex + 1].RutaImagen);
             }
-
             setActiveIndex(activeIndex + 1);
         }
     };
 
-    // Función para manejar el clic en el botón "Iniciar"
     const handleStartClick = () => {
+        if (!comprobarAperturaExamen(examen)) {
+            setTimeout(() => {
+                toast.current?.show({
+                    severity: 'warn',
+                    summary: '¡Adevertencia!',
+                    detail: 'El examen no esta disponible, revisar fecha y hora.',
+                    life: 2500
+                });
+            }, 2500);
+            router.push('/estudiante/examenes');
+        }
         setIniciado(true);
         startTimer();
         if (preguntas[0]?.RutaImagen) obtenerArchivo(preguntas[0].RutaImagen);
@@ -260,15 +267,12 @@ const Page = () => {
 
     const obtenerArchivo = async (ruta: string) => {
         if (ruta === '') {
-            setMensaje('No llegó ruta');
             return;
         }
         try {
-            setMensaje('Hay Imagen');
-
             const response = await axios.get('http://localhost:3001/api/files/download', {
                 params: { fileName: ruta },
-                responseType: 'arraybuffer' // Especificar el tipo de respuesta como 'arraybuffer'
+                responseType: 'arraybuffer'
             });
 
             const blob = new Blob([response.data], { type: response.headers['content-type'] });
@@ -276,11 +280,10 @@ const Page = () => {
 
             setImagenURL(url);
         } catch (error) {
-            // console.error('Error al obtener el archivo:', error);
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Error de carga de archivo',
+                detail: 'Error de carga de imagen',
                 life: 3000
             });
         }
@@ -352,7 +355,7 @@ const Page = () => {
             <React.Fragment>
                 <div className="my-2">
                     <StyleClass nodeRef={openBtnRef} selector=".box" enterClassName="hidden" enterActiveClassName="fadein">
-                        <Button label="Iniciar" icon="pi pi-play" severity="success" className=" mr-2" ref={openBtnRef} onClick={handleStartClick} disabled={iniciado} />
+                        <Button label="Iniciar" icon="pi pi-play" severity="success" className=" mr-2" ref={openBtnRef} onClick={handleStartClick} disabled={iniciado || !comprobarAperturaExamen(examen)} />
                     </StyleClass>
                 </div>
             </React.Fragment>
@@ -369,6 +372,26 @@ const Page = () => {
         );
     };
 
+    const comprobarAperturaExamen = (examen: any) => {
+        const fechaExamen = new Date(examen.Fecha);
+        const hoy = new Date();
+
+        if (fechaExamen.setHours(0, 0, 0, 0) < hoy.setHours(0, 0, 0, 0)) return false;
+
+        const horaActual = new Date();
+
+        // Crear objetos Date para las horas de inicio y fin usando la fecha del examen
+        const horaInicio = new Date(`${fechaExamen.toISOString().split('T')[0]}T${examen.HoraInicio}`);
+        const horaFin = new Date(`${fechaExamen.toISOString().split('T')[0]}T${examen.HoraFin}`);
+
+        // Comprobar que la hora actual está entre la hora de inicio y la hora de fin
+        if (horaActual >= horaInicio && horaActual <= horaFin) {
+            return true;
+        }
+
+        return false;
+    };
+
     return (
         <div className="col-12">
             <div className="card m-0">
@@ -377,7 +400,7 @@ const Page = () => {
                 {/* <h1>Tema: Cultura General{curso?.Nombre}</h1> */}
                 <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
 
-                {visible && (
+                {visible && comprobarAperturaExamen(examen) && (
                     <TabView
                         scrollable
                         activeIndex={activeIndex}

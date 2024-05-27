@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
-import axios from 'axios';
 
 // Registrar la fuente Roboto
 Font.register({
@@ -49,7 +48,9 @@ const styles = StyleSheet.create({
         marginBottom: 20
     },
     studentName: {
-        fontSize: 14
+        fontWeight: 'bold',
+        fontSize: 14,
+        textDecoration: 'underline'
     },
     questionSection: {
         marginBottom: 10
@@ -78,52 +79,49 @@ const styles = StyleSheet.create({
     }
 });
 
-interface PDFProps {
-    CodigoEstudiante: number;
-    CodigoExamen: number;
+interface Persona {
+    Nombres: string;
+    ApellidoPaterno: string;
+    ApellidoMaterno: string;
 }
 
-const PDF: React.FC<PDFProps> = ({ CodigoEstudiante, CodigoExamen }) => {
-    const estudianteVacio = {
-        Codigo: 0,
-        Persona: {
-            Nombres: '',
-            ApellidoPaterno: '',
-            ApellidoMaterno: ''
-        }
-    };
+interface Estudiante {
+    Codigo: number;
+    Persona: Persona;
+}
 
-    const temaVacio = {
-        Codigo: 0,
-        Descripcion: ''
-    };
+interface Tema {
+    Codigo: number;
+    Descripcion: string;
+}
 
-    const [estudiante, setEstudiante] = useState(estudianteVacio);
-    const [examen, setExamen] = useState<any>(null);
-    const [tema, setTema] = useState(temaVacio);
-    const [preguntas, setPreguntas] = useState([]);
+interface Respuesta {
+    Codigo: number;
+    Valor: string;
+    Tipo: boolean;
+}
 
-    useEffect(() => {
-        fetchData();
-    }, [CodigoEstudiante, CodigoExamen]);
+interface Pregunta {
+    Codigo: number;
+    Descripcion: string;
+    RespuestaSeleccionada: number;
+    Respuestas: Respuesta[];
+}
 
-    const fetchData = async () => {
-        await axios
-            .get('http://localhost:3001/api/examen/detalleExamen', { params: { CodigoEstudiante, CodigoExamen } })
-            .then((response) => {
-                console.log(response.data);
+interface Examen {
+    Codigo: number;
+    Nota: number;
+    Fecha: string;
+}
 
-                const { estudiante, tema, preguntas, examen } = response.data;
-                setExamen(examen);
-                setPreguntas(preguntas);
-                setEstudiante(estudiante);
-                setTema(tema);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    };
+interface PDFProps {
+    estudiante: Estudiante;
+    examen: Examen;
+    tema: Tema;
+    preguntas: Pregunta[];
+}
 
+const PDF: React.FC<PDFProps> = ({ estudiante, examen, tema, preguntas }) => {
     const formatDate = (dateString: string) => {
         const options: Intl.DateTimeFormatOptions = {
             day: '2-digit',
@@ -138,14 +136,14 @@ const PDF: React.FC<PDFProps> = ({ CodigoEstudiante, CodigoExamen }) => {
         return new Intl.DateTimeFormat('es-PE', options).format(date);
     };
 
-    const renderPreguntas = (preguntas: any[]) => {
+    const renderPreguntas = (preguntas: Pregunta[]) => {
         return preguntas.map((pregunta, index) => (
             <View key={pregunta.Codigo} style={styles.questionSection}>
                 <Text style={styles.question}>
                     {index + 1}. {pregunta.Descripcion}
                 </Text>
                 <View style={styles.options}>
-                    {pregunta.Respuestas.map((respuesta: any, idx: number) => {
+                    {pregunta.Respuestas.map((respuesta, idx) => {
                         const isMarked = pregunta.RespuestaSeleccionada === respuesta.Codigo;
                         const optionStyle = isMarked
                             ? respuesta.Tipo
@@ -184,3 +182,6 @@ const PDF: React.FC<PDFProps> = ({ CodigoEstudiante, CodigoExamen }) => {
 };
 
 export default PDF;
+
+
+

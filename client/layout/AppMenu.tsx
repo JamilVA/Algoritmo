@@ -65,7 +65,7 @@ const AppMenu = () => {
                 { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/inicio' },
                 // { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/estudiante/cursos' },
                 { label: 'Examenes', icon: 'pi pi-fw pi-file', to: '/estudiante/examenes' },
-                { label: 'Reportes', icon: 'pi pi-fw pi-chart-line', to: '/estudiante/reportes' },
+                { label: 'Historial de examenes', icon: 'pi pi-fw pi-chart-line', to: '/estudiante/reportes' },
 
             ]
         }

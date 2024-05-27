@@ -42,11 +42,15 @@ const getExamenesEstudiante = async (req, res) => {
   try {
     const { CodigoEstudiante } = req.query;
 
+    const fechaActual = new Date();
+    const haceSieteDias = new Date(fechaActual);
+    haceSieteDias.setDate(fechaActual.getDate() - 7);    
+
     const estudiante = await Estudiante.findOne({
       where: { Codigo: CodigoEstudiante },
     });
 
-    const examenes = await ExamenDiario.findAll({
+    const listaExamenes = await ExamenDiario.findAll({
       include: [
         {
           model: Tema,
@@ -64,6 +68,8 @@ const getExamenesEstudiante = async (req, res) => {
       ],
       where: { "$Tema.Curso.CodigoGrado$": estudiante.CodigoGrado },
     });
+    const examenes = listaExamenes.filter((examen) => new Date(examen.Fecha) >= haceSieteDias);
+
     res.json({ message: "Examenes cargados correctamente", examenes });
   } catch (error) {
     console.error(error);
@@ -98,7 +104,7 @@ const getReporteExamenesEstudiante = async (req, res) => {
         include: [
           {
             model: ExamenDiario,
-            attributes: ["Fecha"],
+            attributes: ["Fecha", 'HoraFin'],
             include: [
               {
                 model: Tema,
@@ -194,6 +200,7 @@ const getReporteExamenesEstudiante = async (req, res) => {
       Incorrectas: examen.Incorrectas,
       EnBlanco: examen.EnBlanco,
       Fecha: examen.ExamenDiario.Fecha,
+      HoraFin: examen.ExamenDiario.HoraFin,
       Tema: examen.ExamenDiario.Tema.Descripcion,
       Curso: examen.ExamenDiario.Tema.Curso.Nombre,
     }));
@@ -373,7 +380,7 @@ const getDetalleExamen = async (req, res) => {
         return {
           Codigo: pregunta.Codigo,
           Descripcion: pregunta.Descripcion,
-          RutaImagen: pregunta.RutaImagen ?? "",
+          RutaImagen: pregunta.RutaImagen,
           Respuestas: pregunta.Respuesta,
           RespuestaSeleccionada: buscar.CodigoRespuesta ?? null,
         };
