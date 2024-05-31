@@ -53,7 +53,7 @@ const AppMenu = () => {
             label: 'PANEL DOCENTE',
             items: [
                 { label: 'Inicio', icon: 'pi pi-fw pi-id-card', to: '/inicio' },
-                { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/docente/cursos' }
+                { label: 'Cursos', icon: 'pi pi-fw pi-book', to: '/docente' }
             ]
         }
     ];

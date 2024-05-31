@@ -14,6 +14,10 @@ const {
 
 const { sequelize } = require("../config/database");
 
+const multer = require("multer");
+const { join } = require("path");
+const fs = require("fs");
+
 const getExamenes = async (req, res) => {
   try {
     const { CodigoGrado } = req.query;
@@ -44,7 +48,7 @@ const getExamenesEstudiante = async (req, res) => {
 
     const fechaActual = new Date();
     const haceSieteDias = new Date(fechaActual);
-    haceSieteDias.setDate(fechaActual.getDate() - 7);    
+    haceSieteDias.setDate(fechaActual.getDate() - 7);
 
     const estudiante = await Estudiante.findOne({
       where: { Codigo: CodigoEstudiante },
@@ -68,7 +72,9 @@ const getExamenesEstudiante = async (req, res) => {
       ],
       where: { "$Tema.Curso.CodigoGrado$": estudiante.CodigoGrado },
     });
-    const examenes = listaExamenes.filter((examen) => new Date(examen.Fecha) >= haceSieteDias);
+    const examenes = listaExamenes.filter(
+      (examen) => new Date(examen.Fecha) >= haceSieteDias
+    );
 
     res.json({ message: "Examenes cargados correctamente", examenes });
   } catch (error) {
@@ -104,7 +110,7 @@ const getReporteExamenesEstudiante = async (req, res) => {
         include: [
           {
             model: ExamenDiario,
-            attributes: ["Fecha", 'HoraFin'],
+            attributes: ["Fecha", "HoraFin"],
             include: [
               {
                 model: Tema,
@@ -377,10 +383,20 @@ const getDetalleExamen = async (req, res) => {
           where: { Codigo: buscar.CodigoPregunta },
         });
 
+        let RutaImagen = "";
+
+        if (pregunta.RutaImagen) {
+          const filePath = join(__dirname, "../uploads/", pregunta.RutaImagen);
+
+          if (fs.existsSync(filePath)) {
+            RutaImagen = filePath;
+          }
+        }
+
         return {
           Codigo: pregunta.Codigo,
           Descripcion: pregunta.Descripcion,
-          RutaImagen: pregunta.RutaImagen,
+          RutaImagen: RutaImagen,
           Respuestas: pregunta.Respuesta,
           RespuestaSeleccionada: buscar.CodigoRespuesta ?? null,
         };
@@ -623,13 +639,29 @@ const getDataChartEstudiante = async (req, res) => {
     const { DNI } = req.query;
 
     let datos;
+    let estudiante;
 
     if (CodigoEstudiante) {
+      estudiante = await Estudiante.findOne({
+        where: { Codigo: CodigoEstudiante },
+      });
       datos = await EstudianteExamenDiario.findAll({
         include: [
           {
             model: ExamenDiario,
             attributes: ["Fecha"],
+            include: [
+              {
+                model: Tema,
+                attributes: ["Codigo"],
+                include: [
+                  {
+                    model: Curso,
+                    attributes: ["Codigo"],
+                  },
+                ],
+              },
+            ],
           },
         ],
         attributes: ["Nota"],
@@ -637,11 +669,34 @@ const getDataChartEstudiante = async (req, res) => {
       });
     }
     if (DNI) {
+      estudiante = await Estudiante.findOne({
+        include: [
+          {
+            model: Persona,
+            attributes: ["DNI"],
+          },
+        ],
+        where: { "$Persona.DNI$": DNI },
+      });
+
+
       datos = await EstudianteExamenDiario.findAll({
         include: [
           {
             model: ExamenDiario,
             attributes: ["Fecha"],
+            include: [
+              {
+                model: Tema,
+                attributes: ["Codigo"],
+                include: [
+                  {
+                    model: Curso,
+                    attributes: ["Codigo"],
+                  },
+                ],
+              },
+            ],
           },
           {
             model: Estudiante,
@@ -706,41 +761,69 @@ const getDataChartEstudiante = async (req, res) => {
       "gray",
     ];
 
-    const datosLimpios = datos.map((dato) => ({
-      Nota: dato.Nota,
-      Fecha: dato.ExamenDiario.Fecha,
-    }));
+    const cursos = await Curso.findAll({
+      where: { CodigoGrado: estudiante.CodigoGrado },
+    });
 
-    let datosEstudiante = [];
+    let datosCurso = [];
     let datosFinales = [];
+    let datosPromedios = [];
 
-    for (let j = 0; j < 12; j++) {
-      const mes = datosLimpios
-        .filter((examen) => new Date(examen.Fecha).getMonth() == j)
-        .map((dato) => Number(dato.Nota));
-      if (mes.length > 0) {
-        console.log("MESSI: ", mes);
-        const suma = mes.reduce((total, numero) => total + numero, 0);
-        const promedio = suma / mes.length;
-        datosEstudiante.push(promedio);
-      } else datosEstudiante.push(0);
-    }
+    cursos.forEach((f, index) => {
+      const curso = datos
+        .filter((examen) => examen.ExamenDiario.Tema.Curso.Codigo == f.Codigo)
+        .map((dato) => ({ Nota: dato.Nota, Fecha: dato.ExamenDiario.Fecha }));
+      datosCurso.push([]);
 
-    const x = {
-      label: "Notas del Estudiante",
-      data: datosEstudiante,
-      fill: false,
-      backgroundColor: colors[0],
-      borderColor: colors[0],
-      tension: 0.4,
-    };
-    datosFinales.push(x);
+      for (let j = 0; j < 12; j++) {
+        const cursomes = curso
+          .filter((examen) => new Date(examen.Fecha).getMonth() == j)
+          .map((dato) => Number(dato.Nota));
+        if (cursomes.length > 0) {
+          const suma = cursomes.reduce((total, numero) => total + numero, 0);
+          const promedio = suma / cursomes?.length;
+          datosCurso[index].push(promedio);
+        } else datosCurso[index].push(0);
+      }
+    });
+
+    const promedios = [];
+
+    datosCurso.forEach((curso) => {
+      const cursoLimpio = curso.filter((nota) => nota != 0);
+      if (cursoLimpio.length > 0) {
+        const suma = cursoLimpio.reduce((total, numero) => total + numero, 0);
+        const promedio = suma / cursoLimpio?.length;
+        promedios.push(promedio);
+      } else promedios.push(0);
+    });
+
+    cursos.forEach((curso, index) => {
+      const y = {
+        curso: curso.Nombre,
+        promedio: promedios[index],
+        porcentaje: (promedios[index] / 20) * 100,
+        color: colorsText[index],
+      };
+      datosPromedios.push(y);
+
+      const x = {
+        label: curso.Nombre,
+        data: datosCurso[index],
+        fill: false,
+        backgroundColor: colors[index],
+        borderColor: colors[index],
+        tension: 0.4,
+      };
+      datosFinales.push(x);
+    });
 
     res.json({
       message: "Datos cargados correctamente",
       labels,
       datosFinales,
     });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al cargar los datos" });

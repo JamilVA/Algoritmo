@@ -1,5 +1,5 @@
 'use client'
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
@@ -9,6 +9,7 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import PDF from '../../components/PDF';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
+import { Toast } from 'primereact/toast';
 
 interface Examen {
     Codigo: number;
@@ -32,6 +33,8 @@ const Dashboard: React.FC = () => {
     const [selectedExamenCodigo, setSelectedExamenCodigo] = useState<number | null>(null);
     const [pdfData, setPdfData] = useState<any>(null);
     const { data: session, status } = useSession();
+
+    const toast = useRef<Toast>(null);
 
     useEffect(() => {
         if (status === 'authenticated') {
@@ -150,7 +153,7 @@ const Dashboard: React.FC = () => {
                         <Column field="Correctas" header="Correctas" headerStyle={{ minWidth: '3rem' }} />
                         <Column field="Incorrectas" header="Incorrectas" headerStyle={{ minWidth: '3rem' }} />
                         <Column field="EnBlanco" header="En Blanco" headerStyle={{ minWidth: '3rem' }} />
-                        <Column header="Acciones" body={(data) => renderPDFButton(data)} headerStyle={{ minWidth: '8rem' }} />
+                        <Column body={(data) => renderPDFButton(data)} headerStyle={{ minWidth: '8rem' }} />
                     </DataTable>
                 </div>
             </div>

@@ -374,7 +374,7 @@ export default function GestionEstudiante() {
                     <p>{rowData?.Grado?.Nombre}</p>
                 </div>
                 <div className="flex align-items-center justify-content-center">
-                    <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.CodigoApoderado ? 'Reasignar grado' : 'Asignar grado'} />
+                    <Button icon="pi pi-list" rounded text severity="secondary" onClick={() => openAsignarGrado(rowData)} tooltip={rowData.CodigoGrado ? 'Reasignar grado' : 'Asignar grado'} />
                 </div>
             </div>
         );
@@ -391,7 +391,7 @@ export default function GestionEstudiante() {
                     <p>{!rowData.Apoderado ? '' : apoderado}</p>
                 </div>
                 <div className="flex align-items-center justify-content-center">
-                    <Button icon="pi pi-user" rounded text severity="secondary" onClick={() => openAsignarDocente(rowData)} tooltip={rowData.CodigoApoderado ? 'Reasignar docente' : 'Asignar docente'} />
+                    <Button icon="pi pi-user" rounded text severity="secondary" onClick={() => openAsignarDocente(rowData)} tooltip={rowData.CodigoApoderado ? 'Reasignar apoderado' : 'Asignar apoderado'} />
                 </div>
             </div>
         );
@@ -484,7 +484,7 @@ export default function GestionEstudiante() {
         return (
             <>
                 <Button icon="pi pi-pencil" rounded severity="warning" outlined tooltip="Editar" className="mr-2" onClick={() => editarEstudiante(rowData)} />
-                <Button icon="pi pi-user-plus" rounded severity="help" outlined tooltip="Matricular" className="mr-2" onClick={() => matricular(rowData)} />
+                {/* <Button icon="pi pi-user-plus" rounded severity="help" outlined tooltip="Matricular" className="mr-2" onClick={() => matricular(rowData)} /> */}
             </>
         );
     };

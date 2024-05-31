@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/renderer';
 
 // Registrar la fuente Roboto
 Font.register({
@@ -60,6 +60,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 5
     },
+    questionImage: {
+        marginBottom: 10,
+        maxHeight: 200,
+        width: 'auto'
+    },
     options: {
         marginLeft: 20,
         fontSize: 14
@@ -105,6 +110,7 @@ interface Pregunta {
     Codigo: number;
     Descripcion: string;
     RespuestaSeleccionada: number;
+    RutaImagen: string;
     Respuestas: Respuesta[];
 }
 
@@ -142,6 +148,9 @@ const PDF: React.FC<PDFProps> = ({ estudiante, examen, tema, preguntas }) => {
                 <Text style={styles.question}>
                     {index + 1}. {pregunta.Descripcion}
                 </Text>
+                {/* {pregunta.RutaImagen && (
+                    <Image style={styles.questionImage} src={pregunta.RutaImagen}/>
+                )} */}
                 <View style={styles.options}>
                     {pregunta.Respuestas.map((respuesta, idx) => {
                         const isMarked = pregunta.RespuestaSeleccionada === respuesta.Codigo;

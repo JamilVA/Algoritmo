@@ -45,7 +45,7 @@ const EmptyPage = () => {
                                         </span>
                                     </div>
                                     <div className="text-blue-500 font-bold text-4xl mb-2">{hijo.Nombres}</div>
-                                    <div className="text-600 font-medium text-2xl">{hijo.Apelldios}</div>
+                                    <div className="text-600 font-medium text-2xl">{hijo.Apellidos}</div>
                                     <hr className="my-3 mx-0 border-top-1 border-bottom-none border-300" />
                                     <span className="font-bold text-xl text-yellow-400 mb-2">{hijo.Grado}</span>
                                     <span className="font-medium text-600">{hijo.Nivel}</span>

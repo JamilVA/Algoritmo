@@ -4,18 +4,11 @@ import { Button } from 'primereact/button';
 import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { Menu } from 'primereact/menu';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { ProductService } from '../../../demo/service/ProductService';
-import { LayoutContext } from '../../../layout/context/layoutcontext';
-import Link from 'next/link';
-import { Demo } from '@/types';
 import { ChartData, ChartOptions } from 'chart.js';
-import { Dropdown } from 'primereact/dropdown';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { InputText } from 'primereact/inputtext';
-import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import PDF from '../../components/PDF';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -26,16 +19,30 @@ const estudianteVacio = {
     Grado: ''
 };
 
-const Dashboard = () => {
+interface Examen {
+    Codigo: number;
+    Curso: string;
+    Tema: string;
+    Nota: number;
+    Correctas: number;
+    Incorrectas: number;
+    EnBlanco: number;
+    Fecha: string;
+    HoraFin: string;
+}
+
+const Dashboard: React.FC = () => {
     const searchParams = useSearchParams();
     const CodigoEstudiante = searchParams.get('E');
 
     const [lineOptions, setLineOptions] = useState<ChartOptions>({});
-
     const [lineData, setLineData] = useState({
         labels: [],
         datasets: []
     });
+
+    const [selectedExamenCodigo, setSelectedExamenCodigo] = useState<number | null>(null);
+    const [pdfData, setPdfData] = useState<any>(null);
 
     const toast = useRef<Toast>(null);
 
@@ -123,7 +130,6 @@ const Dashboard = () => {
                     const { data } = response;
                     const { labels, datosFinales } = data;
                     setLineData({ ...lineData, labels: labels, datasets: datosFinales });
-                    console.log('datasets', datosFinales);
                 })
                 .catch((error) => {
                     toast.current?.show({
@@ -150,6 +156,39 @@ const Dashboard = () => {
             });
         }
     };
+
+    const fetchPdfData = async (CodigoEstudiante: number, CodigoExamen: number) => {
+        try {
+            const { data } = await axios.get('http://localhost:3001/api/examen/detalleExamen', {
+                params: { CodigoEstudiante, CodigoExamen }
+            });
+            return data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const renderPDFButton = (examen: Examen) => (
+        <>
+            {examen.Codigo != selectedExamenCodigo && (
+                <Button
+                    icon="pi pi-search"
+                    text
+                    onClick={async () => {
+                        const data = await fetchPdfData(estudiante.Codigo ?? 0, examen.Codigo);
+                        setPdfData({ ...data, CodigoEstudiante: estudiante.Codigo, CodigoExamen: examen.Codigo });
+                        setSelectedExamenCodigo(examen.Codigo);
+                    }}
+                    tooltip="Descargar PDF"
+                ></Button>
+            )}
+            {pdfData && examen.Codigo == selectedExamenCodigo && selectedExamenCodigo !== null && (
+                <PDFDownloadLink document={<PDF estudiante={pdfData.estudiante} examen={pdfData.examen} tema={pdfData.tema} preguntas={pdfData.preguntas} />} fileName={`Examen_${selectedExamenCodigo}.pdf`}>
+                    {({ loading }) => (loading ? 'Cargando documento...' : 'Descargar ahora')}
+                </PDFDownloadLink>
+            )}
+        </>
+    );
 
     return (
         <div className="grid">
@@ -192,20 +231,7 @@ const Dashboard = () => {
                         <Column field="Correctas" header="C" headerStyle={{ minWidth: '2rem' }} />
                         <Column field="Incorrectas" header="I" headerStyle={{ minWidth: '2rem' }} />
                         <Column field="EnBlanco" header="B" headerStyle={{ minWidth: '2rem' }} />
-                        <Column
-                            header="Ver"
-                            headerStyle={{ minWidth: '1rem' }}
-                            body={(examen: any) => (
-                                <>
-                                    {/* <Button icon="pi pi-search" text onClick={() => {
-                                        sdasa
-                                    }}/> */}
-                                    <PDFDownloadLink document={<PDF CodigoEstudiante={estudiante.Codigo} CodigoExamen={examen.Codigo} />} fileName="ExamenResuelto.pdf">
-                                        {({ loading, url, error }) => (loading ? <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i> : <Button icon="pi pi-search" text />)}
-                                    </PDFDownloadLink>
-                                </>
-                            )}
-                        />
+                        <Column body={(data) => renderPDFButton(data)} headerStyle={{ minWidth: '8rem' }} />
                     </DataTable>
                 </div>
                 {/* <div

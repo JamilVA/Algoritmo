@@ -4,6 +4,7 @@ const {
   Persona,
   Docente,
   Grado,
+  Curso,
 } = require("../config/relations");
 
 const { sequelize } = require("../config/database");
@@ -186,13 +187,29 @@ const asignarGrado = async (req, res) => {
 const cargarGrados = async (req, res) => {
   try {
     const grupos = await Grado.findAll({});
-    console.log("cualquiercosa", grupos);
     res.json({
       ok: true,
       grupos,
     });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ error: "Error al cargar Grados" });
+  }
+};
+
+const cursosDocente = async (req, res) => {
+  try {
+    const { CodigoDocente } = req.query;
+    const cursos = await Curso.findAll({
+      where: {CodigoDocente}
+    })
+
+    const grado = await Grado.findOne({
+      
+    })
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al cargar cursos del Docente" });
   }
 };
 
