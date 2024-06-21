@@ -221,9 +221,9 @@ const Dashboard: React.FC = () => {
             <div className="col-12">
                 <div className="card">
                     <h3 className="font-bold">
-                        {estudiante.Nombres} <span className="text-primary-500 text-xl">{' ( ' + estudiante.Grado + ' )'}</span>
+                        {'Examen x'} <span className="text-primary-500 text-xl">{' ( ' + 'Tema Y' + ' )'}</span>
                     </h3>
-                    <h5>Ultimos Examenes</h5>
+                    <h5>Lista de examenes</h5>
                     <DataTable value={examenes} rows={5} paginator responsiveLayout="scroll">
                         <Column field="Curso" header="Curso" sortable headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Tema" header="Tema" headerStyle={{ minWidth: '6rem' }} />

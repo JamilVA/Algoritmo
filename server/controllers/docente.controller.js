@@ -5,6 +5,7 @@ const {
   Docente,
   Grado,
   Curso,
+  Nivel,
 } = require("../config/relations");
 
 const { sequelize } = require("../config/database");
@@ -200,13 +201,33 @@ const cargarGrados = async (req, res) => {
 const cursosDocente = async (req, res) => {
   try {
     const { CodigoDocente } = req.query;
-    const cursos = await Curso.findAll({
+    const datosCursos = await Curso.findAll({
+      include: [
+        {
+          model: Grado,
+          attributes: ['Nombre'],
+          include: [
+            {
+              model: Nivel,
+              attributes: ['Nombre']
+            }
+          ]
+        }
+      ],
       where: {CodigoDocente}
     })
 
+    const cursos = datosCursos.map((curso) => ({Codigo: curso.Codigo, Curso: curso.Nombre, Grado: curso.Grado.Nombre, Nivel: curso.Grado.Nivel.Nombre}))
+
     const grado = await Grado.findOne({
-      
+      where: {CodigoDocente}
     })
+
+    res.json({
+      message: "Datos cargados correctamente",
+      cursos,
+      grado,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al cargar cursos del Docente" });
@@ -219,4 +240,5 @@ module.exports = {
   actualizarDocente,
   asignarGrado,
   cargarGrados,
+  cursosDocente
 };

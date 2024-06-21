@@ -6,26 +6,13 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Menu } from 'primereact/menu';
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { ProductService } from '../../../demo/service/ProductService';
 import { LayoutContext } from '../../../layout/context/layoutcontext';
+import Link from 'next/link';
+import { Demo } from '@/types';
 import { ChartData, ChartOptions } from 'chart.js';
 import { Dropdown } from 'primereact/dropdown';
 import axios from 'axios';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import PDF from '@/app/components/PDF';
-import { Dialog } from 'primereact/dialog';
-
-interface Examen {
-    CodigoExamen: number;
-    CodigoEstudiante: number;
-    Curso: string;
-    Tema: string;
-    Nota: number;
-    Correctas: number;
-    Incorrectas: number;
-    EnBlanco: number;
-    Fecha: string;
-    HoraFin: string;
-}
 
 const nivelVacio = {
     Codigo: 0,
@@ -38,19 +25,6 @@ const gradoVacio = {
     CodigoNivel: 0
 };
 
-const examenVacio = {
-    CodigoExamen: 0,
-    CodigoEstudiante: 0,
-    Curso: '',
-    Tema: '',
-    Nota: 0,
-    Correctas: 0,
-    Incorrectas: 0,
-    EnBlanco: 0,
-    Fecha: '',
-    HoraFin: ''
-};
-
 const Dashboard = () => {
     const [products, setProducts] = useState([]);
     const menu1 = useRef<Menu>(null);
@@ -61,13 +35,6 @@ const Dashboard = () => {
     const [niveles, setNiveles] = useState<(typeof nivelVacio)[]>([]);
     const [grados, setGrados] = useState<(typeof gradoVacio)[]>([]);
     const [gradosx, setGradosx] = useState<(typeof gradoVacio)[]>([]);
-
-    const [examen, setExamen] = useState<Examen>();
-    const [examenesDialog, setExamenesDialog] = useState(false);
-    const [examenesTema, setExamenesTema] = useState<Examen[]>([]);
-
-    const [selectedExamenCodigo, setSelectedExamenCodigo] = useState<number | null>(null);
-    const [pdfData, setPdfData] = useState<any>(null);
 
     const [lineData, setLineData] = useState({
         labels: [],
@@ -201,49 +168,9 @@ const Dashboard = () => {
         }
     };
 
-    const cargarListaExamenes = async (CodigoExamen: number) => {
-        try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/reporteExamenes', {
-                params: { CodigoExamen }
-            });
-            setExamenesTema(data.examenes);
-        } catch (error) {
-            console.error(error);
-        }
+    const formatCurrency = (value: number) => {
+        return value;
     };
-
-    const fetchPdfData = async (CodigoEstudiante: number, CodigoExamen: number) => {
-        try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/detalleExamen', {
-                params: { CodigoEstudiante, CodigoExamen }
-            });
-            return data;
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const renderPDFButton = (examen: Examen) => (
-        <>
-            {examen.CodigoEstudiante != selectedExamenCodigo && (
-                <Button
-                    icon="pi pi-search"
-                    text
-                    onClick={async () => {
-                        const data = await fetchPdfData(Number(examen.CodigoEstudiante) ?? 0, examen.CodigoExamen);
-                        setPdfData({ ...data, CodigoEstudiante: Number(examen.CodigoExamen), CodigoExamen: examen.CodigoExamen });
-                        setSelectedExamenCodigo(examen.CodigoEstudiante);
-                    }}
-                    tooltip="Descargar PDF"
-                ></Button>
-            )}
-            {pdfData && examen.CodigoEstudiante == selectedExamenCodigo && selectedExamenCodigo !== null && (
-                <PDFDownloadLink document={<PDF estudiante={pdfData.estudiante} examen={pdfData.examen} tema={pdfData.tema} preguntas={pdfData.preguntas} />} fileName={`Examen_${selectedExamenCodigo}.pdf`}>
-                    {({ loading }) => (loading ? 'Cargando documento...' : 'Descargar ahora')}
-                </PDFDownloadLink>
-            )}
-        </>
-    );
 
     const onNivelSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
@@ -268,20 +195,6 @@ const Dashboard = () => {
         setGrado(_grado);
         cargarReporte(val);
     };
-
-    const hideExamenesDialog = () => {
-        setPdfData(null);
-        setSelectedExamenCodigo(null);
-        setExamen(examenVacio);
-        setExamenesDialog(false);
-        // setEstudiante(estudianteVacio);
-    };
-
-    const examenesDialofgFooter = (
-        <>
-            <Button label="Salir" icon="pi pi-times" text onClick={hideExamenesDialog} />
-        </>
-    );
 
     return (
         <div className="grid">
@@ -391,22 +304,31 @@ const Dashboard = () => {
                         <Column
                             header="Ver"
                             headerStyle={{ minWidth: '1rem' }}
-                            body={(data) => (
+                            body={() => (
                                 <>
-                                    <Button
-                                        icon="pi pi-search"
-                                        text
-                                        onClick={() => {
-                                            cargarListaExamenes(data.Codigo);
-                                            setExamen(data);
-                                            setExamenesDialog(true);
-                                        }}
-                                    />
+                                    <Button icon="pi pi-search" text />
                                 </>
                             )}
                         />
                     </DataTable>
                 </div>
+                {/* <div
+                    className="px-4 py-5 shadow-2 flex flex-column md:flex-row md:align-items-center justify-content-between mb-3"
+                    style={{
+                        borderRadius: '1rem',
+                        background: 'linear-gradient(0deg, rgba(0, 123, 255, 0.5), rgba(0, 123, 255, 0.5)), linear-gradient(92.54deg, #1C80CF 47.88%, #FFFFFF 100.01%)'
+                    }}
+                >
+                    <div>
+                        <div className="text-blue-100 font-medium text-xl mt-2 mb-3">Resumen </div>
+                        <div className="text-white font-medium text-5xl">Resultados 2024</div>
+                    </div>
+                    <div className="mt-4 mr-auto md:mt-0 md:mr-0">
+                        <Link href="" className="p-button font-bold px-5 py-3 p-button-warning p-button-rounded p-button-raised">
+                            Descargar
+                        </Link>
+                    </div>
+                </div> */}
             </div>
 
             <div className="col-12 xl:col-6">
@@ -414,6 +336,72 @@ const Dashboard = () => {
                     <h5>Tendencia Examenes</h5>
                     <Chart type="line" data={lineData} options={lineOptions} />
                 </div>
+
+                {/* <div className="card">
+                    <div className="flex align-items-center justify-content-between mb-4">
+                        <h5>Notifications</h5>
+                        <div>
+                            <Button type="button" icon="pi pi-ellipsis-v" rounded text className="p-button-plain" onClick={(event) => menu2.current?.toggle(event)} />
+                            <Menu
+                                ref={menu2}
+                                popup
+                                model={[
+                                    { label: 'Add New', icon: 'pi pi-fw pi-plus' },
+                                    { label: 'Remove', icon: 'pi pi-fw pi-minus' }
+                                ]}
+                            />
+                        </div>
+                    </div>
+
+                    <span className="block text-600 font-medium mb-3">TODAY</span>
+                    <ul className="p-0 mx-0 mt-0 mb-4 list-none">
+                        <li className="flex align-items-center py-2 border-bottom-1 surface-border">
+                            <div className="w-3rem h-3rem flex align-items-center justify-content-center bg-blue-100 border-circle mr-3 flex-shrink-0">
+                                <i className="pi pi-dollar text-xl text-blue-500" />
+                            </div>
+                            <span className="text-900 line-height-3">
+                                Richard Jones
+                                <span className="text-700">
+                                    {' '}
+                                    has purchased a blue t-shirt for <span className="text-blue-500">79$</span>
+                                </span>
+                            </span>
+                        </li>
+                        <li className="flex align-items-center py-2">
+                            <div className="w-3rem h-3rem flex align-items-center justify-content-center bg-orange-100 border-circle mr-3 flex-shrink-0">
+                                <i className="pi pi-download text-xl text-orange-500" />
+                            </div>
+                            <span className="text-700 line-height-3">
+                                Your request for withdrawal of <span className="text-blue-500 font-medium">2500$</span> has been initiated.
+                            </span>
+                        </li>
+                    </ul>
+
+                    <span className="block text-600 font-medium mb-3">YESTERDAY</span>
+                    <ul className="p-0 m-0 list-none">
+                        <li className="flex align-items-center py-2 border-bottom-1 surface-border">
+                            <div className="w-3rem h-3rem flex align-items-center justify-content-center bg-blue-100 border-circle mr-3 flex-shrink-0">
+                                <i className="pi pi-dollar text-xl text-blue-500" />
+                            </div>
+                            <span className="text-900 line-height-3">
+                                Keyser Wick
+                                <span className="text-700">
+                                    {' '}
+                                    has purchased a black jacket for <span className="text-blue-500">59$</span>
+                                </span>
+                            </span>
+                        </li>
+                        <li className="flex align-items-center py-2 border-bottom-1 surface-border">
+                            <div className="w-3rem h-3rem flex align-items-center justify-content-center bg-pink-100 border-circle mr-3 flex-shrink-0">
+                                <i className="pi pi-question text-xl text-pink-500" />
+                            </div>
+                            <span className="text-900 line-height-3">
+                                Jane Davis
+                                <span className="text-700"> has posted a new questions about your product.</span>
+                            </span>
+                        </li>
+                    </ul>
+                </div> */}
                 <div className="card">
                     <div className="flex justify-content-between align-items-center mb-5">
                         <h5>Promedio de los examenes diarios en el año</h5>
@@ -428,9 +416,9 @@ const Dashboard = () => {
                                     </div>
                                     <div className="mt-2 md:mt-0 ml-0 md:ml-8 flex align-items-center">
                                         <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
-                                            <div className={'bg-' + curso.color + '-500 h-full'} style={{ width: curso.porcentaje + '%' }} />
+                                            <div className={"bg-"+curso.color+"-500 h-full"} style={{ width: (curso.porcentaje+'%') }} />
                                         </div>
-                                        <span className={'text-' + curso.color + '-500 ml-3 font-medium'}>{curso.promedio > 9 ? curso.promedio : '0' + curso.promedio}/20</span>
+                                        <span className={"text-"+curso.color+"-500 ml-3 font-medium"}>{curso.promedio>9 ? curso.promedio : '0'+curso.promedio}/20</span>
                                     </div>
                                 </li>
                             );
@@ -438,18 +426,6 @@ const Dashboard = () => {
                     </ul>
                 </div>
             </div>
-
-            <Dialog visible={examenesDialog} style={{ width: '750px' }} header={'Lista de examenes: ' + examen?.Tema} modal className="p-fluid" footer={examenesDialofgFooter} onHide={hideExamenesDialog}>
-                <DataTable value={examenesTema} rows={5} paginator responsiveLayout="scroll">
-                    <Column field="Estudiante" header="Estudiante" sortable headerStyle={{ minWidth: '6rem' }} />
-                    <Column field="Nota" header="Nota" sortable headerStyle={{ minWidth: '3rem' }} />
-                    <Column field="Fecha" header="Fecha" sortable headerStyle={{ minWidth: '3rem' }} />
-                    <Column field="Correctas" header="C" headerStyle={{ minWidth: '2rem' }} />
-                    <Column field="Incorrectas" header="I" headerStyle={{ minWidth: '2rem' }} />
-                    <Column field="EnBlanco" header="B" headerStyle={{ minWidth: '2rem' }} />
-                    <Column body={(data) => renderPDFButton(data)} headerStyle={{ minWidth: '8rem' }} />
-                </DataTable>
-            </Dialog>
         </div>
     );
 };
