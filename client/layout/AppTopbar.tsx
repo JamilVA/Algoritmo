@@ -57,10 +57,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
             </button>
 
             <div ref={topbarmenuRef} className={classNames('layout-topbar-menu', { 'layout-topbar-menu-mobile-active': layoutState.profileSidebarVisible })}>
-                {/* <button type="button" className="p-link layout-topbar-button" onClick={(e) => op.current?.toggle(e)}>
-                    <i className="pi pi-user"></i>
-                    <span style={{ color: '#002479' }}>Perfil</span>
-                </button> */}
+
                 <button onClick={openCloseSessionDialog} className="p-link layout-topbar-button">
                     <i className="pi pi-power-off"></i>
                     <span style={{ color: '#002479' }}>Cerrar sesión</span>
