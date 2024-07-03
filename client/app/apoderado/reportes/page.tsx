@@ -85,7 +85,7 @@ const Dashboard: React.FC = () => {
 
     const cargarDatos = async () => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/reporteExamenesEstudiante', {
+            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/examen/reporteExamenesEstudiante', {
                 params: { CodigoEstudiante: CodigoEstudiante }
             });
             setExamenes(data.examenes);
@@ -97,7 +97,7 @@ const Dashboard: React.FC = () => {
 
     const cargarDataGraficos = async () => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/dataChartEstudiante', {
+            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/examen/dataChartEstudiante', {
                 params: { CodigoEstudiante: CodigoEstudiante }
             });
             setLineData({ labels: data.labels, datasets: data.datosFinales });
@@ -108,7 +108,7 @@ const Dashboard: React.FC = () => {
 
     const fetchPdfData = async (CodigoEstudiante: number, CodigoExamen: number) => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/detalleExamen', {
+            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/examen/detalleExamen', {
                 params: { CodigoEstudiante, CodigoExamen }
             });
             return data;

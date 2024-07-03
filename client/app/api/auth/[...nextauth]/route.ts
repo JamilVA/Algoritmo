@@ -11,7 +11,7 @@ const handler = NextAuth({
             },
             async authorize(credentials, req) {
 
-                const res = await fetch(`http://localhost:3001/api/login`, {
+                const res = await fetch(`https://colegiosalgoritmo.edu.pe/api/login`, {
                     method: 'POST',
                     body: JSON.stringify({
                         email: credentials?.email,

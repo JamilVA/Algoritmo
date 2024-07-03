@@ -72,7 +72,7 @@ export default function GestionDocente() {
 
     const cargarDatos = async () => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/docente', {});
+            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/docente', {});
             const { docentes } = data;
             console.log('Hola', docentes);
             setDocentes(docentes);
@@ -83,7 +83,7 @@ export default function GestionDocente() {
     const cargarGrupos = async () => {
         console.log('aaaaa');
 
-        const { data } = await axios.get('http://localhost:3001/api/docente/cargarGrados', {});
+        const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/docente/cargarGrados', {});
         const { grupos } = data;
         console.log('iiiiiiiiii');
 
@@ -120,7 +120,7 @@ export default function GestionDocente() {
         if (!docente.Codigo) {
             try {
                 axios
-                    .post('http://localhost:3001/api/docente', {
+                    .post('https://colegiosalgoritmo.edu.pe/api/docente', {
                         Nombres: _docente.Persona.Nombres,
                         ApellidoPaterno: _docente.Persona.ApellidoPaterno,
                         ApellidoMaterno: _docente.Persona.ApellidoMaterno,
@@ -158,7 +158,7 @@ export default function GestionDocente() {
         } else {
             try {
                 axios
-                    .put('http://localhost:3001/api/docente', {
+                    .put('https://colegiosalgoritmo.edu.pe/api/docente', {
                         Codigo: _docente.Codigo,
                         CodigoPersona: _docente.CodigoPersona,
                         Nombres: _docente.Persona.Nombres,
@@ -197,7 +197,7 @@ export default function GestionDocente() {
 
     const asignarGrupo = async () => {
         await axios
-            .put('http://localhost:3001/api/docente/asignarGrado', {
+            .put('https://colegiosalgoritmo.edu.pe/api/docente/asignarGrado', {
                 CodigoDocente: docente.Codigo,
                 CodigoGrupo: grupo.Codigo
             })

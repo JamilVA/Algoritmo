@@ -92,7 +92,7 @@ export default function BancoPreguntas() {
 
     const cargarTemas = async (CodigoCurso: any) => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/pregunta/cargarTemas', {
+            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/pregunta/cargarTemas', {
                 params: { CodigoCurso }
             });
             const { curso, temas } = data;
@@ -105,7 +105,7 @@ export default function BancoPreguntas() {
 
     const cargarPreguntas = async (CodigoTema: number) => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/pregunta/cargarPreguntas', {
+            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/pregunta/cargarPreguntas', {
                 params: { CodigoTema }
             });
             const { preguntas } = data;
@@ -121,7 +121,7 @@ export default function BancoPreguntas() {
             return;
         }
         try {
-            const response = await axios.get('http://localhost:3001/api/files/download', {
+            const response = await axios.get('https://colegiosalgoritmo.edu.pe/api/files/download', {
                 params: { fileName: ruta },
                 responseType: 'arraybuffer' // Especificar el tipo de respuesta como 'arraybuffer'
             });
@@ -170,7 +170,7 @@ export default function BancoPreguntas() {
         console.log('Add Respuestas', respuesta1, respuesta2, respuesta3, respuesta4, respuesta5);
 
         await axios
-            .post('http://localhost:3001/api/pregunta/crearPregunta', {
+            .post('https://colegiosalgoritmo.edu.pe/api/pregunta/crearPregunta', {
                 CodigoTema: tema.Codigo,
                 pregunta: _pregunta,
                 respuestas: [respuesta1, respuesta2, respuesta3, respuesta4, respuesta5]
@@ -205,7 +205,7 @@ export default function BancoPreguntas() {
 
     const modificarRuta = async (pregunta: any) => {
         await axios
-            .put('http://localhost:3001/api/pregunta/imagenPregunta', {
+            .put('https://colegiosalgoritmo.edu.pe/api/pregunta/imagenPregunta', {
                 pregunta
             })
             .then((response) => {
@@ -233,7 +233,7 @@ export default function BancoPreguntas() {
         const formData = new FormData();
         formData.append('file', file);
         await axios
-            .post('http://localhost:3001/api/files/upload', formData)
+            .post('https://colegiosalgoritmo.edu.pe/api/files/upload', formData)
             .then((response) => {
                 // console.log(response.data.path)
                 let _pregunta = { ...rowData, RutaImagen: response.data.filename };
@@ -257,7 +257,7 @@ export default function BancoPreguntas() {
             try {
                 console.log('crear');
                 axios
-                    .post('http://localhost:3001/api/pregunta', {
+                    .post('https://colegiosalgoritmo.edu.pe/api/pregunta', {
                         Descripcion: _tema.Descripcion,
                         CodigoCurso: codigoCurso
                     })
@@ -280,7 +280,7 @@ export default function BancoPreguntas() {
         } else {
             try {
                 axios
-                    .put('http://localhost:3001/api/pregunta', {
+                    .put('https://colegiosalgoritmo.edu.pe/api/pregunta', {
                         Codigo: _tema.Codigo,
                         Descripcion: _tema.Descripcion
                     })

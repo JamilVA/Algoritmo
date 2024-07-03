@@ -82,7 +82,7 @@ const GestionCursos = () => {
 
     const cargarExamenes = async () => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/examen/examenesEstudiante', {
+            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/examen/examenesEstudiante', {
                 params: { CodigoEstudiante: session?.user.codigoEstudiante }
             });
             const { examenes } = data;
