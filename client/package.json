@@ -5,10 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js",
+    "start": "next start",
     "format": "prettier --write \"{app,demo,layout,types}/**/*.{js,ts,tsx,d.ts}\"",
-    "lint": "next lint",
-    "int": "install --force"
+    "lint": "next lint"
   },
   "dependencies": {
     "@fontsource/montserrat": "^5.0.18",
