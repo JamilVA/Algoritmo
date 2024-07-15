@@ -10,8 +10,7 @@ const handler = NextAuth({
                 password: { label: 'password', type: 'password' }
             },
             async authorize(credentials, req) {
-
-                const res = await fetch(`https://colegiosalgoritmo.edu.pe/api/login`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`, {
                     method: 'POST',
                     body: JSON.stringify({
                         email: credentials?.email,
@@ -30,7 +29,7 @@ const handler = NextAuth({
     ],
     secret: process.env.NEXTAUTH_SECRET,
     session: {
-        maxAge: 15*60
+        maxAge: 15 * 60
     },
     callbacks: {
         async jwt({ token, user }) {
