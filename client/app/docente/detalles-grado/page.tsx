@@ -127,7 +127,7 @@ const Dashboard = () => {
 
     const cargarDatos = async () => {
         try {
-            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/examen/infoReporte');
+            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/examen/infoReporte');
             const { niveles, grados, examenes, estudiantes } = data;
             console.log('Hola', data);
             setNiveles(niveles);
@@ -142,7 +142,7 @@ const Dashboard = () => {
     const cargarReporte = async (CodigoGrado: number) => {
         console.log('CodigoRecibido', CodigoGrado);
         try {
-            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/examen/reporteGrado', {
+            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/examen/reporteGrado', {
                 params: { CodigoGrado: CodigoGrado }
             });
             const { examenes, datos } = data;
@@ -155,7 +155,7 @@ const Dashboard = () => {
 
     const cargarDataGraficos = async (CodigoGrado: number) => {
         try {
-            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/examen/dataChart', {
+            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/examen/dataChart', {
                 params: { CodigoGrado }
             });
             const { labels, datosFinales, datosPromedios, datosGrado } = data;

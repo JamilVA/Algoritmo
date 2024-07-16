@@ -23,7 +23,7 @@ const handler = NextAuth({
             async authorize(credentials) {
                 if (!credentials) throw new Error('No credentials provided');
 
-                const res = await fetchWithTimeout('https://api.colegiosalgoritmo.edu.pe/api/login', {
+                const res = await fetchWithTimeout('https://api.api.colegiosalgoritmo.edu.pe/api/login', {
                     method: 'POST',
                     body: JSON.stringify({
                         email: credentials.email,

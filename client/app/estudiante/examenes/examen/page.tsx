@@ -114,7 +114,7 @@ const Page = () => {
 
     const cargarExamen = async () => {
         try {
-            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/examen/datos', {
+            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/examen/datos', {
                 params: { CodigoExamen }
             });
             const { examen, preguntas } = data;
@@ -239,7 +239,7 @@ const Page = () => {
         }));
 
         await axios
-            .post('https://colegiosalgoritmo.edu.pe/api/examen/guardar', {
+            .post('https://api.colegiosalgoritmo.edu.pe/api/examen/guardar', {
                 estudianteExamenDiario,
                 preguntaEstudianteExamenDiario
             })
@@ -270,7 +270,7 @@ const Page = () => {
             return;
         }
         try {
-            const response = await axios.get('https://colegiosalgoritmo.edu.pe/api/files/download', {
+            const response = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/files/download', {
                 params: { fileName: ruta },
                 responseType: 'arraybuffer'
             });

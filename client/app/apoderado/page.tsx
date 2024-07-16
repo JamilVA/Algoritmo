@@ -18,7 +18,7 @@ const EmptyPage = () => {
 
     const cargarDatos = async () => {
         try {
-            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/apoderado/hijos', {
+            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/apoderado/hijos', {
                 params: { CodigoApoderado: session?.user.codigoApoderado }
             });
             const { datos } = data;

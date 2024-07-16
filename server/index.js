@@ -1,24 +1,31 @@
-const express = require('express'); //de esta forma se importa en node
+const express = require('express');
 
 require('dotenv').config();
 const { dbConnection } = require('./config/database');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
-//Creando el servidor express
 const app = express();
 
-//Configuracion de CORS
-app.use(cors()); 
+// Configuración de CORS
+const corsOptions = {
+    origin: 'https://academico.colegiosalgoritmo.edu.pe',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+};
 
-//Lectura y parseo del body
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
-//Lectuta de cookies
 app.use(cookieParser());
 
-//Conexion a la BD
 dbConnection();
+
+app.get("/api", (req, res) => {
+  res.send("Hola Mundo! AEAS");
+});
 
 app.use('/api/estudiante', require('./routes/estudiante.route'));
 app.use('/api/pago', require('./routes/pago.route'));
@@ -28,13 +35,8 @@ app.use('/api/curso', require('./routes/curso.route'));
 app.use('/api/pregunta', require('./routes/pregunta.route'));
 app.use('/api/examen', require('./routes/examenDiario.route'));
 app.use('/api', require('./routes/auth.route'));
-app.use('/api/files', require('./routes/files.route'))
+app.use('/api/files', require('./routes/files.route'));
 
-
-// app.use('/api/docente', require('./routes/docante.route'));
-
-//Para levantar el servidor
 app.listen(process.env.PORT, () => {
-    console.log('Server running on port ' + process.env.PORT)
-})
-
+    console.log('Server running on port ' + process.env.PORT);
+});

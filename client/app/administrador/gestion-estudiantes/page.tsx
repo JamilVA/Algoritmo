@@ -110,7 +110,7 @@ export default function GestionEstudiante() {
 
     const cargarDatos = async () => {
         try {
-            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/estudiante', {});
+            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/estudiante', {});
             const { estudiantes } = data;
 
             console.log('Hola', estudiantes);
@@ -122,7 +122,7 @@ export default function GestionEstudiante() {
 
     const cargarApoderados = async () => {
         try {
-            const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/apoderado', {});
+            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/apoderado', {});
             const { apoderados } = data;
 
             console.log('Hola', apoderados);
@@ -135,7 +135,7 @@ export default function GestionEstudiante() {
     const cargarGrados = async () => {
         console.log('aaaaa');
 
-        const { data } = await axios.get('https://colegiosalgoritmo.edu.pe/api/estudiante/cargarGrados', {});
+        const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/estudiante/cargarGrados', {});
         const { grados } = data;
         console.log('iiiiiiiiii');
 
@@ -162,7 +162,7 @@ export default function GestionEstudiante() {
 
         if (!estudiante.Codigo) {
             axios
-                .post('https://colegiosalgoritmo.edu.pe/api/estudiante', {
+                .post('https://api.colegiosalgoritmo.edu.pe/api/estudiante', {
                     Nombres: _estudiante.Persona.Nombres,
                     ApellidoPaterno: _estudiante.Persona.ApellidoPaterno,
                     ApellidoMaterno: _estudiante.Persona.ApellidoMaterno,
@@ -194,7 +194,7 @@ export default function GestionEstudiante() {
         } else {
             try {
                 axios
-                    .put('https://colegiosalgoritmo.edu.pe/api/estudiante', {
+                    .put('https://api.colegiosalgoritmo.edu.pe/api/estudiante', {
                         Codigo: _estudiante.Codigo,
                         Nombres: _estudiante.Persona.Nombres,
                         ApellidoPaterno: _estudiante.Persona.ApellidoPaterno,
@@ -239,7 +239,7 @@ export default function GestionEstudiante() {
         }
 
         await axios
-            .put('https://colegiosalgoritmo.edu.pe/api/estudiante/asignarApoderado', {
+            .put('https://api.colegiosalgoritmo.edu.pe/api/estudiante/asignarApoderado', {
                 Codigo: estudiante.Codigo,
                 CodigoApoderado: estudiante.CodigoApoderado
             })
@@ -273,7 +273,7 @@ export default function GestionEstudiante() {
         }
 
         await axios
-            .put('https://colegiosalgoritmo.edu.pe/api/estudiante/asignarGrado', {
+            .put('https://api.colegiosalgoritmo.edu.pe/api/estudiante/asignarGrado', {
                 Codigo: estudiante.Codigo,
                 CodigoGrado: estudiante.CodigoGrado
             })
@@ -307,7 +307,7 @@ export default function GestionEstudiante() {
         }
 
         await axios
-            .post('https://colegiosalgoritmo.edu.pe/api/estudiante/matricular', {
+            .post('https://api.colegiosalgoritmo.edu.pe/api/estudiante/matricular', {
                 Codigo: estudiante.Codigo,
                 CodigoGrado: estudiante.CodigoGrado
             })
