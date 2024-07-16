@@ -1,6 +1,8 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
+console.log('NEXTAUTH_SECRET:', process.env.NEXTAUTH_SECRET);
+
 const fetchWithTimeout = (url: string, options: RequestInit, timeout: number = 10000): Promise<Response> => {
     return Promise.race([
         fetch(url, options),
