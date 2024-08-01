@@ -65,7 +65,12 @@ const GestionCursos = () => {
         HoraInicio: '08:00',
         HoraFin: '09:00',
         Duracion: 0,
-        CodigoTema: 0
+        CodigoTema: 0,
+        Tema: {
+            Codigo: 0,
+            Descripcion: '',
+            CodigoCurso: 0
+        }
     };
 
     const [niveles, setNiveles] = useState<(typeof nivelVacio)[]>([]);
@@ -231,35 +236,36 @@ const GestionCursos = () => {
     const onNivelSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
 
-        setGradosx(grados.filter((g) => g.CodigoNivel == val));
-        let nivelx = niveles.find((nivel) => nivel.Codigo === val);
+        let _nivel = { ...val };
 
-        let _nivel = { ...nivel, Nombre: nivelx?.Nombre ?? '', Codigo: nivelx?.Codigo ?? 0 };
+        _nivel['Codigo'] = val.Codigo;
 
         setNivel(_nivel);
+        setGradosx(grados.filter((g) => g.CodigoNivel == val.Codigo));
         setGrado(gradoVacio);
+
+        console.log('Nivel:', nivel);
+        console.log('Grados:', grados);
     };
 
     const onGradoxSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
 
-        let gradox = grados.find((grado) => grado.Codigo === val);
-
-        let _grado = { ...grado, Nombre: gradox?.Nombre ?? '', Codigo: gradox?.Codigo ?? 0, CodigoNivel: gradox?.CodigoNivel ?? 0 };
+        let _grado = { ...val };
 
         setGrado(_grado);
-        cargarExamenes(val);
+        cargarExamenes(val.Codigo);
     };
 
     const onCursoSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        setCurso({ ...curso, Codigo: val });
-        cargarTemas(val);
+        setCurso({ ...val });
+        cargarTemas(val.Codigo);
     };
 
     const onTemaSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        setExamen({ ...examen, CodigoTema: val });
+        setExamen({ ...examen, Tema: val, CodigoTema: val.Codigo });
     };
 
     const onCalendarChange = (e: any, name: string) => {
@@ -295,7 +301,7 @@ const GestionCursos = () => {
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <div className="field col">
                     <Dropdown
-                        value={nivel.Codigo}
+                        value={nivel}
                         options={niveles}
                         optionLabel="Nombre"
                         optionValue="Codigo"
@@ -309,7 +315,7 @@ const GestionCursos = () => {
                         className="mr-2"
                     />
                     <Dropdown
-                        value={grado.Codigo}
+                        value={grado}
                         options={gradosx}
                         optionLabel="Nombre"
                         optionValue="Codigo"
@@ -449,7 +455,7 @@ const GestionCursos = () => {
                                     Curso:
                                 </label>
                                 <Dropdown
-                                    value={curso.Codigo}
+                                    value={curso}
                                     onChange={(e) => {
                                         onCursoSelect(e);
                                     }}
@@ -466,7 +472,7 @@ const GestionCursos = () => {
                                     Tema:
                                 </label>
                                 <Dropdown
-                                    value={examen?.CodigoTema}
+                                    value={examen?.Tema}
                                     onChange={(e) => {
                                         onTemaSelect(e);
                                     }}

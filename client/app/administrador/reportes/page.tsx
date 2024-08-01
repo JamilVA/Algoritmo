@@ -247,10 +247,9 @@ const Dashboard = () => {
 
     const onNivelSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        setGradosx(grados.filter((g) => g.CodigoNivel == val));
-        let nivelx = niveles.find((nivel) => nivel.Codigo === val);
+        setGradosx(grados.filter((g) => g.CodigoNivel == val.Codigo));
 
-        let _nivel = { ...nivel, Nombre: nivelx?.Nombre ?? '', Codigo: nivelx?.Codigo ?? 0 };
+        let _nivel = { ...val };
 
         setNivel(_nivel);
         setGrado(gradoVacio);
@@ -258,15 +257,12 @@ const Dashboard = () => {
 
     const onGradoxSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-
-        let gradox = grados.find((grado) => grado.Codigo === val);
-
-        let _grado = { ...grado, Nombre: gradox?.Nombre ?? '', Codigo: gradox?.Codigo ?? 0, CodigoNivel: gradox?.CodigoNivel ?? 0 };
-
-        cargarDataGraficos(val);
+        let _grado = { ...val };
 
         setGrado(_grado);
-        cargarReporte(val);
+
+        cargarDataGraficos(val.Codigo);
+        cargarReporte(val.Codigo);
     };
 
     const hideExamenesDialog = () => {
@@ -350,7 +346,7 @@ const Dashboard = () => {
             <div className="grid col-12">
                 <div className="col-12 lg:col-3 xl:col-3">
                     <Dropdown
-                        value={nivel.Codigo}
+                        value={nivel}
                         options={niveles}
                         optionLabel="Nombre"
                         optionValue="Codigo"
@@ -366,7 +362,7 @@ const Dashboard = () => {
                 </div>
                 <div className="col-12 lg:col-3 xl:col-3">
                     <Dropdown
-                        value={grado.Codigo}
+                        value={grado}
                         options={gradosx}
                         optionLabel="Nombre"
                         optionValue="Codigo"

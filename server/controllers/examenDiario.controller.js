@@ -22,6 +22,8 @@ const getExamenes = async (req, res) => {
   try {
     const { CodigoGrado } = req.query;
 
+    console.log('Codigo', CodigoGrado)
+
     const examenes = await ExamenDiario.findAll({
       include: [
         {

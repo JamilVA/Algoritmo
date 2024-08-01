@@ -219,36 +219,32 @@ const GestionCursos = () => {
 
     const onNivelSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        let _nivel = { ...nivel };
-
-        _nivel['Codigo'] = val;
+        let _nivel = { ...val };
 
         setNivel(_nivel);
-        setGradosx(grados.filter((g) => g.CodigoNivel == val));
+        setGradosx(grados.filter((g) => g.CodigoNivel == val.Codigo));
         console.log('Nivel:', val);
         console.log('Grados:', grados);
         console.log(
             'Filtados',
-            grados.filter((g) => g.CodigoNivel == val)
+            grados.filter((g) => g.CodigoNivel == val.Codigo)
         );
     };
 
     const onGradoxSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        let _grado = { ...grado };
-
-        _grado['Codigo'] = val;
+        let _grado = { ...val };
 
         setGrado(_grado);
-        cargarCursos(val);
+        cargarCursos(val.Codigo);
     };
 
     const onGradoSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
         let _curso = { ...curso };
 
-        _curso['CodigoGrado'] = val;
-        _curso.Grado.Codigo = val;
+        _curso['CodigoGrado'] = val.Codigo;
+        _curso['Grado'] = val;
 
         setCurso(_curso);
     };
@@ -257,7 +253,9 @@ const GestionCursos = () => {
         const val = (e.target && e.target.value) || '';
         let _curso = { ...curso };
 
-        _curso['CodigoDocente'] = val;
+        _curso['CodigoDocente'] = val.Codigo;
+        _curso['Docente'] = val;
+
 
         setCurso(_curso);
         console.log('Docente asignado a', _curso);
@@ -290,7 +288,7 @@ const GestionCursos = () => {
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <div className="field col">
                     <Dropdown
-                        value={nivel.Codigo}
+                        value={nivel}
                         options={niveles}
                         optionLabel="Nombre"
                         optionValue="Codigo"
@@ -304,7 +302,7 @@ const GestionCursos = () => {
                         className="mr-2"
                     />
                     <Dropdown
-                        value={grado.Codigo}
+                        value={grado}
                         options={gradosx}
                         optionLabel="Nombre"
                         optionValue="Codigo"
@@ -443,7 +441,7 @@ const GestionCursos = () => {
                                 }}
                                 required
                                 autoFocus
-                                maxLength={60}
+                                maxLength={45}
                                 className={classNames({ 'p-invalid': submitted && !curso.Nombre })}
                             />
                             {submitted && !curso.Nombre && <small className="p-error">Ingrese el nombre del curso.</small>}
@@ -453,17 +451,14 @@ const GestionCursos = () => {
                                 Grado:
                             </label>
                             <Dropdown
-                                id="Grado"
-                                value={curso.CodigoGrado}
+                                value={curso.Grado}
                                 onChange={(e) => {
                                     onGradoSelect(e);
                                 }}
-                                name="CodigoCurso"
                                 options={grados}
                                 optionLabel="Nombre"
                                 optionValue="Codigo"
                                 placeholder="Seleccione grado del curso"
-                                className={classNames({ 'p-invalid': submitted && !curso.Grado })}
                             ></Dropdown>
                         </div>
                     </Dialog>
@@ -473,7 +468,7 @@ const GestionCursos = () => {
                             <label htmlFor="docente">Docente</label>
                             <Dropdown
                                 id="docente"
-                                value={curso.CodigoDocente}
+                                value={curso.Docente}
                                 options={docentes}
                                 optionLabel="Persona.Nombres"
                                 optionValue="Codigo"
