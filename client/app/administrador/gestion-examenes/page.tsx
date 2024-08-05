@@ -98,7 +98,7 @@ const GestionCursos = () => {
 
     const cargarDatos = async () => {
         try {
-            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/curso/niveles');
+            const { data } = await axios.get('https://back.colegiosalgoritmo.edu.pe/api/curso/niveles');
             const { niveles, grados } = data;
             console.log('Hola', data);
             setNiveles(niveles);
@@ -111,7 +111,7 @@ const GestionCursos = () => {
     const cargarExamenes = async (CodigoGrado: number) => {
         console.log('CodigoRecibido', CodigoGrado);
         try {
-            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/examen', {
+            const { data } = await axios.get('https://back.colegiosalgoritmo.edu.pe/api/examen', {
                 params: { CodigoGrado: CodigoGrado }
             });
             const { examenes } = data;
@@ -125,7 +125,7 @@ const GestionCursos = () => {
     const cargarCursos = async (CodigoGrado: number) => {
         console.log('Codigo grado Cursos', CodigoGrado);
         try {
-            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/examen/cursos', {
+            const { data } = await axios.get('https://back.colegiosalgoritmo.edu.pe/api/examen/cursos', {
                 params: { CodigoGrado: CodigoGrado }
             });
             const { cursos } = data;
@@ -139,7 +139,7 @@ const GestionCursos = () => {
     const cargarTemas = async (CodigoCurso: number) => {
         console.log('Codigo Curso temas', CodigoCurso);
         try {
-            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/examen/temas', {
+            const { data } = await axios.get('https://back.colegiosalgoritmo.edu.pe/api/examen/temas', {
                 params: { CodigoCurso: CodigoCurso }
             });
             const { temas } = data;
@@ -153,7 +153,7 @@ const GestionCursos = () => {
     const guardarExamen = async () => {
         console.log('Examen a guardar', examen);
         await axios
-            .post('https://api.colegiosalgoritmo.edu.pe/api/examen', {
+            .post('https://back.colegiosalgoritmo.edu.pe/api/examen', {
                 examen: {
                     ...examen
                 }
@@ -187,7 +187,7 @@ const GestionCursos = () => {
         }
         hideAsignarDocenteDialog();
         await axios
-            .put('https://api.colegiosalgoritmo.edu.pe/api/curso/asignarDocente', {
+            .put('https://back.colegiosalgoritmo.edu.pe/api/curso/asignarDocente', {
                 Codigo: curso.Codigo,
                 CodigoDocente: curso.CodigoDocente
             })

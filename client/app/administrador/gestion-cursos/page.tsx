@@ -83,7 +83,7 @@ const GestionCursos = () => {
 
     const cargarDatos = async () => {
         try {
-            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/curso/niveles');
+            const { data } = await axios.get('https://back.colegiosalgoritmo.edu.pe/api/curso/niveles');
             const { niveles, grados, docentes } = data;
             console.log('Hola', data);
             setNiveles(niveles);
@@ -97,7 +97,7 @@ const GestionCursos = () => {
     const cargarCursos = async (CodigoGrado: number) => {
         console.log('CodigoRecibido', CodigoGrado);
         try {
-            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/curso', {
+            const { data } = await axios.get('https://back.colegiosalgoritmo.edu.pe/api/curso', {
                 params: { CodigoGrado: CodigoGrado }
             });
             const { cursos } = data;
@@ -117,7 +117,7 @@ const GestionCursos = () => {
         if (!curso.Codigo) {
             try {
                 axios
-                    .post('https://api.colegiosalgoritmo.edu.pe/api/curso', {
+                    .post('https://back.colegiosalgoritmo.edu.pe/api/curso', {
                         Nombre: _curso.Nombre,
                         CodigoGrado: _curso.CodigoGrado
                     })
@@ -140,7 +140,7 @@ const GestionCursos = () => {
         } else {
             try {
                 axios
-                    .put('https://api.colegiosalgoritmo.edu.pe/api/curso', {
+                    .put('https://back.colegiosalgoritmo.edu.pe/api/curso', {
                         Codigo: _curso.Codigo,
                         Nombre: _curso.Nombre,
                         CodigoGrado: _curso.CodigoGrado
@@ -173,7 +173,7 @@ const GestionCursos = () => {
         }
         hideAsignarDocenteDialog();
         await axios
-            .put('https://api.colegiosalgoritmo.edu.pe/api/curso/asignarDocente', {
+            .put('https://back.colegiosalgoritmo.edu.pe/api/curso/asignarDocente', {
                 Codigo: curso.Codigo,
                 CodigoDocente: curso.CodigoDocente
             })

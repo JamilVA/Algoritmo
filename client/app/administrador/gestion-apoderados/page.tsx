@@ -52,7 +52,7 @@ export default function GestionApoderado() {
 
     const cargarDatos = async () => {
         try {
-            const { data } = await axios.get('https://api.colegiosalgoritmo.edu.pe/api/apoderado', {});
+            const { data } = await axios.get('https://back.colegiosalgoritmo.edu.pe/api/apoderado', {});
             const { apoderados } = data;
             console.log('Hola', apoderados);
             setApoderados(apoderados);
@@ -81,7 +81,7 @@ export default function GestionApoderado() {
         if (!apoderado.Codigo) {
             try {
                 axios
-                    .post('https://api.colegiosalgoritmo.edu.pe/api/apoderado', {
+                    .post('https://back.colegiosalgoritmo.edu.pe/api/apoderado', {
                         Nombres: _apoderado.Persona.Nombres,
                         ApellidoPaterno: _apoderado.Persona.ApellidoPaterno,
                         ApellidoMaterno: _apoderado.Persona.ApellidoMaterno,
@@ -110,7 +110,7 @@ export default function GestionApoderado() {
         } else {
             try {
                 axios
-                    .put('https://api.colegiosalgoritmo.edu.pe/api/apoderado', {
+                    .put('https://back.colegiosalgoritmo.edu.pe/api/apoderado', {
                         Codigo: _apoderado.Codigo,
                         CodigoPersona: _apoderado.CodigoPersona,
                         Nombres: _apoderado.Persona.Nombres,
