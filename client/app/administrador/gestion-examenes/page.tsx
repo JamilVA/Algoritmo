@@ -213,7 +213,7 @@ const GestionCursos = () => {
         _grado['Codigo'] = val;
 
         setGrado(_grado);
-        cargarExamenes(val.Codigo);
+        cargarExamenes(val);
     };
 
     const onCursoSelect = (e: any) => {

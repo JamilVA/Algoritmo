@@ -232,7 +232,7 @@ const GestionCursos = () => {
         _grado['Codigo'] = val;
 
         setGrado(_grado);
-        cargarCursos(val.Codigo);
+        cargarCursos(val);
     };
 
     const onGradoSelect = (e: any) => {
