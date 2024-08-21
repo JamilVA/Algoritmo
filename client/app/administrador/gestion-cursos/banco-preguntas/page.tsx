@@ -480,7 +480,7 @@ export default function BancoPreguntas() {
                                     <>
                                         <Button
                                             icon="pi pi-times"
-                                            text
+                                            severity='danger'
                                             onClick={() => {
                                                 eliminarPregunta(rowData.Codigo);
                                             }}
