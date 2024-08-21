@@ -3,18 +3,12 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
-import { FileUpload } from 'primereact/fileupload';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
-import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
-import { Rating } from 'primereact/rating';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
-import { Demo } from '@/types';
 import axios from 'axios';
 
 import { useRouter } from 'next/navigation';
@@ -84,9 +78,6 @@ const GestionCursos = () => {
     const [curso, setCurso] = useState(cursoVacio);
     const [examen, setExamen] = useState(examenDiarioVacio);
     const [cursoDialog, setCursoDialog] = useState(false);
-    const [asignarDocenteDialog, setAsignarDocenteDialog] = useState(false);
-
-    const [submitted, setSubmitted] = useState(false);
 
     const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef<Toast>(null);
@@ -178,39 +169,6 @@ const GestionCursos = () => {
             });
     };
 
-    const asignarDocente = async () => {
-        console.log('CursoRecibidoParaAsignar:', curso);
-
-        setSubmitted(true);
-        if (curso.CodigoDocente === null) {
-            return;
-        }
-        hideAsignarDocenteDialog();
-        await axios
-            .put('https://back.colegiosalgoritmo.edu.pe/api/curso/asignarDocente', {
-                Codigo: curso.Codigo,
-                CodigoDocente: curso.CodigoDocente
-            })
-            .then((response) => {
-                cargarExamenes(grado.Codigo);
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Operacion exitosa',
-                    detail: response.data.message,
-                    life: 3000
-                });
-            })
-            .catch((error) => {
-                console.error(error.response);
-                toast.current?.show({
-                    severity: 'error',
-                    summary: 'Operacion fallida',
-                    detail: 'Ha ocurrido un error al procesar la solicitud',
-                    life: 3000
-                });
-            });
-    };
-
     const openNew = () => {
         cargarCursos(grado?.Codigo);
         setExamen(examenDiarioVacio);
@@ -218,7 +176,6 @@ const GestionCursos = () => {
     };
 
     const hideDialog = () => {
-        setSubmitted(false);
         setCursoDialog(false);
     };
 
@@ -236,12 +193,12 @@ const GestionCursos = () => {
     const onNivelSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
 
-        let _nivel = { ...val };
+        let _nivel = { ...nivel };
 
-        _nivel['Codigo'] = val.Codigo;
+        _nivel['Codigo'] = val;
 
         setNivel(_nivel);
-        setGradosx(grados.filter((g) => g.CodigoNivel == val.Codigo));
+        setGradosx(grados.filter((g) => g.CodigoNivel == val));
         setGrado(gradoVacio);
 
         console.log('Nivel:', nivel);
@@ -251,7 +208,9 @@ const GestionCursos = () => {
     const onGradoxSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
 
-        let _grado = { ...val };
+        let _grado = { ...grado };
+
+        _grado['Codigo'] = val;
 
         setGrado(_grado);
         cargarExamenes(val.Codigo);
@@ -259,13 +218,20 @@ const GestionCursos = () => {
 
     const onCursoSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        setCurso({ ...val });
-        cargarTemas(val.Codigo);
+
+        let _curso = {...curso};
+        _curso['Codigo'] = val;
+        setCurso(_curso);
+        cargarTemas(val);
     };
 
     const onTemaSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        setExamen({ ...examen, Tema: val, CodigoTema: val.Codigo });
+
+        let _examen = {...examen};
+        _examen['CodigoTema'] = val;
+
+        setExamen(_examen);
     };
 
     const onCalendarChange = (e: any, name: string) => {
@@ -290,18 +256,13 @@ const GestionCursos = () => {
         }
     };
 
-    const hideAsignarDocenteDialog = () => {
-        setSubmitted(false);
-        setAsignarDocenteDialog(false);
-    };
-
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
             <h4 className="m-0">Lista de Examenes</h4>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <div className="field col">
                     <Dropdown
-                        value={nivel}
+                        value={nivel.Codigo}
                         options={niveles}
                         optionLabel="Nombre"
                         optionValue="Codigo"
@@ -315,7 +276,7 @@ const GestionCursos = () => {
                         className="mr-2"
                     />
                     <Dropdown
-                        value={grado}
+                        value={grado.Codigo}
                         options={gradosx}
                         optionLabel="Nombre"
                         optionValue="Codigo"
@@ -455,7 +416,7 @@ const GestionCursos = () => {
                                     Curso:
                                 </label>
                                 <Dropdown
-                                    value={curso}
+                                    value={curso.Codigo}
                                     onChange={(e) => {
                                         onCursoSelect(e);
                                     }}
@@ -472,7 +433,7 @@ const GestionCursos = () => {
                                     Tema:
                                 </label>
                                 <Dropdown
-                                    value={examen?.Tema}
+                                    value={examen?.CodigoTema}
                                     onChange={(e) => {
                                         onTemaSelect(e);
                                     }}

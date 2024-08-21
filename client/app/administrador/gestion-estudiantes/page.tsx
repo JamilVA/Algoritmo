@@ -4,17 +4,12 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { Calendar } from 'primereact/calendar';
-import { FileUpload } from 'primereact/fileupload';
-import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
-import { Demo } from '@/types';
 import axios from 'axios';
 import { Password } from 'primereact/password';
 
@@ -234,14 +229,14 @@ export default function GestionEstudiante() {
 
     const asignarDocente = async () => {
 
-        if (estudiante.Apoderado.Codigo === 0) {
+        if (estudiante.CodigoApoderado === 0) {
             return;
         }
 
         await axios
             .put('https://back.colegiosalgoritmo.edu.pe/api/estudiante/asignarApoderado', {
                 Codigo: estudiante.Codigo,
-                CodigoApoderado: estudiante.Apoderado.Codigo
+                CodigoApoderado: estudiante.CodigoApoderado
             })
             .then((response) => {
                 console.log(response.data);
@@ -268,14 +263,14 @@ export default function GestionEstudiante() {
     const asignarGrado = async () => {
         console.log('GradoRecibidoParaAsignar:', estudiante);
 
-        if (estudiante.Grado.Codigo === 0) {
+        if (estudiante.CodigoGrado === 0) {
             return;
         }
 
         await axios
             .put('https://back.colegiosalgoritmo.edu.pe/api/estudiante/asignarGrado', {
                 Codigo: estudiante.Codigo,
-                CodigoGrado: estudiante.Grado.Codigo
+                CodigoGrado: estudiante.CodigoGrado
             })
             .then((response) => {
                 console.log(response.data);
@@ -287,37 +282,6 @@ export default function GestionEstudiante() {
                     life: 3000
                 });
                 hideAsignarGradoDialog();
-            })
-            .catch((error) => {
-                console.error(error.response);
-                toast.current?.show({
-                    severity: 'error',
-                    summary: 'Operacion fallida',
-                    detail: 'Ha ocurrido un error al procesar la solicitud',
-                    life: 3000
-                });
-            });
-    };
-
-    const matricular = async (estudiante: typeof estudianteVacio) => {
-        console.log('Estudiante a matricular:', estudiante);
-
-        if (estudiante.CodigoGrado === null) {
-            return;
-        }
-
-        await axios
-            .post('https://back.colegiosalgoritmo.edu.pe/api/estudiante/matricular', {
-                Codigo: estudiante.Codigo,
-                CodigoGrado: estudiante.CodigoGrado
-            })
-            .then((response) => {
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Operacion exitosa',
-                    detail: response.data.message,
-                    life: 3000
-                });
             })
             .catch((error) => {
                 console.error(error.response);
@@ -464,7 +428,7 @@ export default function GestionEstudiante() {
         const val = (e.target && e.target.value) || '';
         let _estudiante = { ...estudiante };
 
-        _estudiante['Apoderado'] = val;
+        _estudiante['CodigoApoderado'] = val;
 
         setEstudiante(_estudiante);
         console.log('Docente asignado a', _estudiante);
@@ -474,7 +438,7 @@ export default function GestionEstudiante() {
         const val = (e.target && e.target.value) || '';
         let _estudiante = { ...estudiante };
 
-        _estudiante['Grado'] = val;
+        _estudiante['CodigoGrado'] = val;
 
         setEstudiante(_estudiante);
         console.log('Grado asignado a', _estudiante);
@@ -542,7 +506,7 @@ export default function GestionEstudiante() {
                         header={header}
                         responsiveLayout="scroll"
                     >
-                        {/* <Column header="Codigo" sortable body={codeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column> */}
+                        {/* <Column header=""></Column> */}
                         <Column field="Persona.Nombres" header="Nombres Completos" sortable body={nombresBodyTemplate} headerStyle={{ minWidth: '12rem' }}></Column>
                         <Column field="Persona.DNI" header="DNI" sortable body={DNIBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
                         <Column field="Grado.Nombre" header="Grado" sortable body={gradoBodyTemplate} headerStyle={{ minWidth: '6rem' }}></Column>
@@ -672,7 +636,7 @@ export default function GestionEstudiante() {
                         <div className="field">
                             <label htmlFor="docente">Docente</label>
                             <Dropdown
-                                value={estudiante.Apoderado}
+                                value={estudiante.CodigoApoderado}
                                 options={apoderados}
                                 optionLabel="Persona.Nombres"
                                 optionValue="Codigo"
@@ -692,7 +656,7 @@ export default function GestionEstudiante() {
                     <Dialog visible={gradoDialog} style={{ width: '450px' }} header="Asignar o reasignar grado" modal className="p-fluid" footer={asignarGradoDialogFooter} onHide={hideAsignarGradoDialog}>
                         <div className="field">
                             <label htmlFor="Estudiante">Grado</label>
-                            <Dropdown value={estudiante.Grado} options={grados} optionLabel="Nombre" optionValue="Codigo" placeholder="Seleccione un grado" onChange={(e) => onGradoSelect(e)} required autoFocus showClear />
+                            <Dropdown value={estudiante.CodigoGrado} options={grados} optionLabel="Nombre" optionValue="Codigo" placeholder="Seleccione un grado" onChange={(e) => onGradoSelect(e)} required autoFocus showClear />
                         </div>
                     </Dialog>
                 </div>

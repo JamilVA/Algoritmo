@@ -203,6 +203,32 @@ export default function BancoPreguntas() {
             });
     };
 
+    const eliminarPregunta = async (CodigoPregunta: number) => {
+        await axios
+            .post('https://back.colegiosalgoritmo.edu.pe/api/pregunta/eliminarPregunta', {
+                CodigoPregunta: CodigoPregunta
+            })
+            .then((response) => {
+                console.log(response.data);
+                cargarPreguntas(tema.Codigo);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Operacion exitosa',
+                    detail: response.data.message,
+                    life: 3000
+                });
+            })
+            .catch((error) => {
+                console.error(error.response);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Operacion fallida',
+                    detail: 'Ha ocurrido un error al procesar la solicitud',
+                    life: 3000
+                });
+            });
+    };
+
     const modificarRuta = async (pregunta: any) => {
         await axios
             .put('https://back.colegiosalgoritmo.edu.pe/api/pregunta/imagenPregunta', {
@@ -363,23 +389,6 @@ export default function BancoPreguntas() {
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
             <h4 className="m-0">Lista de temas del curso</h4>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <div className="field col">
-                    {/* <Dropdown
-                        value={nivel.Codigo}
-                        options={niveles}
-                        optionLabel="Nombre"
-                        optionValue="Codigo"
-                        name="Prerequisito"
-                        onChange={(e) => {
-                            onDropdownChange(e);
-                        }}
-                        placeholder="Seleccione un nivel"
-                        id="Prerequisito"
-                        required
-                    /> */}
-                </div>{' '}
-            </span>
         </div>
     );
 
@@ -445,8 +454,6 @@ export default function BancoPreguntas() {
         );
     };
 
-    /* Body Preguntas */
-
     const respuestaBodyTemplate = (rowData: typeof respuestaVacia) => {
         return rowData.Valor;
     };
@@ -470,6 +477,15 @@ export default function BancoPreguntas() {
                             <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
                                 <h5 className="m-0">{rowData.Descripcion}</h5>
                                 <span className="block mt-2 md:mt-0">
+                                    <>
+                                        <Button
+                                            icon="pi pi-times"
+                                            text
+                                            onClick={() => {
+                                                eliminarPregunta(rowData.Codigo);
+                                            }}
+                                        />
+                                    </>
                                     {!rowData.RutaImagen ? (
                                         <FileUpload
                                             chooseOptions={{ icon: 'pi pi-upload', className: 'p-2' }}

@@ -3,18 +3,12 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
-import { FileUpload } from 'primereact/fileupload';
-import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
-import { Rating } from 'primereact/rating';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
-import { Demo } from '@/types';
 import axios from 'axios';
 
 import { useRouter } from 'next/navigation';
@@ -219,21 +213,23 @@ const GestionCursos = () => {
 
     const onNivelSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        let _nivel = { ...val };
+        let _nivel = { ...nivel };
+        _nivel['Codigo'] = val;
 
         setNivel(_nivel);
-        setGradosx(grados.filter((g) => g.CodigoNivel == val.Codigo));
+        setGradosx(grados.filter((g) => g.CodigoNivel == val));
         console.log('Nivel:', val);
         console.log('Grados:', grados);
         console.log(
             'Filtados',
-            grados.filter((g) => g.CodigoNivel == val.Codigo)
+            grados.filter((g) => g.CodigoNivel == val)
         );
     };
 
     const onGradoxSelect = (e: any) => {
         const val = (e.target && e.target.value) || '';
-        let _grado = { ...val };
+        let _grado = { ...grado };
+        _grado['Codigo'] = val;
 
         setGrado(_grado);
         cargarCursos(val.Codigo);
@@ -243,8 +239,8 @@ const GestionCursos = () => {
         const val = (e.target && e.target.value) || '';
         let _curso = { ...curso };
 
-        _curso['CodigoGrado'] = val.Codigo;
-        _curso['Grado'] = val;
+        _curso['CodigoGrado'] = val;
+        // _curso['Grado'] = val;
 
         setCurso(_curso);
     };
@@ -255,7 +251,6 @@ const GestionCursos = () => {
 
         _curso['CodigoDocente'] = val.Codigo;
         _curso['Docente'] = val;
-
 
         setCurso(_curso);
         console.log('Docente asignado a', _curso);
@@ -288,7 +283,7 @@ const GestionCursos = () => {
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <div className="field col">
                     <Dropdown
-                        value={nivel}
+                        value={nivel.Codigo}
                         options={niveles}
                         optionLabel="Nombre"
                         optionValue="Codigo"
@@ -302,7 +297,7 @@ const GestionCursos = () => {
                         className="mr-2"
                     />
                     <Dropdown
-                        value={grado}
+                        value={grado.Codigo}
                         options={gradosx}
                         optionLabel="Nombre"
                         optionValue="Codigo"
@@ -428,7 +423,7 @@ const GestionCursos = () => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                     </DataTable>
 
-                    <Dialog visible={cursoDialog} style={{ width: '600px' }} header="Datos del Apoderado" modal className="p-fluid" footer={cursoDialogFooter} onHide={hideDialog}>
+                    <Dialog visible={cursoDialog} style={{ width: '600px' }} header="Datos del Curso" modal className="p-fluid" footer={cursoDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="Nombre" className="font-bold">
                                 Nombre del curso
@@ -451,7 +446,7 @@ const GestionCursos = () => {
                                 Grado:
                             </label>
                             <Dropdown
-                                value={curso.Grado}
+                                value={curso.CodigoGrado}
                                 onChange={(e) => {
                                     onGradoSelect(e);
                                 }}
