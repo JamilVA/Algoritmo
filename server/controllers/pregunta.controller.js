@@ -65,16 +65,21 @@ const crearTema = async (req, res) => {
 const modificarImagen = async (req, res) => {
   try {
     const { pregunta } = req.body;
-    console.log('Pregunta para imagen' ,pregunta)
-    await Pregunta.update({RutaImagen: pregunta.RutaImagen},{where: {Codigo: pregunta.Codigo}})
+    console.log("Pregunta para imagen", pregunta);
+    await Pregunta.update(
+      { RutaImagen: pregunta.RutaImagen },
+      { where: { Codigo: pregunta.Codigo } }
+    );
     res.json({
       message: "Pregunta modificada Correctamente",
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "No se pudo modificar la ruta de la Imagen" });
+    res
+      .status(500)
+      .json({ error: "No se pudo modificar la ruta de la Imagen" });
   }
-}
+};
 
 const crearPregunta = async (req, res) => {
   try {
@@ -97,11 +102,14 @@ const crearPregunta = async (req, res) => {
 
       const respuestas = await Promise.all(
         respuestas.map(async (respuesta) => {
-          await Respuesta.update({
-            respuesta,
-          },{
-            where: {Codigo: respuesta.Codigo}
-          });
+          await Respuesta.update(
+            {
+              respuesta,
+            },
+            {
+              where: { Codigo: respuesta.Codigo },
+            }
+          );
 
           // return {
           //   Codigo: pregunta.Codigo,
@@ -135,7 +143,7 @@ const crearPregunta = async (req, res) => {
       });
 
       res.json({
-        message: "Pregunta Creada Correctamente",
+        message: "Pregunta creada correctamente",
       });
     }
   } catch (error) {
@@ -143,6 +151,38 @@ const crearPregunta = async (req, res) => {
     res.status(500).json({ error: "Error al procesar la petición" });
   }
 };
+
+const eliminarPregunta = async (req, res) => {
+  try {
+    const { CodigoPregunta } = req.body;
+
+    await sequelize.transaction(async (t) => {
+      // Eliminar las respuestas asociadas a la pregunta
+      await Respuesta.destroy({
+        where: {
+          CodigoPregunta: CodigoPregunta,
+        },
+        transaction: t,
+      });
+
+      // Eliminar la pregunta
+      await Pregunta.destroy({
+        where: {
+          Codigo: CodigoPregunta,
+        },
+        transaction: t,
+      });
+    });
+
+    res.json({
+      message: "Pregunta y respuestas eliminadas correctamente",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al procesar la petición" });
+  }
+};
+
 
 const editarTema = async (req, res) => {
   try {
@@ -172,5 +212,6 @@ module.exports = {
   editarTema,
   cargarPreguntas,
   crearPregunta,
-  modificarImagen
+  eliminarPregunta,
+  modificarImagen,
 };

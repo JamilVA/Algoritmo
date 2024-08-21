@@ -2,7 +2,9 @@
  
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    /* config options here */
+    experimental: {
+      forceSwcTransforms: true,
+    }
   }
    
   module.exports = nextConfig

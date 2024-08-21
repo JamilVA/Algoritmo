@@ -581,8 +581,6 @@ export default function BancoPreguntas() {
                                 }}
                                 required
                                 autoFocus
-                                maxLength={100}
-                                className={classNames({ 'p-invalid': submitted && !tema.Descripcion })}
                             />
                             {submitted && !tema.Descripcion && <small className="p-error">Ingrese una descripción del tema.</small>}
                         </div>
@@ -598,7 +596,7 @@ export default function BancoPreguntas() {
                                 }}
                                 required
                                 autoFocus
-                                maxLength={100}
+                                maxLength={200}
                                 className={classNames({ 'p-invalid': submitted && !respuesta1.Valor })}
                             />
                         </div>
@@ -615,7 +613,7 @@ export default function BancoPreguntas() {
                                 }}
                                 required
                                 autoFocus
-                                maxLength={100}
+                                maxLength={200}
                                 className={classNames({ 'p-invalid': submitted && !respuesta2.Valor })}
                             />
                             <br />
@@ -628,7 +626,7 @@ export default function BancoPreguntas() {
                                 }}
                                 required
                                 autoFocus
-                                maxLength={100}
+                                maxLength={200}
                                 className={classNames({ 'p-invalid': submitted && !respuesta3.Valor })}
                             />
                             <br />
@@ -641,7 +639,7 @@ export default function BancoPreguntas() {
                                 }}
                                 required
                                 autoFocus
-                                maxLength={100}
+                                maxLength={200}
                                 className={classNames({ 'p-invalid': submitted && !respuesta4.Valor })}
                             />
                             <br />
@@ -654,7 +652,7 @@ export default function BancoPreguntas() {
                                 }}
                                 required
                                 autoFocus
-                                maxLength={100}
+                                maxLength={200}
                                 className={classNames({ 'p-invalid': submitted && !respuesta5.Valor })}
                             />
                         </div>

@@ -6,9 +6,21 @@ interface SimpleLayoutProps {
 }
 
 export const metadata: Metadata = {
-    metadataBase: new URL(process.env.NEXTAUTH_URL as string),
     title: 'Colegios Algoritmo',
-    description: 'The ultimate collection of design-agnostic, flexible and accessible React UI Components.'
+    description: 'Un colegio con alto nivel académico.',
+    robots: { index: false, follow: false },
+    viewport: { initialScale: 1, width: 'device-width' },
+    openGraph: {
+        type: 'website',
+        title: 'Colegios Algoritmo',
+        url: 'https://colegiosalgoritmo.edu.pe/',
+        description: 'Un colegio con alto nivel académico.',
+        images: ['/layout/images/logo.png'],
+        ttl: 300
+    },
+    icons: {
+        icon: '/layout/images/logo.png'
+    }
 };
 
 export default function SimpleLayout({ children }: SimpleLayoutProps) {

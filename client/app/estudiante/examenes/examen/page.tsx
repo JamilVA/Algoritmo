@@ -1,11 +1,8 @@
 'use client';
-import { classNames } from 'primereact/utils';
 import { Toast } from 'primereact/toast';
-import { ProgressBar } from 'primereact/progressbar';
 import { Toolbar } from 'primereact/toolbar';
 
 import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { Card } from 'primereact/card';
 import { RadioButton } from 'primereact/radiobutton';
@@ -228,7 +225,8 @@ const Page = () => {
             Correctas: valorRespuestas.filter((respuesta: boolean) => respuesta === true).length,
             Incorrectas: valorRespuestas.length - valorRespuestas.filter((respuesta: boolean) => respuesta === true).length,
             EnBlanco: preguntas.length - valorRespuestas.length,
-            Estado: true
+            Estado: true,
+            Fecha: new Date()
         };
 
         const preguntaEstudianteExamenDiario = preguntas.map((pregunta, index) => ({

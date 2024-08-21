@@ -6,21 +6,20 @@ interface AppLayoutProps {
 }
 
 export const metadata: Metadata = {
-    metadataBase: new URL(process.env.NEXTAUTH_URL as string),
-    title: 'Académico ESFAPMUA',
-    description: 'The ultimate collection of design-agnostic, flexible and accessible React UI Components.',
+    title: 'Colegios Algoritmo',
+    description: 'Un colegio con alto nivel académico.',
     robots: { index: false, follow: false },
     viewport: { initialScale: 1, width: 'device-width' },
     openGraph: {
         type: 'website',
-        title: 'Académico ESFAPMUA-REACT',
-        url: 'https://sakai.primereact.org/',
-        description: 'The ultimate collection of design-agnostic, flexible and accessible React UI Components.',
-        images: ['https://www.primefaces.org/static/social/sakai-react.png'],
-        ttl: 604800
+        title: 'Colegios Algoritmo',
+        url: 'https://colegiosalgoritmo.edu.pe/',
+        description: 'Un colegio con alto nivel académico.',
+        images: ['/layout/images/logo.png'],
+        ttl: 300
     },
     icons: {
-        icon: '/favicon.ico'
+        icon: '/layout/images/logo.png'
     }
 };
 

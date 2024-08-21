@@ -26,7 +26,8 @@ export default function GestionEstudiante() {
         CodigoGrado: 0,
         CodigoApoderado: 0,
         Grado: {
-            Nombre: ''
+            Nombre: '',
+            Codigo: 0,
         },
         Persona: {
             Codigo: 0,
@@ -232,16 +233,15 @@ export default function GestionEstudiante() {
     };
 
     const asignarDocente = async () => {
-        console.log('CursoRecibidoParaAsignar:', estudiante);
 
-        if (estudiante.CodigoApoderado === null) {
+        if (estudiante.Apoderado.Codigo === 0) {
             return;
         }
 
         await axios
             .put('https://back.colegiosalgoritmo.edu.pe/api/estudiante/asignarApoderado', {
                 Codigo: estudiante.Codigo,
-                CodigoApoderado: estudiante.CodigoApoderado
+                CodigoApoderado: estudiante.Apoderado.Codigo
             })
             .then((response) => {
                 console.log(response.data);
@@ -268,14 +268,14 @@ export default function GestionEstudiante() {
     const asignarGrado = async () => {
         console.log('GradoRecibidoParaAsignar:', estudiante);
 
-        if (estudiante.CodigoGrado === null) {
+        if (estudiante.Grado.Codigo === 0) {
             return;
         }
 
         await axios
             .put('https://back.colegiosalgoritmo.edu.pe/api/estudiante/asignarGrado', {
                 Codigo: estudiante.Codigo,
-                CodigoGrado: estudiante.CodigoGrado
+                CodigoGrado: estudiante.Grado.Codigo
             })
             .then((response) => {
                 console.log(response.data);
@@ -464,7 +464,7 @@ export default function GestionEstudiante() {
         const val = (e.target && e.target.value) || '';
         let _estudiante = { ...estudiante };
 
-        _estudiante['CodigoApoderado'] = val;
+        _estudiante['Apoderado'] = val;
 
         setEstudiante(_estudiante);
         console.log('Docente asignado a', _estudiante);
@@ -474,7 +474,7 @@ export default function GestionEstudiante() {
         const val = (e.target && e.target.value) || '';
         let _estudiante = { ...estudiante };
 
-        _estudiante['CodigoGrado'] = val;
+        _estudiante['Grado'] = val;
 
         setEstudiante(_estudiante);
         console.log('Grado asignado a', _estudiante);
@@ -672,12 +672,11 @@ export default function GestionEstudiante() {
                         <div className="field">
                             <label htmlFor="docente">Docente</label>
                             <Dropdown
-                                id="docente"
-                                value={estudiante.CodigoApoderado}
+                                value={estudiante.Apoderado}
                                 options={apoderados}
                                 optionLabel="Persona.Nombres"
                                 optionValue="Codigo"
-                                placeholder="Seleccione un docente"
+                                placeholder="Seleccione un Apoderado"
                                 onChange={(e) => onDocenteSelect(e)}
                                 required
                                 autoFocus
@@ -693,7 +692,7 @@ export default function GestionEstudiante() {
                     <Dialog visible={gradoDialog} style={{ width: '450px' }} header="Asignar o reasignar grado" modal className="p-fluid" footer={asignarGradoDialogFooter} onHide={hideAsignarGradoDialog}>
                         <div className="field">
                             <label htmlFor="Estudiante">Grado</label>
-                            <Dropdown id="grado" value={estudiante.CodigoGrado} options={grados} optionLabel="Nombre" optionValue="Codigo" placeholder="Seleccione un grado" onChange={(e) => onGradoSelect(e)} required autoFocus showClear />
+                            <Dropdown value={estudiante.Grado} options={grados} optionLabel="Nombre" optionValue="Codigo" placeholder="Seleccione un grado" onChange={(e) => onGradoSelect(e)} required autoFocus showClear />
                         </div>
                     </Dialog>
                 </div>
