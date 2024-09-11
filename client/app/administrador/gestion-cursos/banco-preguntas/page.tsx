@@ -483,6 +483,7 @@ export default function BancoPreguntas() {
                                             severity='danger'
                                             size='small'
                                             tooltip='Eliminar imagen'
+                                            className='m-2'
                                             onClick={() => {
                                                 eliminarPregunta(rowData.Codigo);
                                             }}
@@ -491,7 +492,7 @@ export default function BancoPreguntas() {
                                     {!rowData.RutaImagen ? (
                                         <FileUpload
                                             chooseOptions={{ icon: 'pi pi-upload', className: 'p-2' }}
-                                            chooseLabel="Subir imágen"
+                                            chooseLabel="Imagen"
                                             mode="basic"
                                             accept="image/*"
                                             maxFileSize={5000000}
