@@ -249,8 +249,7 @@ const GestionCursos = () => {
         const val = (e.target && e.target.value) || '';
         let _curso = { ...curso };
 
-        _curso['CodigoDocente'] = val.Codigo;
-        _curso['Docente'] = val;
+        _curso['CodigoDocente'] = val;
 
         setCurso(_curso);
         console.log('Docente asignado a', _curso);
@@ -463,7 +462,7 @@ const GestionCursos = () => {
                             <label htmlFor="docente">Docente</label>
                             <Dropdown
                                 id="docente"
-                                value={curso.Docente}
+                                value={curso.CodigoDocente}
                                 options={docentes}
                                 optionLabel="Persona.Nombres"
                                 optionValue="Codigo"
