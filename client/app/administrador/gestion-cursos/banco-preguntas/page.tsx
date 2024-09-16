@@ -80,7 +80,7 @@ export default function BancoPreguntas() {
 
     const [submitted, setSubmitted] = useState(false);
 
-    const [globalFilter, setGlobalFilter] = useState('a');
+    const [globalFilter, setGlobalFilter] = useState('');
     const [imagenURL, setImagenURL] = useState<string | null>(null);
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
