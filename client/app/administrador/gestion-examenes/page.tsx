@@ -79,7 +79,6 @@ const GestionCursos = () => {
     const [examen, setExamen] = useState(examenDiarioVacio);
     const [cursoDialog, setCursoDialog] = useState(false);
 
-    const [globalFilter, setGlobalFilter] = useState('.');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
@@ -378,7 +377,6 @@ const GestionCursos = () => {
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} cursos"
-                        globalFilter={globalFilter}
                         emptyMessage="No hay examenes de este grado seleccionado."
                         header={header}
                         responsiveLayout="scroll"

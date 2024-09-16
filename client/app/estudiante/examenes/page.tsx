@@ -68,7 +68,6 @@ const GestionCursos = () => {
 
     const [examen, setExamen] = useState(examenDiarioVacio);
 
-    const [globalFilter, setGlobalFilter] = useState('.');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
@@ -195,7 +194,6 @@ const GestionCursos = () => {
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} cursos"
-                        globalFilter={globalFilter}
                         emptyMessage="No hay examenes programados."
                         header={header}
                         responsiveLayout="scroll"

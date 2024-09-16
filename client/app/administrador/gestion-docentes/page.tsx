@@ -55,7 +55,7 @@ export default function GestionDocente() {
 
     const [submitted, setSubmitted] = useState(false);
 
-    const [globalFilter, setGlobalFilter] = useState('.');
+    const [globalFilter, setGlobalFilter] = useState('a');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
