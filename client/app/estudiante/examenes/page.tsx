@@ -68,7 +68,7 @@ const GestionCursos = () => {
 
     const [examen, setExamen] = useState(examenDiarioVacio);
 
-    const [globalFilter, setGlobalFilter] = useState('');
+    const [globalFilter, setGlobalFilter] = useState('.');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 

@@ -80,7 +80,7 @@ export default function BancoPreguntas() {
 
     const [submitted, setSubmitted] = useState(false);
 
-    const [globalFilter, setGlobalFilter] = useState('');
+    const [globalFilter, setGlobalFilter] = useState('.');
     const [imagenURL, setImagenURL] = useState<string | null>(null);
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
@@ -396,7 +396,7 @@ export default function BancoPreguntas() {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New" icon="pi pi-plus" severity="success" className=" mr-2" onClick={openNew} />
+                    <Button label="Nuevo" icon="pi pi-plus" severity="success" className=" mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         );
@@ -411,7 +411,7 @@ export default function BancoPreguntas() {
     };
 
     const headerPreguntasDialog = () => {
-        return <Button label="New" icon="pi pi-plus" size="small" severity="success" className=" mr-2" onClick={openNewPregunta} />;
+        return <Button label="Nuevo" icon="pi pi-plus" size="small" severity="success" className=" mr-2" onClick={openNewPregunta} />;
     };
 
     const newPreguntaDialogFooter = (

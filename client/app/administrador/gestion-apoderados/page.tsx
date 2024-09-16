@@ -36,7 +36,7 @@ export default function GestionApoderado() {
 
     const [submitted, setSubmitted] = useState(false);
 
-    const [globalFilter, setGlobalFilter] = useState('');
+    const [globalFilter, setGlobalFilter] = useState(".");
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
@@ -142,7 +142,7 @@ export default function GestionApoderado() {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New" icon="pi pi-plus" severity="success" className=" mr-2" onClick={openNew} />
+                    <Button label="Nuevo" icon="pi pi-plus" severity="success" className=" mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         );
@@ -222,7 +222,7 @@ export default function GestionApoderado() {
             <h5 className="m-0">Lista de Apoderados</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.currentTarget.value)} placeholder="Buscar..." />
+                <InputText type="search" onInput={(e) => {setGlobalFilter(e.currentTarget.value)}} placeholder="Buscar..." />
             </span>
         </div>
     );
@@ -244,7 +244,7 @@ export default function GestionApoderado() {
                     <DataTable
                         ref={dt}
                         value={apoderados}
-                        dataKey="id"
+                        dataKey="Codigo"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}

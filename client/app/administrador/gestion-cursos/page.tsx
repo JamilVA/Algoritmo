@@ -67,7 +67,7 @@ const GestionCursos = () => {
 
     const [submitted, setSubmitted] = useState(false);
 
-    const [globalFilter, setGlobalFilter] = useState('');
+    const [globalFilter, setGlobalFilter] = useState('.');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
@@ -317,7 +317,7 @@ const GestionCursos = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New" icon="pi pi-plus" severity="success" className=" mr-2" onClick={openNew} />
+                    <Button label="Nuevo" icon="pi pi-plus" severity="success" className=" mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         );
