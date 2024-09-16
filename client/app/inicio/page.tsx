@@ -2,22 +2,14 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
-import { Checkbox } from 'primereact/checkbox';
-import { Button } from 'primereact/button';
-import { Password } from 'primereact/password';
-import { InputText } from 'primereact/inputtext';
-import { Message } from 'primereact/message';
+
 import { classNames } from 'primereact/utils';
 import { signIn, useSession } from 'next-auth/react';
 import { LayoutContext } from '../../layout/context/layoutcontext';
-import { Divider } from 'primereact/divider';
-import Link from 'next/link';
 import axios from 'axios';
 
 const HomePage = () => {
-    const [errors, setErrors] = useState<string>('');
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
+
     const [loading, setLoading] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
 
@@ -30,8 +22,6 @@ const HomePage = () => {
 
     const { data: session, status } = useSession();
 
-    const router = useRouter();
-    const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
 
     const cargarDatos = async () => {
         const { data } = await axios.get('https://back.colegiosalgoritmo.edu.pe/api/info', {
@@ -51,7 +41,7 @@ const HomePage = () => {
     return (
         <div className="surface-0 flex justify-content-center">
             <div id="home" className="">
-                <div
+                {/* <div
                     id="hero"
                     className="flex flex-column pt-4 px-4 lg:px-8 overflow-hidden"
                     style={{
@@ -67,6 +57,13 @@ const HomePage = () => {
                     </div>
                     <div className="flex justify-content-center md:justify-content-end">
                         <img src="/demo/images/landing/alumnos.png" alt="Hero Image" className="w-9 md:w-auto" />
+                    </div>
+                </div> */}
+                <div
+                    id="hero"
+                >
+                    <div className="flex justify-content-center md:justify-content-end">
+                        <img src="/layout/images/inicio.jpeg" alt="Hero Image" className="w-12" />
                     </div>
                 </div>
 

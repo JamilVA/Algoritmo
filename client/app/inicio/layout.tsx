@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: 'website',
         title: 'Colegios Algoritmo',
-        url: 'https://colegiosalgoritmo.edu.pe/',
+        url: 'https://sia.colegiosalgoritmo.edu.pe/',
         description: 'Un colegio con alto nivel académico.',
         images: ['/layout/images/logo.png'],
         ttl: 300

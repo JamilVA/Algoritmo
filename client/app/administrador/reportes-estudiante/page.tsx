@@ -190,6 +190,24 @@ const Dashboard: React.FC = () => {
         </>
     );
 
+    const fechaBodyTemplate = (rowData: any) => {
+        if (rowData.Fecha) {
+            const fecha = new Date(rowData.Fecha);
+            return (
+                fecha
+                    .toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    })
+                    .toUpperCase()
+            );
+        }
+    };
+
     return (
         <div className="grid">
             <Toast ref={toast} />
@@ -221,13 +239,14 @@ const Dashboard: React.FC = () => {
             <div className="col-12">
                 <div className="card">
                     <h3 className="font-bold">
-                        {'Examen x'} <span className="text-primary-500 text-xl">{' ( ' + 'Tema Y' + ' )'}</span>
+                        {estudiante.Nombres} <span className="text-primary-500 text-xl">{' ( ' + estudiante.Grado + ' )'}</span>
                     </h3>
                     <h5>Lista de examenes</h5>
                     <DataTable value={examenes} rows={5} paginator responsiveLayout="scroll">
                         <Column field="Curso" header="Curso" sortable headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Tema" header="Tema" headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Nota" header="Nota" sortable headerStyle={{ minWidth: '3rem' }} />
+                        <Column field="Fecha" header="Fecha" body={fechaBodyTemplate} dataType="date" style={{ minWidth: '13rem' }} />
                         <Column field="Correctas" header="C" headerStyle={{ minWidth: '2rem' }} />
                         <Column field="Incorrectas" header="I" headerStyle={{ minWidth: '2rem' }} />
                         <Column field="EnBlanco" header="B" headerStyle={{ minWidth: '2rem' }} />

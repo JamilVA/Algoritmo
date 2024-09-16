@@ -108,38 +108,63 @@ const Dashboard: React.FC = () => {
         }
     };
 
-    const comprobarAperturaExamen = (examen: Examen) => {
+    const mostrarExamen = (examen: Examen) => {
         const fechaExamen = new Date(examen.Fecha);
         const hoy = new Date();
 
-        if (fechaExamen.setHours(0, 0, 0, 0) > hoy.setHours(0, 0, 0, 0)) return false;
+        if (fechaExamen.setHours(0, 0, 0, 0) < hoy.setHours(0, 0, 0, 0)) return true;
         const horaActual = new Date();
         const horaFin = new Date(`${fechaExamen.toISOString().split('T')[0]}T${examen.HoraFin}`);
         horaFin.setMinutes(horaFin.getMinutes() + 20);
         return horaActual > horaFin;
     };
 
-    const renderPDFButton = (examen: Examen) => (
-        <>
-            {(examen.Codigo != selectedExamenCodigo) && (
-                <Button
-                    icon="pi pi-search"
-                    text
-                    onClick={async () => {
-                        const data = await fetchPdfData(session?.user.codigoEstudiante ?? 0, examen.Codigo);
-                        setPdfData({ ...data, CodigoEstudiante: session?.user.codigoEstudiante, CodigoExamen: examen.Codigo });
-                        setSelectedExamenCodigo(examen.Codigo);
-                    }}
-                    tooltip='Descargar PDF'
-                ></Button>
-            )}
-            {(pdfData && examen.Codigo == selectedExamenCodigo) && selectedExamenCodigo !== null && (
-                <PDFDownloadLink document={<PDF estudiante={pdfData.estudiante} examen={pdfData.examen} tema={pdfData.tema} preguntas={pdfData.preguntas} />} fileName={`Examen_${selectedExamenCodigo}.pdf`}>
-                    {({ loading }) => (loading ? 'Cargando documento...' : 'Descargar ahora')}
-                </PDFDownloadLink>
-            )}
-        </>
-    );
+    const renderPDFButton = (examen: Examen) => {
+        if (!mostrarExamen(examen)) {
+            return null;
+        }
+    
+        return (
+            <>
+                {(examen.Codigo != selectedExamenCodigo) && (
+                    <Button
+                        icon="pi pi-search"
+                        text
+                        onClick={async () => {
+                            const data = await fetchPdfData(session?.user.codigoEstudiante ?? 0, examen.Codigo);
+                            setPdfData({ ...data, CodigoEstudiante: session?.user.codigoEstudiante, CodigoExamen: examen.Codigo });
+                            setSelectedExamenCodigo(examen.Codigo);
+                        }}
+                        tooltip='Descargar PDF'
+                    ></Button>
+                )}
+                {(pdfData && examen.Codigo == selectedExamenCodigo) && selectedExamenCodigo !== null && (
+                    <PDFDownloadLink document={<PDF estudiante={pdfData.estudiante} examen={pdfData.examen} tema={pdfData.tema} preguntas={pdfData.preguntas} />} fileName={`Examen_${selectedExamenCodigo}.pdf`}>
+                        {({ loading }) => (loading ? 'Cargando documento...' : 'Descargar ahora')}
+                    </PDFDownloadLink>
+                )}
+            </>
+        );
+    };
+    
+
+    const fechaBodyTemplate = (rowData: any) => {
+        if (rowData.Fecha) {
+            const fecha = new Date(rowData.Fecha);
+            return (
+                fecha
+                    .toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    })
+                    .toUpperCase()
+            );
+        }
+    };
 
     return (
         <div className="grid">
@@ -150,6 +175,7 @@ const Dashboard: React.FC = () => {
                         <Column field="Curso" header="Curso" sortable headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Tema" header="Tema" headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Nota" header="Nota" sortable headerStyle={{ minWidth: '3rem' }} />
+                        <Column field="Fecha" header="Fecha" body={fechaBodyTemplate} dataType="date" style={{ minWidth: '13rem' }} />
                         <Column field="Correctas" header="Correctas" headerStyle={{ minWidth: '3rem' }} />
                         <Column field="Incorrectas" header="Incorrectas" headerStyle={{ minWidth: '3rem' }} />
                         <Column field="EnBlanco" header="En Blanco" headerStyle={{ minWidth: '3rem' }} />

@@ -12,6 +12,7 @@ import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { Password } from 'primereact/password';
+import _logger from 'next-auth/utils/logger';
 
 export default function GestionEstudiante() {
     const estudianteVacio = {
@@ -22,7 +23,7 @@ export default function GestionEstudiante() {
         CodigoApoderado: 0,
         Grado: {
             Nombre: '',
-            Codigo: 0,
+            Codigo: 0
         },
         Persona: {
             Codigo: 0,
@@ -87,9 +88,9 @@ export default function GestionEstudiante() {
 
     const [submitted, setSubmitted] = useState(false);
 
-    const [globalFilter, setGlobalFilter] = useState('');
+    const [globalFilter, setGlobalFilter] = useState(' ');
     const toast = useRef<Toast>(null);
-    const dt = useRef<DataTable<any>>(null);
+    const dt = useRef<DataTable<any[]> | null>(null);
 
     useEffect(() => {
         cargarDatos();
@@ -199,7 +200,7 @@ export default function GestionEstudiante() {
                         Email: _estudiante.Persona.Usuario.Email,
                         Password: _estudiante.Persona.Usuario.Password,
                         FechaNacimiento: _estudiante.FechaNacimiento,
-                        CodigoPersona: estudiante.Persona.Codigo,
+                        CodigoPersona: estudiante.Persona.Codigo
                     })
                     .then((response) => {
                         console.log(response.data);
@@ -228,7 +229,6 @@ export default function GestionEstudiante() {
     };
 
     const asignarDocente = async () => {
-
         if (estudiante.CodigoApoderado === 0) {
             return;
         }
@@ -413,6 +413,7 @@ export default function GestionEstudiante() {
         setEstudiante(_estudiante);
     };
 
+
     const onCalendarChange = (e: any) => {
         const val = (e.target && e.target.value) || '';
 
@@ -458,7 +459,7 @@ export default function GestionEstudiante() {
             <h5 className="m-0">Lista de Estudiantes</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.currentTarget.value)} placeholder="Search..." />
+                <InputText type="search" onInput={(e) => setGlobalFilter(e.currentTarget.value)} placeholder="Buscar..." />
             </span>
         </div>
     );

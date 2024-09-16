@@ -21,6 +21,11 @@ const styles = StyleSheet.create({
         padding: 30,
         fontFamily: 'Roboto'
     },
+    image: {
+        width: 50,
+        height: 50,
+        alignSelf: 'center', // Centra la imagen horizontalmente
+    },
     header: {
         display: 'flex',
         flexDirection: 'row',
@@ -154,11 +159,7 @@ const PDF: React.FC<PDFProps> = ({ estudiante, examen, tema, preguntas }) => {
                 <View style={styles.options}>
                     {pregunta.Respuestas.map((respuesta, idx) => {
                         const isMarked = pregunta.RespuestaSeleccionada === respuesta.Codigo;
-                        const optionStyle = isMarked
-                            ? respuesta.Tipo
-                                ? styles.markedOptionCorrect
-                                : styles.markedOptionIncorrect
-                            : undefined;
+                        const optionStyle = isMarked ? (respuesta.Tipo ? styles.markedOptionCorrect : styles.markedOptionIncorrect) : undefined;
                         return (
                             <Text key={idx} style={optionStyle}>
                                 {String.fromCharCode(97 + idx)}) {respuesta.Valor} {respuesta.Tipo ? '(Correcta)' : ''}
@@ -173,6 +174,8 @@ const PDF: React.FC<PDFProps> = ({ estudiante, examen, tema, preguntas }) => {
     return (
         <Document>
             <Page size="A4" style={styles.page}>
+                <Image src="/layout/images/logo.png" style={styles.image}></Image>
+
                 <View style={styles.header}>
                     <Text style={styles.title}>Tema: {tema.Descripcion}</Text>
                     <View style={styles.scoreContainer}>
@@ -191,6 +194,3 @@ const PDF: React.FC<PDFProps> = ({ estudiante, examen, tema, preguntas }) => {
 };
 
 export default PDF;
-
-
-

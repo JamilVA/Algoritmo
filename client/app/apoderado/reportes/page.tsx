@@ -139,6 +139,25 @@ const Dashboard: React.FC = () => {
         </>
     );
 
+    const fechaBodyTemplate = (rowData: any) => {
+        if (rowData.Fecha) {
+            const fecha = new Date(rowData.Fecha);
+            return (
+                fecha
+                    .toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    })
+                    .toUpperCase()
+            );
+        }
+    };
+
+
     return (
         <div className="grid">
             <div className="col-12">
@@ -151,6 +170,7 @@ const Dashboard: React.FC = () => {
                         <Column field="Curso" header="Curso" sortable headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Tema" header="Tema" headerStyle={{ minWidth: '6rem' }} />
                         <Column field="Nota" header="Nota" sortable headerStyle={{ minWidth: '3rem' }} />
+                        <Column field="Fecha" header="Fecha" body={fechaBodyTemplate} dataType="date" style={{ minWidth: '13rem' }} />
                         <Column field="Correctas" header="Correctas" headerStyle={{ minWidth: '3rem' }} />
                         <Column field="Incorrectas" header="Incorrectas" headerStyle={{ minWidth: '3rem' }} />
                         <Column field="EnBlanco" header="En Blanco" headerStyle={{ minWidth: '3rem' }} />
