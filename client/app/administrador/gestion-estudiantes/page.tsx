@@ -88,7 +88,7 @@ export default function GestionEstudiante() {
 
     const [submitted, setSubmitted] = useState(false);
 
-    const [globalFilter, setGlobalFilter] = useState('.');
+    const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any[]> | null>(null);
 
