@@ -41,24 +41,6 @@ const HomePage = () => {
     return (
         <div className="surface-0 flex justify-content-center">
             <div id="home" className="">
-                {/* <div
-                    id="hero"
-                    className="flex flex-column pt-4 px-4 lg:px-8 overflow-hidden"
-                    style={{
-                        background: 'linear-gradient(45deg, #052490, #2079fa)',
-                        clipPath: 'ellipse(150% 87% at 93% 13%)'
-                    }}
-                >
-                    <div className="mx-4 md:mx-8 mt-0 md:mt-4">
-                        <h1 className="text-7xl font-bold text-900 text-white line-height-2">
-                            <span className="font-normal block">COLEGIOS </span>ALGORITMO
-                        </h1>
-                        <p className="font-normal text-3xl line-height-3 md:mt-3 text-700 text-white">¡ Te preparamos para el éxito !</p>
-                    </div>
-                    <div className="flex justify-content-center md:justify-content-end">
-                        <img src="/demo/images/landing/alumnos.png" alt="Hero Image" className="w-9 md:w-auto" />
-                    </div>
-                </div> */}
                 <div
                     id="hero"
                 >
