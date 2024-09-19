@@ -428,7 +428,7 @@ const Dashboard = () => {
                                         <div className="surface-300 border-round overflow-hidden w-10rem lg:w-6rem" style={{ height: '8px' }}>
                                             <div className={'bg-' + curso.color + '-500 h-full'} style={{ width: curso.porcentaje + '%' }} />
                                         </div>
-                                        <span className={'text-' + curso.color + '-500 ml-3 font-medium'}>{curso.promedio > 9 ? curso.promedio : '0' + curso.promedio}/20</span>
+                                        <span className={'text-' + curso.color + '-500 ml-3 font-medium'}>{curso.promedio > 9 ? String(curso.promedio).slice(0,5) : '0' + String(curso.promedio).slice(0,4)}/20</span>
                                     </div>
                                 </li>
                             );
