@@ -348,7 +348,7 @@ export default function GestionEstudiante() {
     };
 
     const apoderadoBodyTemplate = (rowData: typeof estudianteVacio) => {
-        let apoderado = rowData.Apoderado?.Persona?.Nombres + ' ' + rowData.Apoderado?.Persona?.ApellidoPaterno + ' ' + rowData.Apoderado?.Persona?.ApellidoPaterno;
+        let apoderado = rowData.Apoderado?.Persona?.Nombres + ' ' + rowData.Apoderado?.Persona?.ApellidoPaterno + ' ' + rowData.Apoderado?.Persona?.ApellidoMaterno;
         return (
             <div className="flex align-content-center">
                 <div className="flex align-items-center justify-content-center">

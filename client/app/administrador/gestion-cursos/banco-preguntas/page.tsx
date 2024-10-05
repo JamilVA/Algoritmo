@@ -482,7 +482,7 @@ export default function BancoPreguntas() {
                                             icon="pi pi-times"
                                             severity='danger'
                                             size='small'
-                                            tooltip='Eliminar imagen'
+                                            tooltip='Eliminar pregunta'
                                             className='m-2'
                                             onClick={() => {
                                                 eliminarPregunta(rowData.Codigo);
